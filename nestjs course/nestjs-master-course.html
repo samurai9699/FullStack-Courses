@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NestJS Master Course</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c10;--surface:#111318;--s2:#161a22;--border:#1e2430;--b2:#252d3a;--text:#e2e8f0;--muted:#64748b;--acc:#f97316;--acc2:#fb923c;--green:#22d3ee;--purple:#a78bfa;--pink:#f472b6;--yellow:#fbbf24;--red:#f87171;--blue:#60a5fa}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.7;overflow-x:hidden}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:280px;min-width:280px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;transition:all .3s}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.sidebar-header{padding:20px 20px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--acc),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff}
+.logo-sub{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.pb-wrap{background:var(--border);border-radius:4px;height:4px;overflow:hidden}
+.pb{height:100%;background:linear-gradient(90deg,var(--acc),var(--purple));border-radius:4px;transition:width .5s ease}
+.pb-lbl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:6px}
+.nav{flex:1;overflow-y:auto;padding:12px 8px}
+.nav::-webkit-scrollbar{width:4px}.nav::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+.ns-lbl{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:8px 12px 4px}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid transparent;margin-bottom:2px}
+.ni:hover{background:var(--s2);border-color:var(--border)}
+.ni.active{background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.25);color:var(--acc)}
+.ni.done{color:var(--green)}.ni.done .nbadge{background:rgba(34,211,238,.1);color:var(--green)}
+.nicon{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.ntitle{font-size:13px;font-weight:500;flex:1}
+.nbadge{font-size:10px;padding:2px 6px;background:var(--border);border-radius:10px;color:var(--muted)}
+.topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-shrink:0;background:var(--surface)}
+.bc{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}.bc span{color:var(--text)}
+.tr{margin-left:auto;display:flex;gap:8px}
+.btn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--acc);color:var(--acc)}
+.btn-p{background:var(--acc);border-color:var(--acc);color:#fff}.btn-p:hover{background:var(--acc2);border-color:var(--acc2);color:#fff}
+#pageContent{padding:0}
+.content{padding:40px 48px;max-width:900px;margin:0 auto;width:100%}
+.m-hero{margin-bottom:36px}
+.m-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--acc);font-weight:600;margin-bottom:12px}
+.m-tag::before{content:'';width:16px;height:2px;background:var(--acc)}
+h1.mt{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1.15;margin-bottom:12px;background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,.7) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.m-desc{font-size:16px;color:var(--muted);max-width:680px;line-height:1.8}
+.m-meta{display:flex;gap:20px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.mm{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.mdot{width:6px;height:6px;border-radius:50%;background:var(--acc);flex-shrink:0}
+h2.st{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin:36px 0 14px;color:#fff;display:flex;align-items:center;gap:10px}
+h2.st::after{content:'';flex:1;height:1px;background:var(--border)}
+h3.sub{font-size:16px;font-weight:600;margin:24px 0 10px;color:var(--text)}
+p{margin-bottom:12px;color:#cbd5e1}
+.cw{margin:16px 0;border-radius:12px;overflow:hidden;border:1px solid var(--b2);background:var(--surface)}
+.ch{padding:10px 16px;background:var(--s2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.dots{display:flex;gap:5px}.dot{width:10px;height:10px;border-radius:50%}
+.dot:nth-child(1){background:#f87171}.dot:nth-child(2){background:#fbbf24}.dot:nth-child(3){background:#34d399}
+.fname{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);flex:1}
+.flang{font-size:10px;padding:2px 8px;background:rgba(249,115,22,.1);color:var(--acc);border-radius:4px;letter-spacing:.5px;text-transform:uppercase}
+.cpbtn{font-size:11px;padding:3px 8px;background:var(--border);border:none;border-radius:4px;color:var(--muted);cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.cpbtn:hover{color:var(--text);background:var(--b2)}
+pre{padding:20px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.8}
+pre::-webkit-scrollbar{height:4px}pre::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+.kw{color:#a78bfa}.str{color:#6ee7b7}.fn{color:#60a5fa}.num{color:#fbbf24}.cmt{color:#475569;font-style:italic}.dec{color:#f472b6}.cls{color:#f97316}.prop{color:#60a5fa}
+.cl{display:flex;gap:14px;padding:16px 18px;border-radius:10px;margin:16px 0;border:1px solid}
+.cl-info{background:rgba(96,165,250,.05);border-color:rgba(96,165,250,.2)}
+.cl-warn{background:rgba(251,191,36,.05);border-color:rgba(251,191,36,.2)}
+.cl-tip{background:rgba(34,211,238,.05);border-color:rgba(34,211,238,.2)}
+.cl-danger{background:rgba(248,113,113,.05);border-color:rgba(248,113,113,.2)}
+.cl-icon{font-size:18px;flex-shrink:0;margin-top:1px}.cl-body{flex:1}
+.cl-title{font-weight:600;font-size:13px;margin-bottom:4px}
+.cl-info .cl-title{color:var(--blue)}.cl-warn .cl-title{color:var(--yellow)}.cl-tip .cl-title{color:var(--green)}.cl-danger .cl-title{color:var(--red)}
+.cl-body p{margin:0;font-size:13.5px;color:var(--muted)}
+.cg{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:16px 0}
+.card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:16px}
+.card-ico{font-size:22px;margin-bottom:10px}.card-t{font-size:14px;font-weight:600;margin-bottom:6px;color:#fff}
+.card-d{font-size:12px;color:var(--muted);line-height:1.6}
+.tw{overflow-x:auto;margin:16px 0;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse}
+th{background:var(--s2);padding:11px 16px;text-align:left;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:11px 16px;font-size:13.5px;border-bottom:1px solid var(--border);color:#cbd5e1}
+tr:last-child td{border-bottom:none}tr:hover td{background:rgba(255,255,255,.02)}
+.qw{background:var(--s2);border:1px solid var(--b2);border-radius:12px;padding:24px;margin:24px 0}
+.qh{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.qi{width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.qt{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.qq{font-size:14px;font-weight:600;margin-bottom:12px;color:#fff}
+.qopts{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.qopt{padding:11px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:13.5px;transition:all .2s;display:flex;align-items:center;gap:10px}
+.qopt:hover{border-color:var(--acc);background:rgba(249,115,22,.04)}
+.qopt.correct{border-color:var(--green);background:rgba(34,211,238,.06);color:var(--green)}
+.qopt.wrong{border-color:var(--red);background:rgba(248,113,113,.06);color:var(--red)}
+.qopt.disabled{pointer-events:none}
+.qradio{width:16px;height:16px;border-radius:50%;border:2px solid var(--b2);flex-shrink:0;transition:all .2s}
+.qopt.correct .qradio{border-color:var(--green);background:var(--green)}
+.qopt.wrong .qradio{border-color:var(--red);background:var(--red)}
+.qfb{font-size:13px;padding:12px;border-radius:8px;display:none}
+.qfb.show{display:block}
+.qfb.pass{background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);color:var(--green)}
+.qfb.fail{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);color:var(--red)}
+.iq{font-size:14px;font-weight:600;margin-bottom:12px;color:#fff}
+.ii{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.iq-btn{padding:14px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background .2s;font-size:14px;font-weight:500}
+.iq-btn:hover{background:var(--s2)}.iq-btn.open{background:var(--s2);border-bottom:1px solid var(--border)}
+.ichev{font-size:12px;transition:transform .3s;color:var(--muted);flex-shrink:0}
+.iq-btn.open .ichev{transform:rotate(90deg)}
+.ia{padding:16px 18px;font-size:13.5px;color:var(--muted);line-height:1.8;display:none;background:var(--surface)}
+.ia.open{display:block}
+.dbadge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;flex-shrink:0}
+.de{background:rgba(34,211,238,.1);color:var(--green)}.dm{background:rgba(251,191,36,.1);color:var(--yellow)}.dh{background:rgba(248,113,113,.1);color:var(--red)}
+.steps{counter-reset:step;margin:16px 0}
+.step{display:flex;gap:16px;margin-bottom:20px;position:relative}
+.step::before{content:'';position:absolute;left:17px;top:38px;bottom:-20px;width:1px;background:var(--border)}
+.step:last-child::before{display:none}
+.snum{width:34px;height:34px;border-radius:50%;background:var(--s2);border:2px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;color:var(--acc);font-family:'Syne',sans-serif}
+.sbody{flex:1;padding-top:4px}.stitle{font-size:14px;font-weight:600;margin-bottom:6px;color:#fff}
+.stext{font-size:13.5px;color:var(--muted);line-height:1.7}
+code{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:rgba(255,255,255,.07);padding:2px 6px;border-radius:4px;color:var(--acc)}
+.lc{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.15);border-radius:12px;margin-top:40px}
+.lc-l{display:flex;align-items:center;gap:12px}.lc-ico{font-size:24px}
+.lc-t{font-size:14px;font-weight:600;color:#fff}.lc-s{font-size:12px;color:var(--muted);margin-top:2px}
+.diag{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:24px;margin:16px 0;overflow-x:auto}
+.home-hero{padding:60px 48px 40px;border-bottom:1px solid var(--border)}
+.home-title{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1.1;margin-bottom:16px}
+.home-title span{background:linear-gradient(135deg,var(--acc),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home-sub{font-size:18px;color:var(--muted);max-width:600px;line-height:1.8;margin-bottom:28px}
+.home-stats{display:flex;gap:32px;flex-wrap:wrap}
+.stat{text-align:center}.stat-n{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--acc)}
+.stat-l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;padding:32px 48px}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.mc::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(249,115,22,.04),transparent);opacity:0;transition:opacity .3s}
+.mc:hover{border-color:rgba(249,115,22,.3);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}.mc:hover::before{opacity:1}
+.mc-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:12px}
+.mc-ico{font-size:28px;margin-bottom:10px}
+.mc-t{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;color:#fff}
+.mc-d{font-size:12px;color:var(--muted);line-height:1.6}
+.mc-f{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+.mc-ls{font-size:11px;color:var(--muted)}
+.mcs{font-size:11px;padding:2px 8px;border-radius:10px}
+.mcs.todo{background:var(--border);color:var(--muted)}
+.mcs.done{background:rgba(34,211,238,.1);color:var(--green)}
+.mcs.inprog{background:rgba(249,115,22,.1);color:var(--acc)}
+.main::-webkit-scrollbar{width:6px}.main::-webkit-scrollbar-thumb{background:var(--b2);border-radius:4px}
+@media(max-width:768px){.sidebar{width:0;min-width:0;overflow:hidden}.sidebar.open{width:280px;min-width:280px}.content{padding:24px 20px}.home-hero{padding:32px 20px 24px}.mg{padding:20px}h1.mt{font-size:26px}.home-title{font-size:32px}}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ MODULE HTML TEMPLATES (stored as HTML, no JS escaping issues) ══════════════ -->
+
+<script type="text/template" id="tpl-home"></script>
+
+<script type="text/template" id="tpl-0">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 01</div>
+    <h1 class="mt">Why NestJS?</h1>
+    <p class="m-desc">NestJS is an opinionated Node.js framework built on TypeScript. It brings enterprise-grade architecture patterns — modules, DI, decorators — to a world that was drowning in unstructured Express code.</p>
+    <div class="m-meta">
+      <div class="mm"><div class="mdot"></div>TypeScript-first</div>
+      <div class="mm"><div class="mdot"></div>Angular-inspired DI</div>
+      <div class="mm"><div class="mdot"></div>Express / Fastify under the hood</div>
+    </div>
+  </div>
+
+  <h2 class="st">The Problem NestJS Solves</h2>
+  <p>Express is un-opinionated — which is great until you're on a team of 5+ engineers each structuring files differently. NestJS enforces a consistent architecture so everyone knows where things live.</p>
+  <div class="cg">
+    <div class="card"><div class="card-ico">😤</div><div class="card-t">Express Pain</div><div class="card-d">No conventions. Spaghetti routing. Global state. No DI. Every project looks different.</div></div>
+    <div class="card"><div class="card-ico">🏢</div><div class="card-t">NestJS Fix</div><div class="card-d">Modules, controllers, services — each with a clear role. Scales from side-project to enterprise.</div></div>
+    <div class="card"><div class="card-ico">🔌</div><div class="card-t">Still Express</div><div class="card-d">NestJS runs on top of Express (or Fastify). All your Express middleware still works.</div></div>
+    <div class="card"><div class="card-ico">🧩</div><div class="card-t">Decorator Magic</div><div class="card-d">TypeScript decorators make config readable: <code>@Controller</code>, <code>@Get</code>, <code>@Injectable</code>.</div></div>
+  </div>
+
+  <h2 class="st">NestJS vs The Alternatives</h2>
+  <div class="tw"><table>
+    <tr><th>Framework</th><th>Opinionated</th><th>DI Built-in</th><th>TypeScript</th><th>Best For</th></tr>
+    <tr><td>Express</td><td>❌</td><td>❌</td><td>Manual</td><td>Simple APIs</td></tr>
+    <tr><td>Fastify</td><td>Partial</td><td>❌</td><td>Good</td><td>High throughput</td></tr>
+    <tr><td><strong>NestJS</strong></td><td>✅ Strong</td><td>✅ Built-in</td><td>✅ First-class</td><td>Enterprise, large teams</td></tr>
+    <tr><td>AdonisJS</td><td>✅</td><td>✅</td><td>✅</td><td>Full-stack monolith</td></tr>
+  </table></div>
+
+  <h2 class="st">Installing NestJS</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">terminal</span><span class="flang">bash</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># Install Nest CLI globally</span>
+<span class="fn">npm</span> i -g @nestjs/cli
+
+<span class="cmt"># Create new project</span>
+<span class="fn">nest</span> new my-api
+
+<span class="cmt"># Start dev server (hot reload)</span>
+<span class="fn">cd</span> my-api &amp;&amp; npm run start:dev
+
+<span class="cmt"># Test it's running</span>
+<span class="fn">curl</span> http://localhost:3000
+<span class="cmt"># Hello World!</span></pre>
+  </div>
+
+  <h2 class="st">Generated Project Structure</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">project structure</span><span class="flang">tree</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre>my-api/
+├── src/
+│   ├── <span class="cls">app.module.ts</span>        <span class="cmt">← Root module (wires everything)</span>
+│   ├── <span class="cls">app.controller.ts</span>   <span class="cmt">← Handles HTTP routes</span>
+│   ├── <span class="cls">app.service.ts</span>      <span class="cmt">← Business logic</span>
+│   └── <span class="fn">main.ts</span>             <span class="cmt">← Bootstrap entry point</span>
+├── test/
+├── nest-cli.json
+├── tsconfig.json
+└── package.json</pre>
+  </div>
+
+  <div class="cl cl-info"><div class="cl-icon">💡</div><div class="cl-body"><div class="cl-title">Key Insight</div><p>Every NestJS app has a root <code>AppModule</code>. Think of it as the entry-point for your dependency graph. Everything flows through modules.</p></div></div>
+
+  <h2 class="st">The main.ts Entrypoint</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">src/main.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">NestFactory</span> } <span class="kw">from</span> <span class="str">'@nestjs/core'</span>;
+<span class="kw">import</span> { <span class="cls">AppModule</span> } <span class="kw">from</span> <span class="str">'./app.module'</span>;
+
+<span class="kw">async function</span> <span class="fn">bootstrap</span>() {
+  <span class="kw">const</span> app = <span class="kw">await</span> <span class="cls">NestFactory</span>.<span class="fn">create</span>(<span class="cls">AppModule</span>);
+
+  <span class="cmt">// Set global prefix for all routes</span>
+  app.<span class="fn">setGlobalPrefix</span>(<span class="str">'api/v1'</span>);
+
+  <span class="cmt">// Enable CORS for browser clients</span>
+  app.<span class="fn">enableCors</span>();
+
+  <span class="kw">await</span> app.<span class="fn">listen</span>(<span class="num">3000</span>);
+  console.<span class="fn">log</span>(<span class="str">'App running on port 3000'</span>);
+}
+
+<span class="fn">bootstrap</span>();</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">What does NestJS run on top of internally?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'NestJS uses Express or Fastify as its HTTP adapter.')"><div class="qradio"></div>Its own HTTP server written from scratch</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'By default NestJS uses Express, but you can swap to Fastify for better throughput.')"><div class="qradio"></div>Express (or optionally Fastify) as the HTTP adapter</div>
+      <div class="qopt" onclick="quizAns(this,false,'NestJS uses Express or Fastify as its HTTP adapter.')"><div class="qradio"></div>Koa.js with async middleware</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 1 Complete</div><div class="lc-s">Next up: Architecture &amp; Modules</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-1">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 02</div>
+    <h1 class="mt">Architecture &amp; Modules</h1>
+    <p class="m-desc">Modules are the backbone of NestJS. Understanding how they compose is what makes you productive — and stops your app from becoming a pile of unrelated files.</p>
+  </div>
+
+  <h2 class="st">The Module System</h2>
+  <p>A NestJS app is a tree of modules. At the root sits <code>AppModule</code>. Every feature (users, auth, products) should have its own module.</p>
+  <div class="diag">
+    <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace">
+      <rect x="280" y="10" width="140" height="44" rx="8" fill="#1e2430" stroke="#f97316" stroke-width="1.5"/>
+      <text x="350" y="37" text-anchor="middle" fill="#f97316" font-size="13" font-weight="600">AppModule</text>
+      <line x1="200" y1="54" x2="350" y2="54" stroke="#252d3a"/><line x1="350" y1="54" x2="500" y2="54" stroke="#252d3a"/>
+      <line x1="200" y1="54" x2="200" y2="100" stroke="#252d3a"/><line x1="350" y1="54" x2="350" y2="100" stroke="#252d3a"/><line x1="500" y1="54" x2="500" y2="100" stroke="#252d3a"/>
+      <rect x="130" y="100" width="140" height="44" rx="8" fill="#111318" stroke="#1e2430" stroke-width="1.5"/>
+      <text x="200" y="127" text-anchor="middle" fill="#60a5fa" font-size="12">UsersModule</text>
+      <rect x="280" y="100" width="140" height="44" rx="8" fill="#111318" stroke="#1e2430" stroke-width="1.5"/>
+      <text x="350" y="127" text-anchor="middle" fill="#a78bfa" font-size="12">AuthModule</text>
+      <rect x="430" y="100" width="140" height="44" rx="8" fill="#111318" stroke="#1e2430" stroke-width="1.5"/>
+      <text x="500" y="127" text-anchor="middle" fill="#22d3ee" font-size="12">ProductsModule</text>
+    </svg>
+  </div>
+
+  <h2 class="st">Anatomy of a Module</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users/users.module.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Module</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+<span class="kw">import</span> { <span class="cls">UsersController</span> } <span class="kw">from</span> <span class="str">'./users.controller'</span>;
+<span class="kw">import</span> { <span class="cls">UsersService</span> } <span class="kw">from</span> <span class="str">'./users.service'</span>;
+
+<span class="dec">@Module</span>({
+  <span class="cmt">// controllers: handle HTTP routing for this module</span>
+  <span class="prop">controllers</span>: [<span class="cls">UsersController</span>],
+
+  <span class="cmt">// providers: services/repos available via DI</span>
+  <span class="prop">providers</span>: [<span class="cls">UsersService</span>],
+
+  <span class="cmt">// exports: make providers available to importing modules</span>
+  <span class="prop">exports</span>: [<span class="cls">UsersService</span>],
+
+  <span class="cmt">// imports: other modules this module needs</span>
+  <span class="prop">imports</span>: [],
+})
+<span class="kw">export class</span> <span class="cls">UsersModule</span> {}</pre>
+  </div>
+
+  <h2 class="st">CLI Generation</h2>
+  <div class="cl cl-tip"><div class="cl-icon">🚀</div><div class="cl-body"><div class="cl-title">Always use the CLI</div><p>The CLI generates all boilerplate and automatically registers the module in AppModule. Never write these from scratch.</p></div></div>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">terminal</span><span class="flang">bash</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># Generates module + controller + service + wires them up</span>
+<span class="fn">nest</span> g resource users
+
+<span class="cmt"># Skip test files</span>
+<span class="fn">nest</span> g resource users --no-spec
+
+<span class="cmt"># Or generate individually</span>
+<span class="fn">nest</span> g module users
+<span class="fn">nest</span> g controller users
+<span class="fn">nest</span> g service users</pre>
+  </div>
+
+  <h2 class="st">Shared &amp; Global Modules</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">database/database.module.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Module</span>, <span class="cls">Global</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+
+<span class="dec">@Global</span>()   <span class="cmt">// ← providers available everywhere without importing</span>
+<span class="dec">@Module</span>({
+  <span class="prop">providers</span>: [<span class="cls">DatabaseService</span>],
+  <span class="prop">exports</span>: [<span class="cls">DatabaseService</span>],  <span class="cmt">// ← still need to export!</span>
+})
+<span class="kw">export class</span> <span class="cls">DatabaseModule</span> {}
+
+<span class="cmt">// Import ONCE in AppModule — available everywhere after that</span></pre>
+  </div>
+
+  <div class="cl cl-warn"><div class="cl-icon">⚠️</div><div class="cl-body"><div class="cl-title">Use @Global() sparingly</div><p>Overusing global modules hides dependencies and makes testing harder. Only config, logging, and DB connections warrant it.</p></div></div>
+
+  <h2 class="st">Dynamic Modules</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">email/email.module.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Module</span>({})
+<span class="kw">export class</span> <span class="cls">EmailModule</span> {
+  <span class="kw">static</span> <span class="fn">forRoot</span>(<span class="prop">options</span>: <span class="cls">EmailOptions</span>): <span class="cls">DynamicModule</span> {
+    <span class="kw">return</span> {
+      <span class="prop">module</span>: <span class="cls">EmailModule</span>,
+      <span class="prop">providers</span>: [
+        { <span class="prop">provide</span>: <span class="str">'EMAIL_OPTIONS'</span>, <span class="prop">useValue</span>: options },
+        <span class="cls">EmailService</span>,
+      ],
+      <span class="prop">exports</span>: [<span class="cls">EmailService</span>],
+    };
+  }
+}
+
+<span class="cmt">// Usage in AppModule:</span>
+<span class="cls">EmailModule</span>.<span class="fn">forRoot</span>({ <span class="prop">apiKey</span>: <span class="str">'sk-...'</span>, <span class="prop">from</span>: <span class="str">'hi@app.com'</span> })</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">What does the <code>exports</code> array in a <code>@Module</code> decorator do?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'exports makes providers available to modules that import this module.')"><div class="qradio"></div>Makes controllers publicly accessible on the internet</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'Any module that imports UsersModule can now inject UsersService.')"><div class="qradio"></div>Makes providers available to other modules that import this module</div>
+      <div class="qopt" onclick="quizAns(this,false,'exports makes providers available to modules that import this module.')"><div class="qradio"></div>Exports TypeScript types for use in frontend code</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 2 Complete</div><div class="lc-s">Next up: Controllers</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-2">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 03</div>
+    <h1 class="mt">Controllers</h1>
+    <p class="m-desc">Controllers handle incoming HTTP requests and return responses. They're the entry-point layer — thin by design, delegating all logic to services.</p>
+  </div>
+
+  <h2 class="st">Full CRUD Controller</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users/users.controller.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Controller</span>, <span class="cls">Get</span>, <span class="cls">Post</span>, <span class="cls">Put</span>, <span class="cls">Delete</span>,
+         <span class="cls">Param</span>, <span class="cls">Body</span>, <span class="cls">Query</span>, <span class="cls">HttpCode</span>, <span class="cls">HttpStatus</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+
+<span class="dec">@Controller</span>(<span class="str">'users'</span>)   <span class="cmt">// all routes prefixed /users</span>
+<span class="kw">export class</span> <span class="cls">UsersController</span> {
+  <span class="kw">constructor</span>(<span class="kw">private readonly</span> <span class="prop">usersService</span>: <span class="cls">UsersService</span>) {}
+
+  <span class="dec">@Get</span>()                        <span class="cmt">// GET /users</span>
+  <span class="fn">findAll</span>(<span class="dec">@Query</span>(<span class="str">'role'</span>) <span class="prop">role</span>?: <span class="kw">string</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">findAll</span>({ role });
+  }
+
+  <span class="dec">@Get</span>(<span class="str">':id'</span>)                   <span class="cmt">// GET /users/:id</span>
+  <span class="fn">findOne</span>(<span class="dec">@Param</span>(<span class="str">'id'</span>) <span class="prop">id</span>: <span class="kw">string</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">findOne</span>(+id);
+  }
+
+  <span class="dec">@Post</span>()                       <span class="cmt">// POST /users</span>
+  <span class="dec">@HttpCode</span>(<span class="cls">HttpStatus</span>.<span class="prop">CREATED</span>) <span class="cmt">// 201</span>
+  <span class="fn">create</span>(<span class="dec">@Body</span>() <span class="prop">dto</span>: <span class="cls">CreateUserDto</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">create</span>(dto);
+  }
+
+  <span class="dec">@Put</span>(<span class="str">':id'</span>)                   <span class="cmt">// PUT /users/:id</span>
+  <span class="fn">update</span>(<span class="dec">@Param</span>(<span class="str">'id'</span>) <span class="prop">id</span>: <span class="kw">string</span>, <span class="dec">@Body</span>() <span class="prop">dto</span>: <span class="cls">UpdateUserDto</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">update</span>(+id, dto);
+  }
+
+  <span class="dec">@Delete</span>(<span class="str">':id'</span>)                <span class="cmt">// DELETE /users/:id</span>
+  <span class="dec">@HttpCode</span>(<span class="cls">HttpStatus</span>.<span class="prop">NO_CONTENT</span>)
+  <span class="fn">remove</span>(<span class="dec">@Param</span>(<span class="str">'id'</span>) <span class="prop">id</span>: <span class="kw">string</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">remove</span>(+id);
+  }
+}</pre>
+  </div>
+
+  <h2 class="st">All Available Decorators</h2>
+  <div class="tw"><table>
+    <tr><th>Decorator</th><th>What it provides</th><th>Example</th></tr>
+    <tr><td><code>@Param('id')</code></td><td>Route parameter</td><td>/users/42</td></tr>
+    <tr><td><code>@Body()</code></td><td>Request body (parsed JSON)</td><td>POST payload</td></tr>
+    <tr><td><code>@Query('page')</code></td><td>Query string parameter</td><td>?page=2</td></tr>
+    <tr><td><code>@Headers('auth')</code></td><td>Request header value</td><td>Authorization: Bearer …</td></tr>
+    <tr><td><code>@Req()</code></td><td>Raw Express Request object</td><td>req.ip, req.cookies</td></tr>
+    <tr><td><code>@Res()</code></td><td>Raw Express Response object</td><td>res.cookie(), res.redirect()</td></tr>
+    <tr><td><code>@Ip()</code></td><td>Client IP address</td><td>Rate limiting</td></tr>
+  </table></div>
+
+  <div class="cl cl-danger"><div class="cl-icon">🚫</div><div class="cl-body"><div class="cl-title">Avoid @Res() unless necessary</div><p>When you use <code>@Res()</code>, NestJS hands over response control entirely. Interceptors, exception filters, and automatic response serialization all stop working.</p></div></div>
+
+  <h2 class="st">Multiple Params &amp; Async</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">example.controller.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">// Multiple route params</span>
+<span class="dec">@Get</span>(<span class="str">'orgs/:orgId/teams/:teamId'</span>)
+<span class="fn">getTeam</span>(
+  <span class="dec">@Param</span>(<span class="str">'orgId'</span>) <span class="prop">orgId</span>: <span class="kw">string</span>,
+  <span class="dec">@Param</span>(<span class="str">'teamId'</span>) <span class="prop">teamId</span>: <span class="kw">string</span>,
+) {}
+
+<span class="cmt">// Wildcard route</span>
+<span class="dec">@Get</span>(<span class="str">'events/*'</span>)
+<span class="fn">handleEvents</span>() {}
+
+<span class="cmt">// Async controller method (always use async for DB calls)</span>
+<span class="dec">@Get</span>(<span class="str">':id'</span>)
+<span class="kw">async</span> <span class="fn">findOne</span>(<span class="dec">@Param</span>(<span class="str">'id'</span>, <span class="cls">ParseIntPipe</span>) <span class="prop">id</span>: <span class="kw">number</span>) {
+  <span class="kw">return</span> <span class="kw">await</span> <span class="kw">this</span>.<span class="prop">service</span>.<span class="fn">findOne</span>(id);
+}
+
+<span class="cmt">// Custom response headers</span>
+<span class="dec">@Get</span>(<span class="str">'export'</span>)
+<span class="dec">@Header</span>(<span class="str">'Content-Disposition'</span>, <span class="str">'attachment; filename="export.csv"'</span>)
+<span class="fn">exportCsv</span>() {}</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">What HTTP status does NestJS return for POST routes by default?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'NestJS defaults to 201 for POST and 200 for everything else.')"><div class="qradio"></div>200 OK for all methods</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'POST defaults to 201 Created. Use @HttpCode() to override.')"><div class="qradio"></div>201 Created for POST, 200 for GET/PUT/DELETE</div>
+      <div class="qopt" onclick="quizAns(this,false,'NestJS defaults to 201 for POST and 200 for everything else.')"><div class="qradio"></div>204 No Content for all write operations</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 3 Complete</div><div class="lc-s">Next: Providers &amp; Dependency Injection</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-3">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 04</div>
+    <h1 class="mt">Providers &amp; Dependency Injection</h1>
+    <p class="m-desc">Dependency Injection is the heart of NestJS. Understanding it unlocks clean architecture, testability, and modularity — this is where Nest diverges most from plain Express.</p>
+  </div>
+
+  <div class="cl cl-info"><div class="cl-icon">💡</div><div class="cl-body"><div class="cl-title">DI in plain English</div><p>Without DI: <code>const svc = new UsersService(new DatabaseService())</code> — you manage everything.<br>With DI: declare what you need in the constructor, Nest resolves and injects it automatically.</p></div></div>
+
+  <h2 class="st">Creating a Service</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users/users.service.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Injectable</span>, <span class="cls">NotFoundException</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+
+<span class="dec">@Injectable</span>()   <span class="cmt">// ← registers with the DI container</span>
+<span class="kw">export class</span> <span class="cls">UsersService</span> {
+  <span class="kw">private</span> <span class="prop">users</span> = [];
+
+  <span class="fn">findAll</span>() { <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">users</span>; }
+
+  <span class="fn">findOne</span>(<span class="prop">id</span>: <span class="kw">number</span>) {
+    <span class="kw">const</span> user = <span class="kw">this</span>.<span class="prop">users</span>.<span class="fn">find</span>(u =&gt; u.id === id);
+    <span class="kw">if</span> (!user) <span class="kw">throw new</span> <span class="cls">NotFoundException</span>(<span class="str">'User not found'</span>);
+    <span class="kw">return</span> user;
+  }
+
+  <span class="fn">create</span>(<span class="prop">data</span>: <span class="cls">CreateUserDto</span>) {
+    <span class="kw">const</span> user = { <span class="prop">id</span>: <span class="cls">Date</span>.<span class="fn">now</span>(), ...data };
+    <span class="kw">this</span>.<span class="prop">users</span>.<span class="fn">push</span>(user);
+    <span class="kw">return</span> user;
+  }
+}</pre>
+  </div>
+
+  <h2 class="st">Cross-Module Injection</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">orders/orders.service.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">OrdersService</span> {
+  <span class="cmt">// Nest resolves UsersService from the DI container automatically</span>
+  <span class="kw">constructor</span>(<span class="kw">private readonly</span> <span class="prop">usersService</span>: <span class="cls">UsersService</span>) {}
+
+  <span class="fn">createOrder</span>(<span class="prop">userId</span>: <span class="kw">number</span>) {
+    <span class="kw">const</span> user = <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">findOne</span>(userId);
+    <span class="kw">return</span> { user };
+  }
+}
+
+<span class="cmt">// In OrdersModule — UsersModule must be imported:</span>
+<span class="dec">@Module</span>({
+  <span class="prop">imports</span>: [<span class="cls">UsersModule</span>],   <span class="cmt">// ← and UsersModule must export UsersService</span>
+  <span class="prop">providers</span>: [<span class="cls">OrdersService</span>],
+})
+<span class="kw">export class</span> <span class="cls">OrdersModule</span> {}</pre>
+  </div>
+
+  <h2 class="st">Provider Scopes</h2>
+  <div class="tw"><table>
+    <tr><th>Scope</th><th>Lifetime</th><th>Use Case</th></tr>
+    <tr><td><code>DEFAULT</code></td><td>Singleton — one instance per app</td><td>Services, repos (almost always)</td></tr>
+    <tr><td><code>REQUEST</code></td><td>New instance per HTTP request</td><td>Tenant ID, request-specific state</td></tr>
+    <tr><td><code>TRANSIENT</code></td><td>New instance each injection</td><td>Rare — avoid unless needed</td></tr>
+  </table></div>
+
+  <h2 class="st">Custom Providers</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">app.module.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Module</span>({
+  <span class="prop">providers</span>: [
+    <span class="cmt">// useValue: inject a plain object/value</span>
+    { <span class="prop">provide</span>: <span class="str">'APP_CONFIG'</span>, <span class="prop">useValue</span>: { <span class="prop">debug</span>: <span class="kw">true</span> } },
+
+    <span class="cmt">// useClass: swap implementation (great for testing)</span>
+    { <span class="prop">provide</span>: <span class="cls">AbstractPaymentService</span>, <span class="prop">useClass</span>: <span class="cls">StripeService</span> },
+
+    <span class="cmt">// useFactory: async initialization</span>
+    {
+      <span class="prop">provide</span>: <span class="str">'DB_CONNECTION'</span>,
+      <span class="prop">useFactory</span>: <span class="kw">async</span> (<span class="prop">config</span>: <span class="cls">ConfigService</span>) =&gt; {
+        <span class="kw">return</span> <span class="kw">await</span> <span class="fn">createConnection</span>(config.<span class="fn">get</span>(<span class="str">'database'</span>));
+      },
+      <span class="prop">inject</span>: [<span class="cls">ConfigService</span>],
+    },
+  ],
+})
+
+<span class="cmt">// Inject string-token providers with @Inject:</span>
+<span class="kw">constructor</span>(<span class="dec">@Inject</span>(<span class="str">'APP_CONFIG'</span>) <span class="kw">private</span> <span class="prop">config</span>: <span class="kw">any</span>) {}</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">You have <code>UsersService</code> in <code>UsersModule</code> and want to use it in <code>OrdersService</code>. What two things must you do?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'You import modules, not services directly. The module must export the service.')"><div class="qradio"></div>Import UsersService directly into OrdersModule providers array</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'UsersModule exports UsersService → OrdersModule imports UsersModule → inject normally in constructor.')"><div class="qradio"></div>Export UsersService from UsersModule AND import UsersModule into OrdersModule</div>
+      <div class="qopt" onclick="quizAns(this,false,'@Global still needs exports, and should be used sparingly.')"><div class="qradio"></div>Decorate UsersModule with @Global() and nothing else</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 4 Complete</div><div class="lc-s">Next: Pipes &amp; Validation</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-4">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 05</div>
+    <h1 class="mt">Pipes &amp; Validation</h1>
+    <p class="m-desc">Pipes transform and validate incoming data before it reaches your controller. Combined with class-validator, they give you bulletproof DTO validation with minimal boilerplate.</p>
+  </div>
+
+  <h2 class="st">Built-in Pipes</h2>
+  <div class="tw"><table>
+    <tr><th>Pipe</th><th>What it does</th></tr>
+    <tr><td><code>ParseIntPipe</code></td><td>Parses string to integer, throws 400 if invalid</td></tr>
+    <tr><td><code>ParseUUIDPipe</code></td><td>Validates UUID format</td></tr>
+    <tr><td><code>ParseBoolPipe</code></td><td>Parses 'true'/'false' strings to boolean</td></tr>
+    <tr><td><code>ParseArrayPipe</code></td><td>Parses comma-separated string to array</td></tr>
+    <tr><td><code>ValidationPipe</code></td><td>Validates body/query against DTO using class-validator</td></tr>
+    <tr><td><code>DefaultValuePipe</code></td><td>Provides a default when value is undefined</td></tr>
+  </table></div>
+
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users.controller.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">// ParseIntPipe — throws 400 if :id is not a valid number</span>
+<span class="dec">@Get</span>(<span class="str">':id'</span>)
+<span class="fn">findOne</span>(<span class="dec">@Param</span>(<span class="str">'id'</span>, <span class="cls">ParseIntPipe</span>) <span class="prop">id</span>: <span class="kw">number</span>) {
+  <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">service</span>.<span class="fn">findOne</span>(id);  <span class="cmt">// id is guaranteed a number</span>
+}
+
+<span class="cmt">// ParseUUIDPipe</span>
+<span class="dec">@Get</span>(<span class="str">':uuid'</span>)
+<span class="fn">getByUuid</span>(<span class="dec">@Param</span>(<span class="str">'uuid'</span>, <span class="cls">ParseUUIDPipe</span>) <span class="prop">uuid</span>: <span class="kw">string</span>) {}
+
+<span class="cmt">// DefaultValuePipe + ParseIntPipe for pagination</span>
+<span class="dec">@Get</span>()
+<span class="fn">findAll</span>(
+  <span class="dec">@Query</span>(<span class="str">'page'</span>, <span class="kw">new</span> <span class="cls">DefaultValuePipe</span>(<span class="num">1</span>), <span class="cls">ParseIntPipe</span>) <span class="prop">page</span>: <span class="kw">number</span>,
+  <span class="dec">@Query</span>(<span class="str">'limit'</span>, <span class="kw">new</span> <span class="cls">DefaultValuePipe</span>(<span class="num">20</span>), <span class="cls">ParseIntPipe</span>) <span class="prop">limit</span>: <span class="kw">number</span>,
+) {}</pre>
+  </div>
+
+  <h2 class="st">DTO Validation with class-validator</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">terminal</span><span class="flang">bash</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">npm</span> install class-validator class-transformer</pre>
+  </div>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">dto/create-user.dto.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">IsEmail</span>, <span class="cls">IsString</span>, <span class="cls">IsOptional</span>,
+         <span class="cls">MinLength</span>, <span class="cls">MaxLength</span>, <span class="cls">IsEnum</span> } <span class="kw">from</span> <span class="str">'class-validator'</span>;
+
+<span class="kw">export enum</span> <span class="cls">UserRole</span> { <span class="prop">ADMIN</span> = <span class="str">'admin'</span>, <span class="prop">USER</span> = <span class="str">'user'</span> }
+
+<span class="kw">export class</span> <span class="cls">CreateUserDto</span> {
+  <span class="dec">@IsString</span>()
+  <span class="dec">@MinLength</span>(<span class="num">2</span>)
+  <span class="dec">@MaxLength</span>(<span class="num">50</span>)
+  <span class="prop">name</span>: <span class="kw">string</span>;
+
+  <span class="dec">@IsEmail</span>()
+  <span class="prop">email</span>: <span class="kw">string</span>;
+
+  <span class="dec">@IsString</span>()
+  <span class="dec">@MinLength</span>(<span class="num">8</span>, { <span class="prop">message</span>: <span class="str">'Password must be at least 8 characters'</span> })
+  <span class="prop">password</span>: <span class="kw">string</span>;
+
+  <span class="dec">@IsOptional</span>()
+  <span class="dec">@IsEnum</span>(<span class="cls">UserRole</span>)
+  <span class="prop">role</span>?: <span class="cls">UserRole</span> = <span class="cls">UserRole</span>.<span class="prop">USER</span>;
+}</pre>
+  </div>
+
+  <h2 class="st">Global ValidationPipe Setup</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">main.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre>app.<span class="fn">useGlobalPipes</span>(<span class="kw">new</span> <span class="cls">ValidationPipe</span>({
+  <span class="prop">whitelist</span>: <span class="kw">true</span>,             <span class="cmt">// Strip unknown properties silently</span>
+  <span class="prop">forbidNonWhitelisted</span>: <span class="kw">true</span>,  <span class="cmt">// Throw 400 if extra props are sent</span>
+  <span class="prop">transform</span>: <span class="kw">true</span>,             <span class="cmt">// Auto-cast params to DTO types</span>
+  <span class="prop">transformOptions</span>: {
+    <span class="prop">enableImplicitConversion</span>: <span class="kw">true</span>,
+  },
+}));</pre>
+  </div>
+
+  <div class="cl cl-tip"><div class="cl-icon">⭐</div><div class="cl-body"><div class="cl-title">Security Best Practice</div><p><code>whitelist: true</code> + <code>forbidNonWhitelisted: true</code> prevents mass assignment attacks where clients send extra fields you didn't expect.</p></div></div>
+
+  <h2 class="st">Custom Pipe</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">pipes/parse-mongo-id.pipe.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">PipeTransform</span>, <span class="cls">Injectable</span>, <span class="cls">BadRequestException</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+<span class="kw">import</span> { <span class="cls">Types</span> } <span class="kw">from</span> <span class="str">'mongoose'</span>;
+
+<span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">ParseMongoIdPipe</span> <span class="kw">implements</span> <span class="cls">PipeTransform</span> {
+  <span class="fn">transform</span>(<span class="prop">value</span>: <span class="kw">string</span>) {
+    <span class="kw">if</span> (!<span class="cls">Types</span>.<span class="cls">ObjectId</span>.<span class="fn">isValid</span>(value)) {
+      <span class="kw">throw new</span> <span class="cls">BadRequestException</span>(<span class="str">'Invalid MongoDB ObjectId'</span>);
+    }
+    <span class="kw">return</span> value;
+  }
+}</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">What does <code>whitelist: true</code> in ValidationPipe do?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'whitelist strips silently. forbidNonWhitelisted throws an error.')"><div class="qradio"></div>Throws a 400 error if any extra properties are in the body</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'Extra properties are stripped before the DTO reaches your handler. Pair with forbidNonWhitelisted to throw instead.')"><div class="qradio"></div>Silently strips properties not declared in the DTO class</div>
+      <div class="qopt" onclick="quizAns(this,false,'whitelist is about request body properties, not IP addresses.')"><div class="qradio"></div>Only allows requests from whitelisted IP addresses</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 5 Complete</div><div class="lc-s">Next: Guards &amp; Auth</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-5">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 06</div>
+    <h1 class="mt">Guards &amp; Authentication</h1>
+    <p class="m-desc">Guards decide whether a request should proceed. This module covers JWT auth, Passport strategies, and role-based access control — the full production auth stack.</p>
+  </div>
+
+  <h2 class="st">Setup</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">terminal</span><span class="flang">bash</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">npm</span> install @nestjs/passport @nestjs/jwt passport passport-jwt
+<span class="fn">npm</span> install -D @types/passport-jwt</pre>
+  </div>
+
+  <h2 class="st">JWT Strategy</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">auth/jwt.strategy.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">PassportStrategy</span> } <span class="kw">from</span> <span class="str">'@nestjs/passport'</span>;
+<span class="kw">import</span> { <span class="cls">ExtractJwt</span>, <span class="cls">Strategy</span> } <span class="kw">from</span> <span class="str">'passport-jwt'</span>;
+
+<span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">JwtStrategy</span> <span class="kw">extends</span> <span class="cls">PassportStrategy</span>(<span class="cls">Strategy</span>) {
+  <span class="kw">constructor</span>(<span class="prop">config</span>: <span class="cls">ConfigService</span>) {
+    <span class="kw">super</span>({
+      <span class="prop">jwtFromRequest</span>: <span class="cls">ExtractJwt</span>.<span class="fn">fromAuthHeaderAsBearerToken</span>(),
+      <span class="prop">ignoreExpiration</span>: <span class="kw">false</span>,
+      <span class="prop">secretOrKey</span>: config.<span class="fn">get</span>(<span class="str">'JWT_SECRET'</span>),
+    });
+  }
+
+  <span class="cmt">// Called after JWT verified. Return value becomes req.user</span>
+  <span class="kw">async</span> <span class="fn">validate</span>(<span class="prop">payload</span>: { <span class="prop">sub</span>: <span class="kw">number</span>; <span class="prop">email</span>: <span class="kw">string</span>; <span class="prop">role</span>: <span class="kw">string</span> }) {
+    <span class="kw">return</span> { <span class="prop">userId</span>: payload.sub, <span class="prop">email</span>: payload.email, <span class="prop">role</span>: payload.role };
+  }
+}</pre>
+  </div>
+
+  <h2 class="st">Auth Service — Login &amp; Token</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">auth/auth.service.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">AuthService</span> {
+  <span class="kw">constructor</span>(
+    <span class="kw">private</span> <span class="prop">usersService</span>: <span class="cls">UsersService</span>,
+    <span class="kw">private</span> <span class="prop">jwtService</span>: <span class="cls">JwtService</span>,
+  ) {}
+
+  <span class="kw">async</span> <span class="fn">login</span>(<span class="prop">user</span>: <span class="cls">User</span>) {
+    <span class="kw">const</span> payload = { <span class="prop">sub</span>: user.id, <span class="prop">email</span>: user.email, <span class="prop">role</span>: user.role };
+    <span class="kw">return</span> { <span class="prop">access_token</span>: <span class="kw">this</span>.<span class="prop">jwtService</span>.<span class="fn">sign</span>(payload) };
+  }
+
+  <span class="kw">async</span> <span class="fn">validateUser</span>(<span class="prop">email</span>: <span class="kw">string</span>, <span class="prop">password</span>: <span class="kw">string</span>) {
+    <span class="kw">const</span> user = <span class="kw">await</span> <span class="kw">this</span>.<span class="prop">usersService</span>.<span class="fn">findByEmail</span>(email);
+    <span class="kw">if</span> (user &amp;&amp; <span class="kw">await</span> bcrypt.<span class="fn">compare</span>(password, user.passwordHash)) {
+      <span class="kw">const</span> { passwordHash, ...<span class="prop">result</span> } = user;
+      <span class="kw">return</span> result;
+    }
+    <span class="kw">return null</span>;
+  }
+}</pre>
+  </div>
+
+  <h2 class="st">JWT Guard + @Public() Decorator</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">auth/jwt-auth.guard.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">// decorators/public.decorator.ts</span>
+<span class="kw">export const</span> <span class="cls">Public</span> = () =&gt; <span class="fn">SetMetadata</span>(<span class="str">'isPublic'</span>, <span class="kw">true</span>);
+
+<span class="cmt">// auth/jwt-auth.guard.ts</span>
+<span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">JwtAuthGuard</span> <span class="kw">extends</span> <span class="cls">AuthGuard</span>(<span class="str">'jwt'</span>) {
+  <span class="kw">constructor</span>(<span class="kw">private</span> <span class="prop">reflector</span>: <span class="cls">Reflector</span>) { <span class="kw">super</span>(); }
+
+  <span class="fn">canActivate</span>(<span class="prop">ctx</span>: <span class="cls">ExecutionContext</span>) {
+    <span class="kw">const</span> isPublic = <span class="kw">this</span>.<span class="prop">reflector</span>.<span class="fn">getAllAndOverride</span>&lt;<span class="kw">boolean</span>&gt;(<span class="str">'isPublic'</span>, [
+      ctx.<span class="fn">getHandler</span>(), ctx.<span class="fn">getClass</span>(),
+    ]);
+    <span class="kw">if</span> (isPublic) <span class="kw">return true</span>;
+    <span class="kw">return super</span>.<span class="fn">canActivate</span>(ctx);
+  }
+}
+
+<span class="cmt">// Usage: mark public routes with @Public()</span>
+<span class="dec">@Public</span>()
+<span class="dec">@Post</span>(<span class="str">'login'</span>)
+<span class="fn">login</span>(<span class="dec">@Body</span>() <span class="prop">dto</span>: <span class="cls">LoginDto</span>) {}
+
+<span class="cmt">// Apply globally in main.ts:</span>
+app.<span class="fn">useGlobalGuards</span>(<span class="kw">new</span> <span class="cls">JwtAuthGuard</span>(reflector));</pre>
+  </div>
+
+  <h2 class="st">Role-Based Access Control (RBAC)</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">guards/roles.guard.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">// 1. Create decorator</span>
+<span class="kw">export const</span> <span class="cls">Roles</span> = (...<span class="prop">roles</span>: <span class="kw">string</span>[]) =&gt; <span class="fn">SetMetadata</span>(<span class="str">'roles'</span>, roles);
+
+<span class="cmt">// 2. Create guard</span>
+<span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">RolesGuard</span> <span class="kw">implements</span> <span class="cls">CanActivate</span> {
+  <span class="kw">constructor</span>(<span class="kw">private</span> <span class="prop">reflector</span>: <span class="cls">Reflector</span>) {}
+  <span class="fn">canActivate</span>(<span class="prop">ctx</span>: <span class="cls">ExecutionContext</span>): <span class="kw">boolean</span> {
+    <span class="kw">const</span> required = <span class="kw">this</span>.<span class="prop">reflector</span>.<span class="fn">getAllAndOverride</span>&lt;<span class="kw">string</span>[]&gt;(<span class="str">'roles'</span>, [
+      ctx.<span class="fn">getHandler</span>(), ctx.<span class="fn">getClass</span>(),
+    ]);
+    <span class="kw">if</span> (!required) <span class="kw">return true</span>;
+    <span class="kw">const</span> { user } = ctx.<span class="fn">switchToHttp</span>().<span class="fn">getRequest</span>();
+    <span class="kw">return</span> required.<span class="fn">some</span>(r =&gt; user.role === r);
+  }
+}
+
+<span class="cmt">// 3. Use it</span>
+<span class="dec">@Roles</span>(<span class="str">'admin'</span>)
+<span class="dec">@UseGuards</span>(<span class="cls">JwtAuthGuard</span>, <span class="cls">RolesGuard</span>)
+<span class="dec">@Delete</span>(<span class="str">':id'</span>)
+<span class="fn">deleteUser</span>(<span class="dec">@Param</span>(<span class="str">'id'</span>) <span class="prop">id</span>: <span class="kw">string</span>) {}</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">Where does <code>req.user</code> come from when using JWT auth?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'The DB is not queried automatically. The payload comes from the validated JWT.')"><div class="qradio"></div>NestJS queries the database on every request automatically</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'JwtStrategy.validate() returns the user object. Passport attaches it to req.user automatically.')"><div class="qradio"></div>The return value of validate() in JwtStrategy</div>
+      <div class="qopt" onclick="quizAns(this,false,'The user object comes from JwtStrategy.validate(), not the guard.')"><div class="qradio"></div>The canActivate() method in JwtAuthGuard</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 6 Complete</div><div class="lc-s">Next: Interceptors &amp; Middleware</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-6">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 07</div>
+    <h1 class="mt">Interceptors &amp; Middleware</h1>
+    <p class="m-desc">Interceptors wrap around request execution using RxJS. They can transform responses, measure performance, or add caching. Middleware is Express-compatible and runs before everything else.</p>
+  </div>
+
+  <h2 class="st">Request Lifecycle</h2>
+  <div class="diag">
+    <svg viewBox="0 0 700 56" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace" font-size="11">
+      <rect x="5" y="8" width="72" height="36" rx="6" fill="#111318" stroke="#1e2430"/><text x="41" y="31" text-anchor="middle" fill="#64748b">Request</text>
+      <line x1="79" y1="26" x2="92" y2="26" stroke="#252d3a"/><polygon points="89,22 97,26 89,30" fill="#252d3a"/>
+      <rect x="97" y="8" width="80" height="36" rx="6" fill="#111318" stroke="#1e2430"/><text x="137" y="31" text-anchor="middle" fill="#60a5fa">Middleware</text>
+      <line x1="179" y1="26" x2="192" y2="26" stroke="#252d3a"/><polygon points="189,22 197,26 189,30" fill="#252d3a"/>
+      <rect x="197" y="8" width="62" height="36" rx="6" fill="#111318" stroke="#f97316" stroke-width="1.5"/><text x="228" y="31" text-anchor="middle" fill="#f97316">Guards</text>
+      <line x1="261" y1="26" x2="274" y2="26" stroke="#252d3a"/><polygon points="271,22 279,26 271,30" fill="#252d3a"/>
+      <rect x="279" y="8" width="80" height="36" rx="6" fill="#111318" stroke="#a78bfa" stroke-width="1.5"/><text x="319" y="31" text-anchor="middle" fill="#a78bfa">Interceptor</text>
+      <line x1="361" y1="26" x2="374" y2="26" stroke="#252d3a"/><polygon points="371,22 379,26 371,30" fill="#252d3a"/>
+      <rect x="379" y="8" width="52" height="36" rx="6" fill="#111318" stroke="#1e2430"/><text x="405" y="31" text-anchor="middle" fill="#fbbf24">Pipes</text>
+      <line x1="433" y1="26" x2="446" y2="26" stroke="#252d3a"/><polygon points="443,22 451,26 443,30" fill="#252d3a"/>
+      <rect x="451" y="8" width="76" height="36" rx="6" fill="#111318" stroke="#1e2430"/><text x="489" y="31" text-anchor="middle" fill="#22d3ee">Controller</text>
+      <line x1="529" y1="26" x2="542" y2="26" stroke="#252d3a"/><polygon points="539,22 547,26 539,30" fill="#252d3a"/>
+      <rect x="547" y="8" width="68" height="36" rx="6" fill="#111318" stroke="#1e2430"/><text x="581" y="31" text-anchor="middle" fill="#f472b6">Service</text>
+      <line x1="617" y1="26" x2="630" y2="26" stroke="#252d3a"/><polygon points="627,22 635,26 627,30" fill="#252d3a"/>
+      <rect x="635" y="8" width="60" height="36" rx="6" fill="#111318" stroke="#1e2430"/><text x="665" y="31" text-anchor="middle" fill="#64748b">Response</text>
+    </svg>
+  </div>
+
+  <h2 class="st">Logging Interceptor</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">interceptors/logging.interceptor.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Injectable</span>, <span class="cls">NestInterceptor</span>, <span class="cls">ExecutionContext</span>, <span class="cls">CallHandler</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+<span class="kw">import</span> { <span class="cls">Observable</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="prop">tap</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">LoggingInterceptor</span> <span class="kw">implements</span> <span class="cls">NestInterceptor</span> {
+  <span class="fn">intercept</span>(<span class="prop">ctx</span>: <span class="cls">ExecutionContext</span>, <span class="prop">next</span>: <span class="cls">CallHandler</span>): <span class="cls">Observable</span>&lt;<span class="kw">any</span>&gt; {
+    <span class="kw">const</span> req = ctx.<span class="fn">switchToHttp</span>().<span class="fn">getRequest</span>();
+    <span class="kw">const</span> start = <span class="cls">Date</span>.<span class="fn">now</span>();
+    <span class="kw">return</span> next.<span class="fn">handle</span>().<span class="fn">pipe</span>(
+      <span class="fn">tap</span>(() =&gt; console.<span class="fn">log</span>(req.method + <span class="str">' '</span> + req.url + <span class="str">' → '</span> + (<span class="cls">Date</span>.<span class="fn">now</span>() - start) + <span class="str">'ms'</span>)),
+    );
+  }
+}</pre>
+  </div>
+
+  <h2 class="st">Response Transform Interceptor</h2>
+  <p>Standardise all API responses to <code>{ data, success, timestamp }</code>.</p>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">interceptors/transform.interceptor.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="prop">map</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">TransformInterceptor</span> <span class="kw">implements</span> <span class="cls">NestInterceptor</span> {
+  <span class="fn">intercept</span>(<span class="prop">ctx</span>: <span class="cls">ExecutionContext</span>, <span class="prop">next</span>: <span class="cls">CallHandler</span>) {
+    <span class="kw">return</span> next.<span class="fn">handle</span>().<span class="fn">pipe</span>(
+      <span class="fn">map</span>(data =&gt; ({
+        <span class="prop">data</span>,
+        <span class="prop">success</span>: <span class="kw">true</span>,
+        <span class="prop">timestamp</span>: <span class="kw">new</span> <span class="cls">Date</span>().<span class="fn">toISOString</span>(),
+      })),
+    );
+  }
+}
+<span class="cmt">// Apply globally: app.useGlobalInterceptors(new TransformInterceptor())</span></pre>
+  </div>
+
+  <h2 class="st">Middleware</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">middleware/request-id.middleware.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">RequestIdMiddleware</span> <span class="kw">implements</span> <span class="cls">NestMiddleware</span> {
+  <span class="fn">use</span>(<span class="prop">req</span>: <span class="cls">Request</span>, <span class="prop">res</span>: <span class="cls">Response</span>, <span class="prop">next</span>: <span class="cls">NextFunction</span>) {
+    req[<span class="str">'requestId'</span>] = <span class="fn">randomUUID</span>();
+    res.<span class="fn">setHeader</span>(<span class="str">'X-Request-ID'</span>, req[<span class="str">'requestId'</span>]);
+    <span class="fn">next</span>();
+  }
+}
+
+<span class="cmt">// Register in AppModule.configure():</span>
+consumer.<span class="fn">apply</span>(<span class="cls">RequestIdMiddleware</span>).<span class="fn">forRoutes</span>(<span class="str">'*'</span>);</pre>
+  </div>
+
+  <div class="qw">
+    <div class="qh"><div class="qi">🧠</div><div class="qt">Quick Check</div></div>
+    <div class="qq">You need to wrap all API responses with <code>{ data, success, timestamp }</code>. What's the right primitive?</div>
+    <div class="qopts">
+      <div class="qopt" onclick="quizAns(this,false,'Middleware runs before guards and cannot see the response body.')"><div class="qradio"></div>Middleware — it has access to the response object</div>
+      <div class="qopt" onclick="quizAns(this,false,'A pipe transforms input data, not output data.')"><div class="qradio"></div>A Pipe — it transforms data passing through</div>
+      <div class="qopt" data-correct="true" onclick="quizAns(this,true,'Interceptors wrap both sides of handler execution and can map the outgoing response with RxJS map().')"><div class="qradio"></div>An Interceptor — maps the return value via RxJS operators</div>
+    </div>
+    <div class="qfb"></div>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 7 Complete</div><div class="lc-s">Next: Exception Filters</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-7">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 08</div>
+    <h1 class="mt">Exception Filters</h1>
+    <p class="m-desc">Exception filters catch unhandled exceptions and return clean HTTP error responses. NestJS ships with great defaults — you extend them for consistency and structured logging.</p>
+  </div>
+
+  <h2 class="st">Built-in HTTP Exceptions</h2>
+  <div class="tw"><table>
+    <tr><th>Exception</th><th>Status</th></tr>
+    <tr><td><code>BadRequestException</code></td><td>400</td></tr>
+    <tr><td><code>UnauthorizedException</code></td><td>401</td></tr>
+    <tr><td><code>ForbiddenException</code></td><td>403</td></tr>
+    <tr><td><code>NotFoundException</code></td><td>404</td></tr>
+    <tr><td><code>ConflictException</code></td><td>409</td></tr>
+    <tr><td><code>UnprocessableEntityException</code></td><td>422</td></tr>
+    <tr><td><code>InternalServerErrorException</code></td><td>500</td></tr>
+  </table></div>
+
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users.service.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">findOne</span>(<span class="prop">id</span>: <span class="kw">number</span>) {
+  <span class="kw">const</span> user = <span class="kw">this</span>.<span class="prop">repo</span>.<span class="fn">findOneBy</span>({ id });
+  <span class="kw">if</span> (!user) <span class="kw">throw new</span> <span class="cls">NotFoundException</span>(<span class="str">'User not found'</span>);
+  <span class="kw">return</span> user;
+}
+
+<span class="kw">async</span> <span class="fn">create</span>(<span class="prop">dto</span>: <span class="cls">CreateUserDto</span>) {
+  <span class="kw">const</span> exists = <span class="kw">await</span> <span class="kw">this</span>.<span class="prop">repo</span>.<span class="fn">findOneBy</span>({ <span class="prop">email</span>: dto.email });
+  <span class="kw">if</span> (exists) <span class="kw">throw new</span> <span class="cls">ConflictException</span>(<span class="str">'Email already in use'</span>);
+  <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">repo</span>.<span class="fn">save</span>(dto);
+}</pre>
+  </div>
+
+  <h2 class="st">Custom Global Exception Filter</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">filters/all-exceptions.filter.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">ExceptionFilter</span>, <span class="cls">Catch</span>, <span class="cls">ArgumentsHost</span>,
+         <span class="cls">HttpException</span>, <span class="cls">HttpStatus</span>, <span class="cls">Logger</span> } <span class="kw">from</span> <span class="str">'@nestjs/common'</span>;
+
+<span class="dec">@Catch</span>()  <span class="cmt">// catches ALL unhandled exceptions</span>
+<span class="kw">export class</span> <span class="cls">AllExceptionsFilter</span> <span class="kw">implements</span> <span class="cls">ExceptionFilter</span> {
+  <span class="kw">private readonly</span> <span class="prop">logger</span> = <span class="kw">new</span> <span class="cls">Logger</span>(<span class="cls">AllExceptionsFilter</span>.<span class="prop">name</span>);
+
+  <span class="fn">catch</span>(<span class="prop">exception</span>: <span class="kw">unknown</span>, <span class="prop">host</span>: <span class="cls">ArgumentsHost</span>) {
+    <span class="kw">const</span> ctx = host.<span class="fn">switchToHttp</span>();
+    <span class="kw">const</span> res = ctx.<span class="fn">getResponse</span>();
+    <span class="kw">const</span> req = ctx.<span class="fn">getRequest</span>();
+
+    <span class="kw">const</span> status = exception <span class="kw">instanceof</span> <span class="cls">HttpException</span>
+      ? exception.<span class="fn">getStatus</span>()
+      : <span class="cls">HttpStatus</span>.<span class="prop">INTERNAL_SERVER_ERROR</span>;
+
+    <span class="cmt">// Log unexpected 5xx errors</span>
+    <span class="kw">if</span> (status &gt;= <span class="num">500</span>) <span class="kw">this</span>.<span class="prop">logger</span>.<span class="fn">error</span>(exception);
+
+    res.<span class="fn">status</span>(status).<span class="fn">json</span>({
+      <span class="prop">statusCode</span>: status,
+      <span class="prop">message</span>: exception <span class="kw">instanceof</span> <span class="cls">HttpException</span> ? exception.<span class="fn">getResponse</span>() : <span class="str">'Internal error'</span>,
+      <span class="prop">path</span>: req.url,
+      <span class="prop">timestamp</span>: <span class="kw">new</span> <span class="cls">Date</span>().<span class="fn">toISOString</span>(),
+    });
+  }
+}
+
+<span class="cmt">// main.ts:</span>
+app.<span class="fn">useGlobalFilters</span>(<span class="kw">new</span> <span class="cls">AllExceptionsFilter</span>());</pre>
+  </div>
+
+  <h2 class="st">Custom Business Exceptions</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">exceptions/insufficient-credits.exception.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">export class</span> <span class="cls">InsufficientCreditsException</span> <span class="kw">extends</span> <span class="cls">HttpException</span> {
+  <span class="kw">constructor</span>(<span class="prop">required</span>: <span class="kw">number</span>, <span class="prop">available</span>: <span class="kw">number</span>) {
+    <span class="kw">super</span>(
+      { <span class="prop">error</span>: <span class="str">'INSUFFICIENT_CREDITS'</span>, <span class="prop">required</span>, <span class="prop">available</span> },
+      <span class="cls">HttpStatus</span>.<span class="prop">PAYMENT_REQUIRED</span>  <span class="cmt">// 402</span>
+    );
+  }
+}
+
+<span class="cmt">// Usage:</span>
+<span class="kw">throw new</span> <span class="cls">InsufficientCreditsException</span>(<span class="num">10</span>, <span class="num">3</span>);</pre>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 8 Complete</div><div class="lc-s">Next: Database &amp; TypeORM</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-8">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 09</div>
+    <h1 class="mt">Database &amp; TypeORM</h1>
+    <p class="m-desc">TypeORM is the most popular ORM with NestJS. This module covers entities, repositories, relations, and transactions — everything you need for production data persistence.</p>
+  </div>
+
+  <h2 class="st">Setup</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">terminal + app.module.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">npm</span> install @nestjs/typeorm typeorm pg
+
+<span class="cmt">// app.module.ts</span>
+<span class="cls">TypeOrmModule</span>.<span class="fn">forRootAsync</span>({
+  <span class="prop">imports</span>: [<span class="cls">ConfigModule</span>],
+  <span class="prop">inject</span>: [<span class="cls">ConfigService</span>],
+  <span class="prop">useFactory</span>: (<span class="prop">config</span>: <span class="cls">ConfigService</span>) =&gt; ({
+    <span class="prop">type</span>: <span class="str">'postgres'</span>,
+    <span class="prop">url</span>: config.<span class="fn">get</span>(<span class="str">'DATABASE_URL'</span>),
+    <span class="prop">entities</span>: [__dirname + <span class="str">'/**/*.entity{.ts,.js}'</span>],
+    <span class="prop">synchronize</span>: config.<span class="fn">get</span>(<span class="str">'NODE_ENV'</span>) !== <span class="str">'production'</span>, <span class="cmt">// NEVER in prod</span>
+    <span class="prop">migrations</span>: [__dirname + <span class="str">'/migrations/*{.ts,.js}'</span>],
+  }),
+})</pre>
+  </div>
+
+  <h2 class="st">Defining an Entity</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users/user.entity.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Entity</span>, <span class="cls">Column</span>, <span class="cls">PrimaryGeneratedColumn</span>,
+         <span class="cls">CreateDateColumn</span>, <span class="cls">UpdateDateColumn</span>, <span class="cls">OneToMany</span> } <span class="kw">from</span> <span class="str">'typeorm'</span>;
+
+<span class="dec">@Entity</span>(<span class="str">'users'</span>)
+<span class="kw">export class</span> <span class="cls">User</span> {
+  <span class="dec">@PrimaryGeneratedColumn</span>()
+  <span class="prop">id</span>: <span class="kw">number</span>;
+
+  <span class="dec">@Column</span>({ <span class="prop">unique</span>: <span class="kw">true</span> })
+  <span class="prop">email</span>: <span class="kw">string</span>;
+
+  <span class="dec">@Column</span>()
+  <span class="prop">name</span>: <span class="kw">string</span>;
+
+  <span class="dec">@Column</span>({ <span class="prop">select</span>: <span class="kw">false</span> })  <span class="cmt">// never returned in SELECT *</span>
+  <span class="prop">passwordHash</span>: <span class="kw">string</span>;
+
+  <span class="dec">@Column</span>({ <span class="prop">type</span>: <span class="str">'enum'</span>, <span class="prop">enum</span>: [<span class="str">'admin'</span>, <span class="str">'user'</span>], <span class="prop">default</span>: <span class="str">'user'</span> })
+  <span class="prop">role</span>: <span class="kw">string</span>;
+
+  <span class="dec">@OneToMany</span>(() =&gt; <span class="cls">Order</span>, order =&gt; order.user)
+  <span class="prop">orders</span>: <span class="cls">Order</span>[];
+
+  <span class="dec">@CreateDateColumn</span>() <span class="prop">createdAt</span>: <span class="cls">Date</span>;
+  <span class="dec">@UpdateDateColumn</span>() <span class="prop">updatedAt</span>: <span class="cls">Date</span>;
+}</pre>
+  </div>
+
+  <h2 class="st">Repository Pattern</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users/users.service.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">UsersService</span> {
+  <span class="kw">constructor</span>(
+    <span class="dec">@InjectRepository</span>(<span class="cls">User</span>)
+    <span class="kw">private readonly</span> <span class="prop">repo</span>: <span class="cls">Repository</span>&lt;<span class="cls">User</span>&gt;,
+  ) {}
+
+  <span class="fn">findAll</span>() { <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">repo</span>.<span class="fn">find</span>(); }
+
+  <span class="fn">findWithOrders</span>(<span class="prop">id</span>: <span class="kw">number</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">repo</span>.<span class="fn">findOne</span>({ <span class="prop">where</span>: { id }, <span class="prop">relations</span>: { <span class="prop">orders</span>: <span class="kw">true</span> } });
+  }
+
+  <span class="cmt">// QueryBuilder for complex queries</span>
+  <span class="fn">findActiveAdmins</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">repo</span>
+      .<span class="fn">createQueryBuilder</span>(<span class="str">'user'</span>)
+      .<span class="fn">leftJoinAndSelect</span>(<span class="str">'user.orders'</span>, <span class="str">'orders'</span>)
+      .<span class="fn">where</span>(<span class="str">'user.role = :role'</span>, { <span class="prop">role</span>: <span class="str">'admin'</span> })
+      .<span class="fn">orderBy</span>(<span class="str">'user.name'</span>, <span class="str">'ASC'</span>)
+      .<span class="fn">getMany</span>();
+  }
+}
+
+<span class="cmt">// In UsersModule, register the entity:</span>
+<span class="cls">TypeOrmModule</span>.<span class="fn">forFeature</span>([<span class="cls">User</span>])</pre>
+  </div>
+
+  <h2 class="st">Transactions</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">payments/payments.service.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="dec">@Injectable</span>()
+<span class="kw">export class</span> <span class="cls">PaymentsService</span> {
+  <span class="kw">constructor</span>(<span class="kw">private</span> <span class="prop">dataSource</span>: <span class="cls">DataSource</span>) {}
+
+  <span class="kw">async</span> <span class="fn">transfer</span>(<span class="prop">fromId</span>: <span class="kw">number</span>, <span class="prop">toId</span>: <span class="kw">number</span>, <span class="prop">amount</span>: <span class="kw">number</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">dataSource</span>.<span class="fn">transaction</span>(<span class="kw">async</span> <span class="prop">manager</span> =&gt; {
+      <span class="kw">const</span> sender = <span class="kw">await</span> manager.<span class="fn">findOneOrFail</span>(<span class="cls">User</span>, { <span class="prop">where</span>: { <span class="prop">id</span>: fromId } });
+      <span class="kw">const</span> receiver = <span class="kw">await</span> manager.<span class="fn">findOneOrFail</span>(<span class="cls">User</span>, { <span class="prop">where</span>: { <span class="prop">id</span>: toId } });
+
+      <span class="kw">if</span> (sender.credits &lt; amount) <span class="kw">throw new</span> <span class="cls">BadRequestException</span>(<span class="str">'Not enough credits'</span>);
+
+      sender.credits -= amount;
+      receiver.credits += amount;
+
+      <span class="kw">await</span> manager.<span class="fn">save</span>(sender);
+      <span class="kw">await</span> manager.<span class="fn">save</span>(receiver);
+      <span class="cmt">// if any save throws, both changes auto-rollback</span>
+    });
+  }
+}</pre>
+  </div>
+
+  <div class="cl cl-danger"><div class="cl-icon">🚫</div><div class="cl-body"><div class="cl-title">Never use synchronize: true in production</div><p>It auto-applies schema changes and can drop columns. Use TypeORM migrations instead.</p></div></div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 9 Complete</div><div class="lc-s">Next: Configuration &amp; Env</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-9">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 10</div>
+    <h1 class="mt">Configuration &amp; Environment</h1>
+    <p class="m-desc">Proper config management is a 12-factor app requirement. NestJS's ConfigModule makes it clean, typed, and validated — essential for any serious deployment.</p>
+  </div>
+
+  <h2 class="st">Setup with Joi Validation</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">app.module.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">npm</span> install @nestjs/config joi
+
+<span class="kw">import</span> * <span class="kw">as</span> <span class="cls">Joi</span> <span class="kw">from</span> <span class="str">'joi'</span>;
+
+<span class="cls">ConfigModule</span>.<span class="fn">forRoot</span>({
+  <span class="prop">isGlobal</span>: <span class="kw">true</span>,         <span class="cmt">// no need to import in every module</span>
+  <span class="prop">envFilePath</span>: <span class="str">'.env'</span>,
+  <span class="prop">validationSchema</span>: <span class="cls">Joi</span>.<span class="fn">object</span>({
+    <span class="prop">NODE_ENV</span>: <span class="cls">Joi</span>.<span class="fn">string</span>().<span class="fn">valid</span>(<span class="str">'development'</span>, <span class="str">'production'</span>, <span class="str">'test'</span>).<span class="fn">required</span>(),
+    <span class="prop">PORT</span>: <span class="cls">Joi</span>.<span class="fn">number</span>().<span class="fn">default</span>(<span class="num">3000</span>),
+    <span class="prop">DATABASE_URL</span>: <span class="cls">Joi</span>.<span class="fn">string</span>().<span class="fn">required</span>(),
+    <span class="prop">JWT_SECRET</span>: <span class="cls">Joi</span>.<span class="fn">string</span>().<span class="fn">min</span>(<span class="num">32</span>).<span class="fn">required</span>(),
+    <span class="prop">JWT_EXPIRES_IN</span>: <span class="cls">Joi</span>.<span class="fn">string</span>().<span class="fn">default</span>(<span class="str">'7d'</span>),
+  }),
+})</pre>
+  </div>
+
+  <h2 class="st">Typed Namespace Config</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">config/database.config.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="fn">registerAs</span> } <span class="kw">from</span> <span class="str">'@nestjs/config'</span>;
+
+<span class="kw">export default</span> <span class="fn">registerAs</span>(<span class="str">'database'</span>, () =&gt; ({
+  <span class="prop">url</span>: process.env.<span class="prop">DATABASE_URL</span>,
+  <span class="prop">maxConnections</span>: <span class="cls">parseInt</span>(process.env.<span class="prop">DB_MAX_CONNECTIONS</span> || <span class="str">'10'</span>),
+  <span class="prop">ssl</span>: process.env.<span class="prop">NODE_ENV</span> === <span class="str">'production'</span>,
+}));
+
+<span class="cmt">// In any service:</span>
+<span class="kw">constructor</span>(<span class="kw">private</span> <span class="prop">config</span>: <span class="cls">ConfigService</span>) {}
+
+<span class="kw">this</span>.<span class="prop">config</span>.<span class="fn">get</span>&lt;<span class="kw">string</span>&gt;(<span class="str">'DATABASE_URL'</span>);
+<span class="kw">this</span>.<span class="prop">config</span>.<span class="fn">getOrThrow</span>&lt;<span class="kw">string</span>&gt;(<span class="str">'JWT_SECRET'</span>); <span class="cmt">// throws if undefined</span></pre>
+  </div>
+
+  <div class="cl cl-tip"><div class="cl-icon">🔒</div><div class="cl-body"><div class="cl-title">Always validate at startup</div><p>Joi validation fails fast at app boot if required env vars are missing — much better than discovering missing config in production mid-request.</p></div></div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 10 Complete</div><div class="lc-s">Next: Testing</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-10">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 11</div>
+    <h1 class="mt">Testing</h1>
+    <p class="m-desc">NestJS is built for testability. The TestingModule lets you spin up isolated slices of your app with mocked dependencies. This covers unit tests, controller tests, and e2e.</p>
+  </div>
+
+  <h2 class="st">Unit Testing a Service</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">users/users.service.spec.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> { <span class="cls">Test</span> } <span class="kw">from</span> <span class="str">'@nestjs/testing'</span>;
+<span class="kw">import</span> { <span class="fn">getRepositoryToken</span> } <span class="kw">from</span> <span class="str">'@nestjs/typeorm'</span>;
+
+<span class="fn">describe</span>(<span class="str">'UsersService'</span>, () =&gt; {
+  <span class="kw">let</span> <span class="prop">service</span>: <span class="cls">UsersService</span>;
+
+  <span class="kw">const</span> <span class="prop">mockRepo</span> = {
+    <span class="prop">find</span>: jest.<span class="fn">fn</span>(),
+    <span class="prop">findOne</span>: jest.<span class="fn">fn</span>(),
+    <span class="prop">save</span>: jest.<span class="fn">fn</span>(),
+  };
+
+  <span class="fn">beforeEach</span>(<span class="kw">async</span> () =&gt; {
+    <span class="kw">const</span> module = <span class="kw">await</span> <span class="cls">Test</span>.<span class="fn">createTestingModule</span>({
+      <span class="prop">providers</span>: [
+        <span class="cls">UsersService</span>,
+        {
+          <span class="prop">provide</span>: <span class="fn">getRepositoryToken</span>(<span class="cls">User</span>),
+          <span class="prop">useValue</span>: mockRepo,  <span class="cmt">// inject mock instead of real DB</span>
+        },
+      ],
+    }).<span class="fn">compile</span>();
+
+    service = module.<span class="fn">get</span>(<span class="cls">UsersService</span>);
+  });
+
+  <span class="fn">it</span>(<span class="str">'returns all users'</span>, <span class="kw">async</span> () =&gt; {
+    mockRepo.find.<span class="fn">mockResolvedValue</span>([{ <span class="prop">id</span>: <span class="num">1</span>, <span class="prop">name</span>: <span class="str">'Sam'</span> }]);
+    <span class="kw">const</span> result = <span class="kw">await</span> service.<span class="fn">findAll</span>();
+    <span class="fn">expect</span>(result).<span class="fn">toHaveLength</span>(<span class="num">1</span>);
+  });
+
+  <span class="fn">it</span>(<span class="str">'throws NotFoundException for unknown user'</span>, <span class="kw">async</span> () =&gt; {
+    mockRepo.findOne.<span class="fn">mockResolvedValue</span>(<span class="kw">null</span>);
+    <span class="kw">await</span> <span class="fn">expect</span>(service.<span class="fn">findOne</span>(<span class="num">999</span>)).<span class="fn">rejects</span>.<span class="fn">toThrow</span>(<span class="cls">NotFoundException</span>);
+  });
+});</pre>
+  </div>
+
+  <h2 class="st">E2E Testing</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">test/users.e2e-spec.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="kw">import</span> * <span class="kw">as</span> request <span class="kw">from</span> <span class="str">'supertest'</span>;
+
+<span class="fn">describe</span>(<span class="str">'Users (e2e)'</span>, () =&gt; {
+  <span class="kw">let</span> app: <span class="cls">INestApplication</span>;
+  <span class="kw">let</span> token: <span class="kw">string</span>;
+
+  <span class="fn">beforeAll</span>(<span class="kw">async</span> () =&gt; {
+    <span class="kw">const</span> module = <span class="kw">await</span> <span class="cls">Test</span>.<span class="fn">createTestingModule</span>({
+      <span class="prop">imports</span>: [<span class="cls">AppModule</span>],
+    }).<span class="fn">compile</span>();
+    app = module.<span class="fn">createNestApplication</span>();
+    app.<span class="fn">useGlobalPipes</span>(<span class="kw">new</span> <span class="cls">ValidationPipe</span>({ <span class="prop">whitelist</span>: <span class="kw">true</span> }));
+    <span class="kw">await</span> app.<span class="fn">init</span>();
+
+    <span class="cmt">// Get auth token</span>
+    <span class="kw">const</span> { body } = <span class="kw">await</span> request(app.<span class="fn">getHttpServer</span>())
+      .<span class="fn">post</span>(<span class="str">'/auth/login'</span>)
+      .<span class="fn">send</span>({ <span class="prop">email</span>: <span class="str">'admin@test.com'</span>, <span class="prop">password</span>: <span class="str">'password'</span> });
+    token = body.access_token;
+  });
+
+  <span class="fn">afterAll</span>(<span class="kw">async</span> () =&gt; <span class="kw">await</span> app.<span class="fn">close</span>());
+
+  <span class="fn">it</span>(<span class="str">'GET /users → 200 array'</span>, () =&gt;
+    request(app.<span class="fn">getHttpServer</span>())
+      .<span class="fn">get</span>(<span class="str">'/users'</span>)
+      .<span class="fn">set</span>(<span class="str">'Authorization'</span>, <span class="str">'Bearer '</span> + token)
+      .<span class="fn">expect</span>(<span class="num">200</span>)
+  );
+
+  <span class="fn">it</span>(<span class="str">'POST /users bad body → 400'</span>, () =&gt;
+    request(app.<span class="fn">getHttpServer</span>()).<span class="fn">post</span>(<span class="str">'/users'</span>).<span class="fn">send</span>({ <span class="prop">x</span>: <span class="num">1</span> }).<span class="fn">expect</span>(<span class="num">400</span>)
+  );
+});</pre>
+  </div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 11 Complete</div><div class="lc-s">Next: Deploy &amp; Production</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Continue →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-11">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Module 12</div>
+    <h1 class="mt">Deploy &amp; Production</h1>
+    <p class="m-desc">Shipping a NestJS app to production requires Dockerizing, health checks, structured logging, and a security-hardened setup. Here's the complete production checklist.</p>
+  </div>
+
+  <h2 class="st">Multi-Stage Dockerfile</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">Dockerfile</span><span class="flang">dockerfile</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># Stage 1: Build</span>
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+<span class="cmt"># Stage 2: Run (lean image)</span>
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+<span class="cmt"># Non-root user for security</span>
+RUN addgroup -g 1001 -S nodejs &amp;&amp; adduser -S nestjs -u 1001
+USER nestjs
+
+COPY --from=builder --chown=nestjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+
+EXPOSE 3000
+CMD ["node", "dist/main"]</pre>
+  </div>
+
+  <h2 class="st">Health Checks</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">health/health.controller.ts</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">npm</span> install @nestjs/terminus
+
+<span class="dec">@Controller</span>(<span class="str">'health'</span>)
+<span class="kw">export class</span> <span class="cls">HealthController</span> {
+  <span class="kw">constructor</span>(
+    <span class="kw">private</span> <span class="prop">health</span>: <span class="cls">HealthCheckService</span>,
+    <span class="kw">private</span> <span class="prop">db</span>: <span class="cls">TypeOrmHealthIndicator</span>,
+  ) {}
+
+  <span class="dec">@Get</span>()
+  <span class="dec">@HealthCheck</span>()
+  <span class="fn">check</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">health</span>.<span class="fn">check</span>([
+      () =&gt; <span class="kw">this</span>.<span class="prop">db</span>.<span class="fn">pingCheck</span>(<span class="str">'database'</span>),
+    ]);
+  }
+}
+<span class="cmt">// GET /health → { status: "ok", details: { database: { status: "up" } } }</span></pre>
+  </div>
+
+  <h2 class="st">Security Hardening in main.ts</h2>
+  <div class="cw">
+    <div class="ch"><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="fname">main.ts (production)</span><span class="flang">typescript</span><button class="cpbtn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="fn">npm</span> install helmet @nestjs/throttler
+
+<span class="kw">async function</span> <span class="fn">bootstrap</span>() {
+  <span class="kw">const</span> app = <span class="kw">await</span> <span class="cls">NestFactory</span>.<span class="fn">create</span>(<span class="cls">AppModule</span>);
+
+  <span class="cmt">// Security headers</span>
+  app.<span class="fn">use</span>(<span class="fn">helmet</span>());
+
+  <span class="cmt">// CORS</span>
+  app.<span class="fn">enableCors</span>({ <span class="prop">origin</span>: process.env.<span class="prop">ALLOWED_ORIGIN</span> });
+
+  <span class="cmt">// Global validation</span>
+  app.<span class="fn">useGlobalPipes</span>(<span class="kw">new</span> <span class="cls">ValidationPipe</span>({ <span class="prop">whitelist</span>: <span class="kw">true</span>, <span class="prop">transform</span>: <span class="kw">true</span> }));
+
+  <span class="cmt">// Global exception filter</span>
+  app.<span class="fn">useGlobalFilters</span>(<span class="kw">new</span> <span class="cls">AllExceptionsFilter</span>());
+
+  <span class="cmt">// API versioning</span>
+  app.<span class="fn">setGlobalPrefix</span>(<span class="str">'api'</span>);
+  app.<span class="fn">enableVersioning</span>({ <span class="prop">type</span>: <span class="cls">VersioningType</span>.<span class="prop">URI</span> });
+
+  <span class="kw">await</span> app.<span class="fn">listen</span>(process.env.<span class="prop">PORT</span> || <span class="num">3000</span>);
+}</pre>
+  </div>
+
+  <h2 class="st">Production Checklist</h2>
+  <div class="tw"><table>
+    <tr><th>Item</th><th>Status</th><th>Why it matters</th></tr>
+    <tr><td>ValidationPipe globally enabled</td><td>✅</td><td>Security against invalid/malicious input</td></tr>
+    <tr><td>Helmet middleware</td><td>✅</td><td>Sets security HTTP headers (XSS, CSRF, etc.)</td></tr>
+    <tr><td>Rate limiting</td><td>✅</td><td>Prevents brute-force and abuse</td></tr>
+    <tr><td>synchronize: false in TypeORM</td><td>✅</td><td>Prevents accidental schema drops in prod</td></tr>
+    <tr><td>Joi env validation</td><td>✅</td><td>Fail fast if config is missing at boot</td></tr>
+    <tr><td>Health check endpoint</td><td>✅</td><td>Required for Kubernetes / load balancers</td></tr>
+    <tr><td>Non-root Docker user</td><td>✅</td><td>Container security best practice</td></tr>
+    <tr><td>Multi-stage Dockerfile</td><td>✅</td><td>Smaller image, no build tools in prod</td></tr>
+  </table></div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🎉</div><div><div class="lc-t">Module 12 Complete</div><div class="lc-s">Final: Interview Prep</div></div></div><button class="btn btn-p" onclick="markDone();nextMod()">Go to Interview Prep →</button></div>
+</div>
+</script>
+
+<script type="text/template" id="tpl-12">
+<div class="content">
+  <div class="m-hero">
+    <div class="m-tag">Final Module</div>
+    <h1 class="mt">Interview Prep</h1>
+    <p class="m-desc">Curated NestJS interview questions across difficulty levels. These cover the exact concepts that come up in real engineering interviews. Click any question to reveal the answer.</p>
+    <div class="m-meta">
+      <div class="mm"><div class="mdot" style="background:var(--green)"></div><span style="color:var(--green)">Easy</span></div>
+      <div class="mm"><div class="mdot" style="background:var(--yellow)"></div><span style="color:var(--yellow)">Medium</span></div>
+      <div class="mm"><div class="mdot" style="background:var(--red)"></div><span style="color:var(--red)">Hard</span></div>
+    </div>
+  </div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>1. What is the difference between a Module, Controller, and Service?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge de">easy</span><span class="ichev">▶</span></div></div><div class="ia">A <strong>Module</strong> organises related code and wires together controllers, providers, and imports — it's a domain boundary (UsersModule, AuthModule). A <strong>Controller</strong> handles HTTP routing — receives requests, delegates to services, returns responses. No business logic. A <strong>Service</strong> (decorated @Injectable()) contains all business logic and data access. This separation follows Single Responsibility Principle.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>2. What does the @Injectable() decorator do?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge de">easy</span><span class="ichev">▶</span></div></div><div class="ia">It marks a class as a "provider" — meaning NestJS's IoC container can manage its creation and lifetime. Without @Injectable(), the class cannot be injected via constructor injection. It also enables TypeScript's reflect-metadata so the framework can resolve dependencies by type.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>3. What is the difference between imports, exports, providers, and controllers in @Module?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge de">easy</span><span class="ichev">▶</span></div></div><div class="ia"><strong>providers</strong>: Services/classes available via DI within this module. <strong>controllers</strong>: Route handlers for this module. <strong>imports</strong>: Other modules whose exported providers this module needs. <strong>exports</strong>: Providers this module makes available to other modules that import it. A provider must be in both providers AND exports to be accessible externally.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>4. How do you apply middleware in NestJS?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge de">easy</span><span class="ichev">▶</span></div></div><div class="ia">Implement NestMiddleware and register in a module that implements NestModule. The configure() method uses MiddlewareConsumer: <code>consumer.apply(MyMiddleware).forRoutes('*')</code>. You can scope it to specific routes, controllers, or HTTP methods. It's Express-compatible — you can use any Express middleware directly.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>5. What is the default scope of an @Injectable() provider?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge de">easy</span><span class="ichev">▶</span></div></div><div class="ia">DEFAULT (singleton) scope — one instance per application, shared across all consumers. REQUEST scope creates a new instance per HTTP request (performance cost, use sparingly). TRANSIENT creates a new instance each time it's injected. Avoid non-singleton scopes unless you have a specific reason — they propagate scope up the dependency chain.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>6. Explain the NestJS request lifecycle in order.</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dm">medium</span><span class="ichev">▶</span></div></div><div class="ia">Request → Middleware → Guards → Interceptors (pre) → Pipes → Controller Handler → Service → Interceptors (post) → Exception Filters (if error).<br><br>Key: Interceptors wrap both sides (before and after), which is why they use RxJS observables. Guards run before pipes, so you cannot access validated body data in a guard. Exception Filters catch anything thrown anywhere in the chain.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>7. How does Dependency Injection work under the hood in NestJS?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dm">medium</span><span class="ichev">▶</span></div></div><div class="ia">NestJS uses TypeScript's reflect-metadata to read constructor parameter types at runtime. When you declare <code>constructor(private usersService: UsersService)</code>, decorator metadata stores the UsersService type as the DI token. The IoC container resolves the dependency by looking up the registered provider with that token, creating it if needed (respecting scope), and injecting it. String tokens require @Inject('TOKEN') since there's no type to reflect.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>8. What is the difference between a Guard, Interceptor, and Middleware?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dm">medium</span><span class="ichev">▶</span></div></div><div class="ia"><strong>Middleware</strong>: Express-compatible, runs first, no access to Nest context (can't know which handler will run). Good for: request ID, CORS, rate limiting.<br><strong>Guards</strong>: Run after middleware, return true/false. Have access to ExecutionContext (handler metadata via Reflector). Good for: authentication, RBAC.<br><strong>Interceptors</strong>: Wrap handler execution using RxJS. Can transform both request and response, add caching, measure timing. Good for: response shaping, logging, timeout handling.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>9. How would you implement refresh token rotation in NestJS?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dm">medium</span><span class="ichev">▶</span></div></div><div class="ia">Issue both a short-lived access token (15min) and long-lived refresh token (7 days) on login. Store the refresh token (hashed) in the DB with a revocation flag. Create POST /auth/refresh protected by a RefreshTokenGuard that validates the token against the stored hash. On successful refresh: issue new access AND new refresh token (rotation), invalidate the old one. This prevents theft — if the old token is used after rotation, invalidate the entire token family.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>10. How do you prevent circular dependencies in NestJS?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dm">medium</span><span class="ichev">▶</span></div></div><div class="ia">Use forwardRef() to break circular imports: <code>@Inject(forwardRef(() => AuthService))</code> and in module imports: <code>imports: [forwardRef(() => AuthModule)]</code>. However, circular dependencies are a design smell — consider extracting shared logic into a third module (e.g., SharedModule) that both can import without circularity.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>11. How would you implement multi-tenancy in a NestJS SaaS?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dh">hard</span><span class="ichev">▶</span></div></div><div class="ia"><strong>Option 1 (schema-per-tenant)</strong>: REQUEST-scoped TenantService reads tenant from JWT/header. Custom TypeORM connection factory creates connection to correct schema. Full isolation but expensive.<br><strong>Option 2 (row-level)</strong>: Add tenantId to all entities. REQUEST-scoped repository wrapper auto-adds WHERE tenantId = X to all queries. Simpler, better performance. Combine with PostgreSQL row-level security for defense in depth.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>12. How would you implement distributed caching in NestJS?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dh">hard</span><span class="ichev">▶</span></div></div><div class="ia">Install @nestjs/cache-manager and cache-manager-ioredis. Register CacheModule globally with Redis store. Use @UseInterceptors(CacheInterceptor) on read-heavy GET endpoints. For manual caching inject CACHE_MANAGER and use cache.get/set. For invalidation, prefix keys by entity type (user:1, users:all) and purge prefixes on mutation. For write-through, update both DB and cache in the service. Set TTL per resource volatility.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>13. How do you structure a large NestJS monorepo?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dh">hard</span><span class="ichev">▶</span></div></div><div class="ia">Use Nest CLI workspace mode: <code>nest g app</code> for multiple applications (API, admin, workers) and <code>nest g lib</code> for shared libraries (database, auth, common-utils). Each app has its own main.ts but shares library code. This avoids duplication while keeping deployment units separate. Start with monorepo to reduce overhead — only split into separate repos when team size or release cadence demands it.</div></div>
+
+  <div class="ii"><div class="iq-btn" onclick="toggleI(this)"><span>14. How would you implement per-user rate limiting across multiple instances?</span><div style="display:flex;gap:8px;align-items:center"><span class="dbadge dh">hard</span><span class="ichev">▶</span></div></div><div class="ia">Use @nestjs/throttler with a custom ThrottlerGuard. Override getTracker() to return req.user.userId instead of IP. Configure ThrottlerStorageRedisService so limits are shared across all server instances. For tiered limits (free vs paid), override getThrottler() to return different TTL/limit based on user.plan from the JWT. Expose X-RateLimit-Remaining headers in the response for clients.</div></div>
+
+  <div class="cl cl-tip" style="margin-top:32px"><div class="cl-icon">🎯</div><div class="cl-body"><div class="cl-title">Interview Strategy</div><p>For hard questions, structure your answer as: (1) state the problem, (2) give the approach with trade-offs, (3) mention production considerations. Interviewers care more about your thinking process than the exact syntax.</p></div></div>
+
+  <div class="lc"><div class="lc-l"><div class="lc-ico">🏆</div><div><div class="lc-t">Course Complete!</div><div class="lc-s">You've covered everything from modules to production deployment</div></div></div><button class="btn btn-p" onclick="markDone();showHome()">Back to Home →</button></div>
+</div>
+</script>
+
+<!-- ══════════════ APP SHELL ══════════════ -->
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">🪺</div>
+        <div><div class="logo-text">NestJS Master</div><div class="logo-sub">Interactive Course</div></div>
+      </div>
+      <div class="pb-wrap"><div class="pb" id="pb" style="width:0%"></div></div>
+      <div class="pb-lbl"><span>Progress</span><span id="pbTxt">0%</span></div>
+    </div>
+    <nav class="nav" id="nav">
+      <div><div class="ns-lbl">Overview</div>
+        <div class="ni active" id="ni-home" onclick="showHome()"><span class="nicon">🏠</span><span class="ntitle">Course Home</span></div>
+      </div>
+      <div><div class="ns-lbl">Foundation</div>
+        <div class="ni" id="ni-0" onclick="showMod(0)"><span class="nicon">⚡</span><span class="ntitle">Why NestJS?</span><span class="nbadge">M1</span></div>
+        <div class="ni" id="ni-1" onclick="showMod(1)"><span class="nicon">🏗️</span><span class="ntitle">Architecture &amp; Modules</span><span class="nbadge">M2</span></div>
+        <div class="ni" id="ni-2" onclick="showMod(2)"><span class="nicon">🎮</span><span class="ntitle">Controllers</span><span class="nbadge">M3</span></div>
+        <div class="ni" id="ni-3" onclick="showMod(3)"><span class="nicon">⚙️</span><span class="ntitle">Providers &amp; DI</span><span class="nbadge">M4</span></div>
+      </div>
+      <div><div class="ns-lbl">Core Features</div>
+        <div class="ni" id="ni-4" onclick="showMod(4)"><span class="nicon">🔧</span><span class="ntitle">Pipes &amp; Validation</span><span class="nbadge">M5</span></div>
+        <div class="ni" id="ni-5" onclick="showMod(5)"><span class="nicon">🛡️</span><span class="ntitle">Guards &amp; Auth</span><span class="nbadge">M6</span></div>
+        <div class="ni" id="ni-6" onclick="showMod(6)"><span class="nicon">🔄</span><span class="ntitle">Interceptors &amp; Middleware</span><span class="nbadge">M7</span></div>
+        <div class="ni" id="ni-7" onclick="showMod(7)"><span class="nicon">💥</span><span class="ntitle">Exception Filters</span><span class="nbadge">M8</span></div>
+      </div>
+      <div><div class="ns-lbl">Data Layer</div>
+        <div class="ni" id="ni-8" onclick="showMod(8)"><span class="nicon">🗃️</span><span class="ntitle">Database &amp; TypeORM</span><span class="nbadge">M9</span></div>
+        <div class="ni" id="ni-9" onclick="showMod(9)"><span class="nicon">🌱</span><span class="ntitle">Configuration &amp; Env</span><span class="nbadge">M10</span></div>
+      </div>
+      <div><div class="ns-lbl">Advanced</div>
+        <div class="ni" id="ni-10" onclick="showMod(10)"><span class="nicon">🧪</span><span class="ntitle">Testing</span><span class="nbadge">M11</span></div>
+        <div class="ni" id="ni-11" onclick="showMod(11)"><span class="nicon">🚀</span><span class="ntitle">Deploy &amp; Production</span><span class="nbadge">M12</span></div>
+        <div class="ni" id="ni-12" onclick="showMod(12)"><span class="nicon">🎯</span><span class="ntitle">Interview Prep</span><span class="nbadge">Final</span></div>
+      </div>
+    </nav>
+  </aside>
+
+  <div class="main" id="main">
+    <div class="topbar">
+      <button class="btn" onclick="toggleSidebar()" style="padding:7px 10px">☰</button>
+      <div class="bc">NestJS Master › <span id="bcCur">Home</span></div>
+      <div class="tr">
+        <button class="btn" id="btnPrev" onclick="prevMod()" style="display:none">← Prev</button>
+        <button class="btn btn-p" id="btnNext" onclick="nextMod()" style="display:none">Next →</button>
+        <button class="btn" id="btnDone" onclick="markDone()" style="display:none">✓ Mark Done</button>
+      </div>
+    </div>
+    <div id="pageContent"></div>
+  </div>
+</div>
+
+<script>
+const TOTAL = 13;
+const titles = ['Why NestJS?','Architecture & Modules','Controllers','Providers & DI','Pipes & Validation','Guards & Auth','Interceptors & Middleware','Exception Filters','Database & TypeORM','Configuration & Env','Testing','Deploy & Production','Interview Prep'];
+let cur = -1;
+const done = JSON.parse(localStorage.getItem('njc_done') || '[]');
+
+function save(){ localStorage.setItem('njc_done', JSON.stringify(done)); }
+
+function updateProgress(){
+  const pct = Math.round((done.length / TOTAL) * 100);
+  document.getElementById('pb').style.width = pct + '%';
+  document.getElementById('pbTxt').textContent = pct + '%';
+  for(let i = 0; i < TOTAL; i++){
+    const el = document.getElementById('ni-'+i);
+    if(!el) continue;
+    el.classList.toggle('done', done.includes(i));
+    const badge = el.querySelector('.nbadge');
+    if(badge) badge.textContent = done.includes(i) ? '✓' : 'M'+(i+1);
+  }
+  // refresh module cards if on home
+  document.querySelectorAll('.mcs').forEach((el, i) => {
+    if(done.includes(i)){ el.textContent = '✓ Done'; el.className = 'mcs done'; }
+    else if(i === cur){ el.textContent = 'In Progress'; el.className = 'mcs inprog'; }
+    else { el.textContent = 'Not Started'; el.className = 'mcs todo'; }
+  });
+}
+
+function setNav(idx){
+  document.querySelectorAll('.ni').forEach(el => el.classList.remove('active'));
+  const t = idx === -1 ? document.getElementById('ni-home') : document.getElementById('ni-'+idx);
+  if(t) t.classList.add('active');
+}
+
+function showNavBtns(idx){
+  document.getElementById('btnPrev').style.display = idx > 0 ? 'block' : 'none';
+  document.getElementById('btnNext').style.display = idx < TOTAL-1 ? 'block' : 'none';
+  const db = document.getElementById('btnDone');
+  db.style.display = idx >= 0 ? 'block' : 'none';
+  if(idx >= 0 && done.includes(idx)){
+    db.textContent = '✓ Done'; db.style.color = 'var(--green)';
+    db.style.borderColor = 'rgba(34,211,238,.3)';
+  } else {
+    db.textContent = '✓ Mark Done'; db.style.color = ''; db.style.borderColor = '';
+  }
+}
+
+function markDone(){
+  if(cur >= 0 && !done.includes(cur)) done.push(cur);
+  save(); updateProgress();
+  const db = document.getElementById('btnDone');
+  db.textContent = '✓ Done'; db.style.color = 'var(--green)';
+  db.style.borderColor = 'rgba(34,211,238,.3)';
+}
+
+function nextMod(){ if(cur < TOTAL-1) showMod(cur+1); }
+function prevMod(){ if(cur > 0) showMod(cur-1); else showHome(); }
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+
+function copyCode(btn){
+  const pre = btn.closest('.cw').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function quizAns(el, correct, explanation){
+  const wrap = el.closest('.qw');
+  wrap.querySelectorAll('.qopt').forEach(o => o.classList.add('disabled'));
+  const fb = wrap.querySelector('.qfb');
+  if(correct){
+    el.classList.add('correct');
+    fb.textContent = '✓ Correct! ' + explanation;
+    fb.className = 'qfb show pass';
+  } else {
+    el.classList.add('wrong');
+    fb.textContent = '✗ Not quite. ' + explanation;
+    fb.className = 'qfb show fail';
+    wrap.querySelectorAll('.qopt[data-correct="true"]').forEach(o => o.classList.add('correct'));
+  }
+}
+
+function toggleI(el){
+  const a = el.nextElementSibling;
+  el.classList.toggle('open');
+  a.classList.toggle('open');
+}
+
+function showHome(){
+  cur = -1; setNav(-1);
+  document.getElementById('bcCur').textContent = 'Home';
+  document.getElementById('btnPrev').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('btnDone').style.display = 'none';
+
+  const mods = [
+    {ico:'⚡',t:'Why NestJS?',d:'Origin story, opinionated architecture, when to choose Nest',l:'6 concepts'},
+    {ico:'🏗️',t:'Architecture & Modules',d:'Module system, root module, feature modules, shared modules',l:'8 concepts'},
+    {ico:'🎮',t:'Controllers',d:'Routing, decorators, params, query, body, status codes',l:'10 concepts'},
+    {ico:'⚙️',t:'Providers & DI',d:'Services, DI, scopes, custom providers (useValue/useClass/useFactory)',l:'9 concepts'},
+    {ico:'🔧',t:'Pipes & Validation',d:'Built-in pipes, class-validator, DTOs, global ValidationPipe',l:'8 concepts'},
+    {ico:'🛡️',t:'Guards & Auth',d:'JWT, Passport, @Public(), role-based access control',l:'10 concepts'},
+    {ico:'🔄',t:'Interceptors & Middleware',d:'Response transformation, logging, request lifecycle',l:'7 concepts'},
+    {ico:'💥',t:'Exception Filters',d:'Built-in exceptions, custom filters, global error handling',l:'6 concepts'},
+    {ico:'🗃️',t:'Database & TypeORM',d:'Entities, repositories, relations, migrations, transactions',l:'12 concepts'},
+    {ico:'🌱',t:'Configuration & Env',d:'ConfigModule, Joi validation schema, typed namespaced config',l:'6 concepts'},
+    {ico:'🧪',t:'Testing',d:'Unit tests, e2e tests, mocking, TestingModule',l:'8 concepts'},
+    {ico:'🚀',t:'Deploy & Production',d:'Docker multi-stage, health checks, security hardening',l:'7 concepts'},
+    {ico:'🎯',t:'Interview Prep',d:'14 curated Q&A — easy to hard with full model answers',l:'14 Q&A'},
+  ];
+
+  const cards = mods.map((m,i) => `
+    <div class="mc" onclick="showMod(${i})">
+      <div class="mc-n">MODULE ${String(i+1).padStart(2,'0')}</div>
+      <div class="mc-ico">${m.ico}</div>
+      <div class="mc-t">${m.t}</div>
+      <div class="mc-d">${m.d}</div>
+      <div class="mc-f">
+        <span class="mc-ls">${m.l}</span>
+        <span class="mcs ${done.includes(i)?'done':'todo'}">${done.includes(i)?'✓ Done':'Not Started'}</span>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('pageContent').innerHTML = `
+    <div class="home-hero">
+      <div class="m-tag">Full Course</div>
+      <div class="home-title">Master <span>NestJS</span><br>from Zero</div>
+      <div class="home-sub">Production-grade, interactive course covering everything from modules to deployment. Built for engineers who want depth, not just syntax.</div>
+      <div class="home-stats">
+        <div class="stat"><div class="stat-n">13</div><div class="stat-l">Modules</div></div>
+        <div class="stat"><div class="stat-n">100+</div><div class="stat-l">Concepts</div></div>
+        <div class="stat"><div class="stat-n">50+</div><div class="stat-l">Code Examples</div></div>
+        <div class="stat"><div class="stat-n">14</div><div class="stat-l">Interview Q&amp;A</div></div>
+      </div>
+    </div>
+    <div class="mg">${cards}</div>`;
+  updateProgress();
+}
+
+function showMod(idx){
+  cur = idx;
+  setNav(idx);
+  showNavBtns(idx);
+  document.getElementById('bcCur').textContent = titles[idx];
+  const tpl = document.getElementById('tpl-'+idx);
+  document.getElementById('pageContent').innerHTML = tpl ? tpl.innerHTML : '<div class="content"><p>Module not found.</p></div>';
+  document.getElementById('main').scrollTo(0, 0);
+  updateProgress();
+}
+
+// Init
+updateProgress();
+showHome();
+</script>
+</body>
+</html>

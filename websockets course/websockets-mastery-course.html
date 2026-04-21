@@ -1,0 +1,3285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebSockets Mastery — Zero to Production</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c10;
+    --bg2: #0d1117;
+    --bg3: #111820;
+    --surface: #161d27;
+    --surface2: #1c2535;
+    --border: #1e2d40;
+    --border2: #263548;
+    --accent: #00d4ff;
+    --accent2: #0099cc;
+    --accent3: #00ffb3;
+    --warn: #ff7b00;
+    --danger: #ff3860;
+    --success: #00ffb3;
+    --muted: #4a6080;
+    --text: #c8d8e8;
+    --text2: #8aa0b8;
+    --text3: #4a6080;
+    --heading: #e8f4ff;
+    --code-bg: #0a1520;
+    --highlight: rgba(0,212,255,0.08);
+    --glow: 0 0 20px rgba(0,212,255,0.15);
+    --glow2: 0 0 40px rgba(0,212,255,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: fixed;
+    top: 0; left: 0;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .logo-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.2;
+  }
+
+  .progress-bar-wrap {
+    margin-top: 14px;
+    background: var(--border);
+    height: 3px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .nav-section {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-section-label {
+    padding: 10px 20px 6px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 400;
+  }
+
+  .nav-item:hover {
+    background: var(--highlight);
+    color: var(--text);
+    border-left-color: var(--border2);
+  }
+
+  .nav-item.active {
+    background: rgba(0,212,255,0.06);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .nav-item.completed .nav-num {
+    background: var(--accent3);
+    color: #000;
+  }
+
+  .nav-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: var(--border2);
+    color: var(--text3);
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .nav-item.active .nav-num {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* MAIN */
+  #main {
+    margin-left: 280px;
+    flex: 1;
+    min-height: 100vh;
+  }
+
+  .module {
+    display: none;
+    padding: 48px 56px;
+    max-width: 900px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .module.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .module-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1.module-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--heading);
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .module-subtitle {
+    font-size: 16px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    font-weight: 400;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--heading);
+    margin: 36px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  h2::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 24px 0 10px;
+    color: var(--accent3);
+  }
+
+  p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--text);
+    margin-bottom: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 400;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    margin: 20px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-lang {
+    font-size: 11px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .code-copy {
+    font-size: 11px;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    transition: all 0.15s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .code-copy:hover { color: var(--accent); border-color: var(--accent); }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #c9d1d9;
+  }
+
+  pre::-webkit-scrollbar { height: 4px; }
+  pre::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .kw { color: #ff7b72; }
+  .fn { color: #d2a8ff; }
+  .str { color: #a5d6ff; }
+  .num { color: #79c0ff; }
+  .cmt { color: #4a6080; font-style: italic; }
+  .cls { color: #ffa657; }
+  .prop { color: #79c0ff; }
+  .bool { color: #ff7b72; }
+  .op { color: #c9d1d9; }
+  .acc { color: #00d4ff; }
+
+  /* CALLOUTS */
+  .callout {
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { flex: 1; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 700; }
+
+  .callout.info { background: rgba(0,212,255,0.06); border: 1px solid rgba(0,212,255,0.15); }
+  .callout.info strong { color: var(--accent); }
+  .callout.warn { background: rgba(255,123,0,0.06); border: 1px solid rgba(255,123,0,0.2); }
+  .callout.warn strong { color: var(--warn); }
+  .callout.danger { background: rgba(255,56,96,0.06); border: 1px solid rgba(255,56,96,0.2); }
+  .callout.danger strong { color: var(--danger); }
+  .callout.success { background: rgba(0,255,179,0.06); border: 1px solid rgba(0,255,179,0.15); }
+  .callout.success strong { color: var(--accent3); }
+
+  /* DIAGRAM */
+  .diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text2);
+    overflow-x: auto;
+  }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    padding: 11px 16px;
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 700;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border2);
+  }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  tr:hover td { background: var(--highlight); }
+
+  /* INTERACTIVE DEMO */
+  .demo-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 24px 0;
+  }
+
+  .demo-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .demo-title::before {
+    content: '▶';
+    font-size: 10px;
+  }
+
+  .demo-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    transition: all 0.15s;
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  .demo-btn:hover { background: #33ddff; transform: translateY(-1px); }
+  .demo-btn.danger { background: var(--danger); color: #fff; }
+  .demo-btn.danger:hover { background: #ff5577; }
+  .demo-btn.muted { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+  .demo-btn.muted:hover { border-color: var(--accent); color: var(--accent); }
+
+  .demo-log {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    height: 180px;
+    overflow-y: auto;
+    margin-top: 14px;
+  }
+
+  .demo-log::-webkit-scrollbar { width: 4px; }
+  .demo-log::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .log-entry { margin-bottom: 4px; line-height: 1.5; }
+  .log-entry.sent { color: var(--accent); }
+  .log-entry.recv { color: var(--accent3); }
+  .log-entry.sys { color: var(--text3); }
+  .log-entry.err { color: var(--danger); }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+    display: inline-block;
+    margin-right: 6px;
+    transition: background 0.3s;
+  }
+  .status-dot.connected { background: var(--accent3); box-shadow: 0 0 6px var(--accent3); }
+  .status-dot.connecting { background: var(--warn); animation: pulse 1s infinite; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .demo-input {
+    flex: 1;
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .demo-input:focus { border-color: var(--accent); }
+
+  /* QUIZ */
+  .quiz-box {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 24px;
+    margin: 28px 0;
+  }
+
+  .quiz-q {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--heading);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .quiz-opt {
+    display: block;
+    padding: 11px 16px;
+    margin-bottom: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    transition: all 0.15s;
+    font-family: 'Syne', sans-serif;
+    text-align: left;
+    width: 100%;
+  }
+
+  .quiz-opt:hover { border-color: var(--accent); color: var(--accent); background: var(--highlight); }
+  .quiz-opt.correct { background: rgba(0,255,179,0.1); border-color: var(--accent3); color: var(--accent3); }
+  .quiz-opt.wrong { background: rgba(255,56,96,0.1); border-color: var(--danger); color: var(--danger); }
+  .quiz-opt:disabled { cursor: default; }
+
+  .quiz-feedback {
+    margin-top: 12px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: none;
+    padding: 12px 16px;
+    border-radius: 6px;
+  }
+
+  .quiz-feedback.show { display: block; }
+
+  /* NAV FOOTER */
+  .module-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-prev, .nav-next {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    font-family: 'Syne', sans-serif;
+  }
+
+  .nav-prev:hover, .nav-next:hover { border-color: var(--accent); color: var(--accent); }
+  .nav-next { background: var(--accent); color: #000; border-color: var(--accent); }
+  .nav-next:hover { background: #33ddff; border-color: #33ddff; color: #000; }
+
+  /* TAG */
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    margin: 0 2px;
+  }
+
+  .tag.blue { background: rgba(0,212,255,0.12); color: var(--accent); }
+  .tag.green { background: rgba(0,255,179,0.12); color: var(--accent3); }
+  .tag.orange { background: rgba(255,123,0,0.12); color: var(--warn); }
+  .tag.red { background: rgba(255,56,96,0.12); color: var(--danger); }
+
+  /* LIFECYCLE VIZ */
+  .lifecycle {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 24px 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .lc-step {
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .lc-step .lc-icon { font-size: 20px; margin-bottom: 4px; }
+  .lc-step .lc-name { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+  .lc-step .lc-code { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+  .lc-arrow {
+    flex-shrink: 0;
+    color: var(--text3);
+    font-size: 18px;
+    padding: 0 4px;
+  }
+
+  /* COMPARISON CARDS */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .compare-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 20px;
+  }
+
+  .compare-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-card ul {
+    list-style: none;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .compare-card ul li::before { margin-right: 8px; }
+  .compare-card.pro ul li::before { content: '✓'; color: var(--accent3); }
+  .compare-card.con ul li::before { content: '×'; color: var(--danger); }
+
+  /* INTERVIEW CARDS */
+  .interview-q {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    margin: 14px 0;
+    overflow: hidden;
+  }
+
+  .interview-q-header {
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    transition: background 0.15s;
+  }
+
+  .interview-q-header:hover { background: var(--highlight); }
+  .interview-q-header .arrow { color: var(--accent); transition: transform 0.2s; font-size: 12px; }
+  .interview-q-header.open .arrow { transform: rotate(90deg); }
+
+  .interview-q-body {
+    display: none;
+    padding: 0 18px 16px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--text2);
+    border-top: 1px solid var(--border);
+  }
+
+  .interview-q-body.show { display: block; }
+
+  /* FLOW DIAGRAM SVG */
+  .flow-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+  }
+
+  /* TICKER */
+  .ticker-wrap {
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+
+  .ticker-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ticker-item:last-child { border-bottom: none; }
+  .ticker-sym { color: var(--accent); font-weight: 700; }
+  .ticker-price { font-weight: 600; }
+  .ticker-up { color: var(--accent3); }
+  .ticker-down { color: var(--danger); }
+
+  /* MOBILE */
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 200;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #000;
+    font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; }
+    .module { padding: 56px 20px 24px; }
+    h1.module-title { font-size: 26px; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .menu-toggle { display: block; }
+  }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent3);
+  }
+
+  ul, ol {
+    padding-left: 22px;
+    margin: 10px 0 14px;
+  }
+
+  li {
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 14px 0;
+  }
+
+  .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid;
+  }
+
+  .chip.blue { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.06); }
+  .chip.green { border-color: var(--accent3); color: var(--accent3); background: rgba(0,255,179,0.06); }
+  .chip.orange { border-color: var(--warn); color: var(--warn); background: rgba(255,123,0,0.06); }
+
+  /* Chat sim */
+  .chat-sim {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  .chat-panel {
+    flex: 1;
+    background: var(--code-bg);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .chat-panel-header {
+    padding: 10px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text2);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chat-messages {
+    padding: 12px;
+    height: 160px;
+    overflow-y: auto;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border2); }
+
+  .msg { margin-bottom: 6px; line-height: 1.5; }
+  .msg .sender { font-weight: 700; }
+  .msg.alice .sender { color: var(--accent); }
+  .msg.bob .sender { color: var(--accent3); }
+  .msg.system { color: var(--text3); font-style: italic; }
+
+  .chat-input-row {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    min-width: 0;
+  }
+
+  .chat-send {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .chat-send:hover { background: #33ddff; }
+
+  /* Presence panel */
+  .presence-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    min-height: 48px;
+  }
+
+  .presence-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+    transition: all 0.3s;
+  }
+
+  .presence-badge.active { border-color: var(--accent3); color: var(--accent3); }
+  .presence-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent3); }
+
+  /* Reconnect demo */
+  .reconnect-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+
+  .reconnect-fill {
+    height: 100%;
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  .reconnect-fill.progress { background: var(--warn); }
+  .reconnect-fill.success { background: var(--accent3); }
+
+  /* Rooms grid */
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .room-btn {
+    padding: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+
+  .room-btn:hover, .room-btn.active { border-color: var(--accent); color: var(--accent); background: var(--highlight); }
+
+  /* Scaling visual */
+  .arch-visual {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+  .arch-node {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    text-align: center;
+    min-width: 80px;
+  }
+
+  .arch-node .icon { font-size: 20px; }
+  .arch-node .label { margin-top: 4px; color: var(--text2); }
+  .arch-node.primary { border-color: var(--accent); }
+  .arch-node.primary .label { color: var(--accent); }
+  .arch-node.secondary { border-color: var(--accent3); }
+  .arch-node.secondary .label { color: var(--accent3); }
+
+  .arch-arrow { display: flex; align-items: center; color: var(--text3); font-size: 18px; padding-top: 14px; }
+
+  /* Rate limit meter */
+  .rate-meter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+  }
+
+  .rate-label { min-width: 80px; color: var(--text2); }
+  .rate-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .rate-fill { height: 100%; border-radius: 4px; background: var(--accent3); transition: width 0.3s; }
+  .rate-fill.warn { background: var(--warn); }
+  .rate-fill.danger { background: var(--danger); }
+  .rate-val { min-width: 50px; text-align: right; color: var(--text); }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">WS · MASTERY</div>
+    <div class="logo-title">WebSockets<br>Zero → Production</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-label" id="progressLabel">0 / 12 modules</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Fundamentals</div>
+    <div class="nav-item active" data-mod="0"><div class="nav-num">1</div>What Are WebSockets?</div>
+    <div class="nav-item" data-mod="1"><div class="nav-num">2</div>The Handshake & Protocol</div>
+    <div class="nav-item" data-mod="2"><div class="nav-num">3</div>The Browser WebSocket API</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Building Servers</div>
+    <div class="nav-item" data-mod="3"><div class="nav-num">4</div>Node.js WS Server</div>
+    <div class="nav-item" data-mod="4"><div class="nav-num">5</div>Events & Message Types</div>
+    <div class="nav-item" data-mod="5"><div class="nav-num">6</div>Connection Lifecycle</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Real-World Patterns</div>
+    <div class="nav-item" data-mod="6"><div class="nav-num">7</div>Rooms, Presence & Chat</div>
+    <div class="nav-item" data-mod="7"><div class="nav-num">8</div>Auth & Security</div>
+    <div class="nav-item" data-mod="8"><div class="nav-num">9</div>Scaling WebSockets</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-label">Production</div>
+    <div class="nav-item" data-mod="9"><div class="nav-num">10</div>Socket.io vs Raw WS</div>
+    <div class="nav-item" data-mod="10"><div class="nav-num">11</div>Production Deployment</div>
+    <div class="nav-item" data-mod="11"><div class="nav-num">12</div>Interview Prep</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- ====== MODULE 0: WHAT ARE WEBSOCKETS ====== -->
+<div class="module active" id="mod-0">
+  <div class="module-badge">Module 01 · Fundamentals</div>
+  <h1 class="module-title">What Are WebSockets?</h1>
+  <p class="module-subtitle">Before writing a single line of code, you need to understand <em>why</em> WebSockets exist — and what problem they solve that HTTP can't.</p>
+
+  <h2>The Problem With HTTP</h2>
+  <p>HTTP is a request-response protocol. The client asks, the server answers, and the connection closes. That's perfectly fine for fetching a webpage or submitting a form. But what if you need the <strong>server to push data to the client</strong> without the client asking?</p>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4 style="color:var(--danger)">❌ HTTP Polling (Bad)</h4>
+      <ul class="con">
+        <li>Client polls every N seconds</li>
+        <li>Wastes bandwidth even when idle</li>
+        <li>High latency (misses events between polls)</li>
+        <li>Server under constant load</li>
+        <li>Hard to scale efficiently</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4 style="color:var(--accent3)">✅ WebSockets (Good)</h4>
+      <ul class="pro">
+        <li>Single persistent connection</li>
+        <li>Server pushes data instantly</li>
+        <li>Extremely low overhead per message</li>
+        <li>Full-duplex (both sides talk simultaneously)</li>
+        <li>Minimal CPU and bandwidth waste</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>What Is a WebSocket, Exactly?</h2>
+  <p>A WebSocket is a <strong>persistent, full-duplex TCP connection</strong> between a client and server. Once established, either side can send data at any time — no request needed. The connection stays open until one party closes it.</p>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <strong>Full-Duplex Explained</strong>
+      HTTP is like a walkie-talkie — one side talks, waits, then the other responds. WebSockets are like a phone call — both sides can talk simultaneously, in real time.
+    </div>
+  </div>
+
+  <h2>The Big Picture: HTTP vs WebSockets</h2>
+
+  <div class="table-wrap">
+    <table>
+      <tr>
+        <th>Feature</th>
+        <th>HTTP/1.1</th>
+        <th>WebSocket</th>
+      </tr>
+      <tr>
+        <td>Connection</td>
+        <td>New connection per request</td>
+        <td>One persistent connection</td>
+      </tr>
+      <tr>
+        <td>Direction</td>
+        <td>Client → Server only (initiates)</td>
+        <td>Bidirectional (either side)</td>
+      </tr>
+      <tr>
+        <td>Overhead</td>
+        <td>~700 bytes headers per request</td>
+        <td>~2 bytes per frame</td>
+      </tr>
+      <tr>
+        <td>Latency</td>
+        <td>New TCP handshake each time</td>
+        <td>Already established, near-zero</td>
+      </tr>
+      <tr>
+        <td>State</td>
+        <td>Stateless (server forgets)</td>
+        <td>Stateful (server knows who you are)</td>
+      </tr>
+      <tr>
+        <td>Protocol</td>
+        <td>HTTP/HTTPS</td>
+        <td>ws:// or wss:// (TLS)</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Where Are WebSockets Used?</h2>
+  <div class="chip-row">
+    <div class="chip blue">💬 Chat Apps</div>
+    <div class="chip blue">📈 Live Stock Tickers</div>
+    <div class="chip blue">🎮 Multiplayer Games</div>
+    <div class="chip blue">🤝 Collaborative Editors</div>
+    <div class="chip blue">📊 Live Dashboards</div>
+    <div class="chip blue">🔔 Push Notifications</div>
+    <div class="chip blue">👥 Presence Indicators</div>
+    <div class="chip blue">🚗 Real-time Location</div>
+    <div class="chip blue">⚡ Live Auctions</div>
+  </div>
+
+  <h2>WebSockets vs. The Alternatives</h2>
+  <div class="table-wrap">
+    <table>
+      <tr>
+        <th>Technology</th>
+        <th>Direction</th>
+        <th>Use When</th>
+        <th>Avoid When</th>
+      </tr>
+      <tr>
+        <td><strong>Short Polling</strong></td>
+        <td>Client → Server</td>
+        <td>Low-frequency, simple updates</td>
+        <td>High frequency, many clients</td>
+      </tr>
+      <tr>
+        <td><strong>Long Polling</strong></td>
+        <td>Client → Server</td>
+        <td>Legacy support needed</td>
+        <td>You need true real-time</td>
+      </tr>
+      <tr>
+        <td><strong>SSE (Server-Sent Events)</strong></td>
+        <td>Server → Client only</td>
+        <td>One-way streams (news feeds, logs)</td>
+        <td>Client needs to send data too</td>
+      </tr>
+      <tr>
+        <td><strong>WebSockets</strong></td>
+        <td>Bidirectional</td>
+        <td>Chat, games, collaboration</td>
+        <td>Simple one-way push (use SSE)</td>
+      </tr>
+      <tr>
+        <td><strong>WebRTC</strong></td>
+        <td>Peer-to-peer</td>
+        <td>Video/audio, P2P file transfer</td>
+        <td>Server-mediated communication</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <strong>Don't Default to WebSockets</strong>
+      If your use case is <em>server-to-client only</em> (live scores, news feed, log streaming), SSE is simpler, cheaper, and works over plain HTTP/2. WebSockets add complexity — reach for them only when you need <strong>bidirectional</strong> or <strong>high-frequency</strong> communication.
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 Quick Check: What makes WebSockets fundamentally different from HTTP?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this, false)">A. WebSockets use UDP instead of TCP</button>
+    <button class="quiz-opt" onclick="checkQuiz(this, true)">B. WebSockets maintain a persistent, bidirectional connection — no new request needed</button>
+    <button class="quiz-opt" onclick="checkQuiz(this, false)">C. WebSockets compress data automatically</button>
+    <button class="quiz-opt" onclick="checkQuiz(this, false)">D. WebSockets are only available in browsers, not Node.js</button>
+    <div class="quiz-feedback" id="qfb-0">✅ Correct! The persistent bidirectional connection is the defining characteristic. Once open, both server and client can push data without a new request cycle. This eliminates HTTP polling overhead and enables true real-time communication.</div>
+  </div>
+
+  <div class="module-nav">
+    <div></div>
+    <button class="nav-next" onclick="goTo(1)">The Handshake & Protocol →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 1: HANDSHAKE ====== -->
+<div class="module" id="mod-1">
+  <div class="module-badge">Module 02 · Fundamentals</div>
+  <h1 class="module-title">The Handshake & Protocol</h1>
+  <p class="module-subtitle">WebSockets start their life as HTTP requests — then upgrade. Understanding this upgrade mechanism is critical for debugging and security.</p>
+
+  <h2>The Upgrade Handshake</h2>
+  <p>A WebSocket connection begins as a standard HTTP/1.1 request. The client sends special headers asking the server to "upgrade" to the WebSocket protocol. If the server agrees, the TCP connection is reused — now speaking WebSocket instead of HTTP.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">HTTP → WS Upgrade (Client Request)</span>
+      <button class="code-copy" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">/* Client sends this HTTP request */</span>
+GET /chat HTTP/1.1
+Host: server.example.com
+Upgrade: websocket              <span class="cmt">// Must be present</span>
+Connection: Upgrade             <span class="cmt">// Must be present</span>
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==  <span class="cmt">// Random base64</span>
+Sec-WebSocket-Version: 13       <span class="cmt">// Always 13 for RFC 6455</span>
+Origin: http://www.example.com  <span class="cmt">// Security: where request came from</span></pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Server Response (101 Switching Protocols)</span>
+      <button class="code-copy" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre>HTTP/1.1 <span class="num">101</span> Switching Protocols
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=  <span class="cmt">// SHA-1 hash of key</span>
+
+<span class="cmt">/* After this line, the connection speaks WebSocket — not HTTP */</span></pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">🔑</div>
+    <div class="callout-body">
+      <strong>How Sec-WebSocket-Accept is Computed</strong>
+      The server takes the client's <code>Sec-WebSocket-Key</code>, appends the magic GUID <code>258EAFA5-E914-47DA-95CA-C5AB0DC85B11</code>, computes SHA-1, and base64-encodes the result. This proves the server genuinely understands the WebSocket protocol — it's not a cache or proxy returning an old response.
+    </div>
+  </div>
+
+  <h2>WebSocket Frame Format</h2>
+  <p>After the handshake, data is sent as <strong>frames</strong> — not raw text. Each frame has a compact binary header (minimum 2 bytes) carrying metadata about the payload.</p>
+
+  <div class="diagram">
+    <pre style="color:var(--text2); background:transparent; padding:0; font-size:11px;">
+Bit:    0   1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  ...
+        ┌───┬───────────────────────┬───┬───────────────────────────────────
+        │FIN│ RSV1  RSV2  RSV3     │MSK│         Payload Length            │
+        └───┴───────────────────────┴───┴───────────────────────────────────
+
+FIN  = 1 if this is the final fragment (most frames are single-fragment)
+RSV  = Reserved for extensions (usually 0)
+Opcode (4 bits):
+  0x0 = Continuation frame
+  0x1 = Text frame         ← most common
+  0x2 = Binary frame
+  0x8 = Connection Close
+  0x9 = Ping
+  0xA = Pong
+MASK = 1 if payload is masked (client→server MUST mask; server→client MUST NOT)
+Payload Length:
+  0-125   → length is this value
+  126     → next 2 bytes = actual length
+  127     → next 8 bytes = actual length</pre>
+  </div>
+
+  <h2>Masking: Why Clients Must Mask</h2>
+  <p>A key requirement: <strong>clients must XOR-mask all frames they send</strong>. Servers must NOT mask their sends. This prevents malicious browser scripts from sending crafted bytes that could confuse proxies/caches — a defense against cache poisoning attacks.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <span class="code-lang">Masking Algorithm (for understanding)</span>
+      <button class="code-copy" onclick="copyCode(this)">copy</button>
+    </div>
+    <pre><span class="cmt">// 4-byte masking key is randomly chosen per frame
+// Each byte of payload XORed with corresponding mask byte</span>
+<span class="kw">function</span> <span class="fn">mask</span>(payload, maskingKey) {
+  <span class="kw">const</span> masked = <span class="cls">Buffer</span>.alloc(payload.length);
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; payload.length; i++) {
+    masked[i] = payload[i] ^ maskingKey[i % <span class="num">4</span>];
+  }
+  <span class="kw">return</span> masked;
+}
+<span class="cmt">// Unmasking is the same operation — XOR is its own inverse</span></pre>
+  </div>
+
+  <h2>The Full Connection Lifecycle</h2>
+  <div class="lifecycle">
+    <div class="lc-step"><div class="lc-icon">🌐</div><div class="lc-name">TCP Connect</div><div class="lc-code">SYN/SYN-ACK</div></div>
+    <div class="lc-arrow">→</div>
+    <div class="lc-step" style="border-color:var(--accent)"><div class="lc-icon">🤝</div><div class="lc-name">HTTP Upgrade</div><div class="lc-code">101 Switching</div></div>
+    <div class="lc-arrow">→</div>
+    <div class="lc-step" style="border-color:var(--accent3)"><div class="lc-icon">⚡</div><div class="lc-name">OPEN</div><div class="lc-code">ws.onopen</div></div>
+    <div class="lc-arrow">→</div>
+    <div class="lc-step"><div class="lc-icon">📦</div><div class="lc-name">Frames</div><div class="lc-code">send/recv</div></div>
+    <div class="lc-arrow">→</div>
+    <div class="lc-step"><div class="lc-icon">💓</div><div class="lc-name">Ping/Pong</div><div class="lc-code">keepalive</div></div>
+    <div class="lc-arrow">→</div>
+    <div class="lc-step" style="border-color:var(--danger)"><div class="lc-icon">🔌</div><div class="lc-name">CLOSE</div><div class="lc-code">code + reason</div></div>
+    <div class="lc-arrow">→</div>
+    <div class="lc-step"><div class="lc-icon">🔚</div><div class="lc-name">TCP FIN</div><div class="lc-code">4-way teardown</div></div>
+  </div>
+
+  <h2>Close Codes — The Exit Status of a WS Connection</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Code</th><th>Name</th><th>Meaning</th></tr>
+      <tr><td><code>1000</code></td><td>Normal Closure</td><td>Connection closed cleanly, all done</td></tr>
+      <tr><td><code>1001</code></td><td>Going Away</td><td>Browser tab closing, server restarting</td></tr>
+      <tr><td><code>1002</code></td><td>Protocol Error</td><td>Received frame violating the spec</td></tr>
+      <tr><td><code>1003</code></td><td>Unsupported Data</td><td>Got binary when only text is accepted</td></tr>
+      <tr><td><code>1006</code></td><td>Abnormal Closure</td><td>Connection dropped without close frame</td></tr>
+      <tr><td><code>1007</code></td><td>Invalid Payload</td><td>Non-UTF-8 data in text frame</td></tr>
+      <tr><td><code>1008</code></td><td>Policy Violation</td><td>Message violates app policy (use for auth)</td></tr>
+      <tr><td><code>1009</code></td><td>Message Too Big</td><td>Frame exceeds server's configured limit</td></tr>
+      <tr><td><code>1011</code></td><td>Server Error</td><td>Unexpected server-side error</td></tr>
+      <tr><td><code>4000-4999</code></td><td>App-Defined</td><td>Custom codes you define for your app</td></tr>
+    </table>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <strong>Code 1006 Is Always Abnormal</strong>
+      You'll never receive 1006 in a close frame — it's synthesized by the browser when the connection drops without a proper close handshake (network failure, server crash). Always trigger reconnection logic on 1006.
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 Quick Check: Why must clients mask their frames to the server?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. To encrypt the data end-to-end</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">B. To compress the payload</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">C. To prevent cache/proxy poisoning by ensuring crafted bytes can't exploit intermediate infrastructure</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. Because servers can't process unmasked data</button>
+    <div class="quiz-feedback" id="qfb-1">✅ Correct! Masking is a security measure against cache poisoning — not encryption. It prevents a malicious script from sending crafted bytes that could confuse HTTP proxies that don't understand the WebSocket protocol.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(0)">← What Are WebSockets?</button>
+    <button class="nav-next" onclick="goTo(2)">The Browser API →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 2: BROWSER API ====== -->
+<div class="module" id="mod-2">
+  <div class="module-badge">Module 03 · Fundamentals</div>
+  <h1 class="module-title">The Browser WebSocket API</h1>
+  <p class="module-subtitle">The browser's native WebSocket API is small but precise. Master it and you understand the foundation everything else builds on.</p>
+
+  <h2>Creating a Connection</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">JavaScript — Client</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// ws:// for plain  |  wss:// for TLS (always use wss:// in production)</span>
+<span class="kw">const</span> ws = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">'wss://api.yourapp.com/ws'</span>);
+
+<span class="cmt">// Optional: specify a subprotocol (agree on a message format)</span>
+<span class="kw">const</span> ws = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">'wss://api.yourapp.com/ws'</span>, <span class="str">'json-v1'</span>);
+<span class="cmt">// Or multiple supported subprotocols (server picks one)</span>
+<span class="kw">const</span> ws = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">'wss://api.yourapp.com/ws'</span>, [<span class="str">'json-v1'</span>, <span class="str">'json-v2'</span>]);</pre>
+  </div>
+
+  <h2>The Four Event Handlers</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">JavaScript — All Events</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// 1. Connection established — safe to send now</span>
+ws.<span class="prop">onopen</span> = (event) => {
+  console.<span class="fn">log</span>(<span class="str">'Connected!'</span>, ws.<span class="prop">readyState</span>); <span class="cmt">// 1 = OPEN</span>
+  ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'auth'</span>, token: <span class="str">'...'</span> }));
+};
+
+<span class="cmt">// 2. Message received from server</span>
+ws.<span class="prop">onmessage</span> = (event) => {
+  <span class="kw">const</span> data = event.<span class="prop">data</span>; <span class="cmt">// string | Blob | ArrayBuffer</span>
+
+  <span class="kw">if</span> (<span class="kw">typeof</span> data === <span class="str">'string'</span>) {
+    <span class="kw">const</span> msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(data);
+    <span class="fn">handleMessage</span>(msg);
+  }
+
+  <span class="kw">if</span> (data <span class="kw">instanceof</span> <span class="cls">ArrayBuffer</span>) {
+    <span class="fn">handleBinary</span>(data);  <span class="cmt">// e.g. audio chunks, images</span>
+  }
+};
+
+<span class="cmt">// 3. Connection closed (could be clean or abnormal)</span>
+ws.<span class="prop">onclose</span> = (event) => {
+  console.<span class="fn">log</span>(<span class="str">`Closed: code=</span><span class="op">${</span>event.<span class="prop">code</span><span class="op">}</span><span class="str"> reason=</span><span class="op">${</span>event.<span class="prop">reason</span><span class="op">}</span><span class="str"> clean=</span><span class="op">${</span>event.<span class="prop">wasClean</span><span class="op">}</span><span class="str">`</span>);
+  <span class="kw">if</span> (!event.<span class="prop">wasClean</span> || event.<span class="prop">code</span> === <span class="num">1006</span>) {
+    <span class="fn">scheduleReconnect</span>(); <span class="cmt">// Don't reconnect on intentional closes</span>
+  }
+};
+
+<span class="cmt">// 4. Network error (always followed by onclose)</span>
+ws.<span class="prop">onerror</span> = (error) => {
+  console.<span class="fn">error</span>(<span class="str">'WebSocket error'</span>, error);
+  <span class="cmt">// Limited info available here — full detail in onclose</span>
+};</pre>
+  </div>
+
+  <h2>ReadyState — The Connection State Machine</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">WebSocket States</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre>WebSocket.<span class="acc">CONNECTING</span>  = <span class="num">0</span>  <span class="cmt">// Handshake in progress, can't send yet</span>
+WebSocket.<span class="acc">OPEN</span>         = <span class="num">1</span>  <span class="cmt">// Connection live — safe to send</span>
+WebSocket.<span class="acc">CLOSING</span>      = <span class="num">2</span>  <span class="cmt">// Close handshake in progress</span>
+WebSocket.<span class="acc">CLOSED</span>       = <span class="num">3</span>  <span class="cmt">// Connection terminated</span>
+
+<span class="cmt">// ✅ Always guard your sends:</span>
+<span class="kw">function</span> <span class="fn">safeSend</span>(ws, data) {
+  <span class="kw">if</span> (ws.<span class="prop">readyState</span> === WebSocket.<span class="acc">OPEN</span>) {
+    ws.<span class="fn">send</span>(data);
+  } <span class="kw">else</span> {
+    console.<span class="fn">warn</span>(<span class="str">'WebSocket not open, queuing message'</span>);
+    messageQueue.<span class="fn">push</span>(data); <span class="cmt">// flush on reconnect</span>
+  }
+}</pre>
+  </div>
+
+  <h2>Sending Data: Text, JSON, and Binary</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Sending Different Data Types</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// Plain string</span>
+ws.<span class="fn">send</span>(<span class="str">'hello world'</span>);
+
+<span class="cmt">// JSON (most common pattern — always use a "type" field)</span>
+ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({
+  type: <span class="str">'chat:message'</span>,
+  room: <span class="str">'general'</span>,
+  text: <span class="str">'Hello!'</span>,
+  ts: <span class="cls">Date</span>.<span class="fn">now</span>()
+}));
+
+<span class="cmt">// Binary: ArrayBuffer (e.g. typed arrays for game state)</span>
+<span class="kw">const</span> buffer = <span class="kw">new</span> <span class="cls">Float32Array</span>([1.0, 2.5, 3.14]);
+ws.<span class="fn">send</span>(buffer.<span class="prop">buffer</span>);
+
+<span class="cmt">// Binary: Blob (files, images)</span>
+<span class="kw">const</span> blob = <span class="kw">new</span> <span class="cls">Blob</span>([<span class="str">'binary data'</span>], { type: <span class="str">'application/octet-stream'</span> });
+ws.<span class="fn">send</span>(blob);
+
+<span class="cmt">// Tell WebSocket to receive binary as ArrayBuffer (default is Blob)</span>
+ws.<span class="prop">binaryType</span> = <span class="str">'arraybuffer'</span>;</pre>
+  </div>
+
+  <h2>The bufferedAmount Property</h2>
+  <p>This is an underused but critical property for performance. It tells you how many bytes are queued in the browser waiting to be sent. If you send too fast, you'll pile up data in memory.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Backpressure Management</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// Don't flood the socket — check backpressure first</span>
+<span class="kw">function</span> <span class="fn">sendWithBackpressure</span>(ws, data) {
+  <span class="kw">const</span> THRESHOLD = <span class="num">16384</span>; <span class="cmt">// 16KB</span>
+
+  <span class="kw">if</span> (ws.<span class="prop">bufferedAmount</span> &gt; THRESHOLD) {
+    <span class="cmt">// Too much data queued — skip or delay this frame</span>
+    console.<span class="fn">warn</span>(<span class="str">`Buffer full: </span><span class="op">${</span>ws.<span class="prop">bufferedAmount</span><span class="op">}</span><span class="str"> bytes queued`</span>);
+    <span class="kw">return false</span>;
+  }
+
+  ws.<span class="fn">send</span>(data);
+  <span class="kw">return true</span>;
+}
+
+<span class="cmt">// Common in games: send at fixed intervals only if buffer is clear</span>
+<span class="fn">setInterval</span>(() => {
+  <span class="kw">if</span> (ws.<span class="prop">bufferedAmount</span> === <span class="num">0</span>) {
+    ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>(gameState));
+  }
+}, <span class="num">50</span>); <span class="cmt">// 20 FPS</span></pre>
+  </div>
+
+  <h2>🛠️ Interactive Demo: Simulated WebSocket</h2>
+  <div class="demo-box">
+    <div class="demo-title">WebSocket Client Simulator</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">This simulates a WebSocket connection — watch the readyState, events, and message flow.</p>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <span class="status-dot" id="dot0"></span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)" id="stateLabel0">CLOSED (readyState: 3)</span>
+    </div>
+    <div>
+      <button class="demo-btn" onclick="simConnect()">ws.connect()</button>
+      <button class="demo-btn muted" onclick="simSend()">ws.send('ping')</button>
+      <button class="demo-btn danger" onclick="simClose()">ws.close(1000)</button>
+    </div>
+    <div class="input-row">
+      <input class="demo-input" id="simMsgInput" placeholder='e.g. {"type":"chat","text":"hello"}' />
+      <button class="demo-btn" onclick="simSendCustom()">send</button>
+    </div>
+    <div class="demo-log" id="simLog0">
+      <div class="log-entry sys">// WebSocket simulator ready. Click connect to begin.</div>
+    </div>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body">
+      <strong>Production Pattern: Typed Message Envelope</strong>
+      Always send JSON with a <code>type</code> field. This is your message router. Every message maps to a handler, giving you a mini-protocol on top of WebSockets. Example: <code>{"type":"user:typing","userId":"abc"}</code>
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 When is it safe to call ws.send()?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. Immediately after new WebSocket() — it queues automatically</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">B. Only when readyState === WebSocket.OPEN (inside onopen or after it fires)</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. Anytime — the browser will buffer and send when ready</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. Only from the onmessage handler</button>
+    <div class="quiz-feedback" id="qfb-2">✅ Correct! Calling send() before the connection is OPEN throws an InvalidStateError. Always guard with a readyState check or call send() from within/after the onopen handler.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(1)">← The Handshake</button>
+    <button class="nav-next" onclick="goTo(3)">Node.js WS Server →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 3: NODE SERVER ====== -->
+<div class="module" id="mod-3">
+  <div class="module-badge">Module 04 · Building Servers</div>
+  <h1 class="module-title">Node.js WebSocket Server</h1>
+  <p class="module-subtitle">Build a production-grade WebSocket server from scratch — with client tracking, broadcasting, and clean shutdown.</p>
+
+  <h2>Choosing Your Library</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Library</th><th>Install</th><th>Best For</th><th>Notes</th></tr>
+      <tr><td><strong>ws</strong></td><td><code>npm i ws</code></td><td>Raw, minimal, production</td><td>No abstractions — full control</td></tr>
+      <tr><td><strong>uWebSockets.js</strong></td><td><code>npm i uWebSockets.js</code></td><td>Extreme performance</td><td>C++ core — fastest option</td></tr>
+      <tr><td><strong>Socket.io</strong></td><td><code>npm i socket.io</code></td><td>Quick dev, rooms built-in</td><td>Adds abstractions and overhead</td></tr>
+      <tr><td><strong>Fastify + ws</strong></td><td><code>npm i fastify @fastify/websocket</code></td><td>Full HTTP + WS server</td><td>Best for REST + WS combo</td></tr>
+    </table>
+  </div>
+
+  <p>We'll use <strong>ws</strong> — the most widely deployed and production-proven Node.js WebSocket library. Understanding ws deeply makes Socket.io trivial.</p>
+
+  <h2>Minimal Echo Server</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">server.js — Minimal</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> { <span class="cls">WebSocketServer</span> } = <span class="fn">require</span>(<span class="str">'ws'</span>);
+
+<span class="kw">const</span> wss = <span class="kw">new</span> <span class="cls">WebSocketServer</span>({ port: <span class="num">8080</span> });
+
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws, req) => {
+  <span class="kw">const</span> ip = req.<span class="prop">socket</span>.<span class="prop">remoteAddress</span>;
+  console.<span class="fn">log</span>(<span class="str">`Client connected: </span><span class="op">${</span>ip<span class="op">}</span><span class="str">`</span>);
+
+  ws.<span class="fn">on</span>(<span class="str">'message'</span>, (data) => {
+    console.<span class="fn">log</span>(<span class="str">`Received: </span><span class="op">${</span>data<span class="op">}</span><span class="str">`</span>);
+    ws.<span class="fn">send</span>(<span class="str">`Echo: </span><span class="op">${</span>data<span class="op">}</span><span class="str">`</span>); <span class="cmt">// Echo back</span>
+  });
+
+  ws.<span class="fn">on</span>(<span class="str">'close'</span>, (code, reason) => {
+    console.<span class="fn">log</span>(<span class="str">`Client disconnected: </span><span class="op">${</span>code<span class="op">}</span><span class="str"> </span><span class="op">${</span>reason<span class="op">}</span><span class="str">`</span>);
+  });
+
+  ws.<span class="fn">send</span>(<span class="str">'Welcome!'</span>);
+});
+
+console.<span class="fn">log</span>(<span class="str">'WebSocket server running on ws://localhost:8080'</span>);</pre>
+  </div>
+
+  <h2>Production Server with Client Registry</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">server.js — Production Pattern</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> http = <span class="fn">require</span>(<span class="str">'http'</span>);
+<span class="kw">const</span> { <span class="cls">WebSocketServer</span> } = <span class="fn">require</span>(<span class="str">'ws'</span>);
+<span class="kw">const</span> { <span class="cls">randomUUID</span> } = <span class="fn">require</span>(<span class="str">'crypto'</span>);
+
+<span class="cmt">// Share an HTTP server — handles /health, REST routes, AND WebSockets</span>
+<span class="kw">const</span> server = http.<span class="fn">createServer</span>((req, res) => {
+  <span class="kw">if</span> (req.<span class="prop">url</span> === <span class="str">'/health'</span>) {
+    res.<span class="fn">end</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ clients: wss.<span class="prop">clients</span>.<span class="prop">size</span> }));
+  }
+});
+
+<span class="kw">const</span> wss = <span class="kw">new</span> <span class="cls">WebSocketServer</span>({ server });
+
+<span class="cmt">// Client registry — attach metadata to each socket</span>
+<span class="kw">function</span> <span class="fn">initClient</span>(ws, req) {
+  ws.<span class="prop">id</span> = <span class="fn">randomUUID</span>();
+  ws.<span class="prop">ip</span> = req.<span class="prop">headers</span>[<span class="str">'x-forwarded-for'</span>] || req.<span class="prop">socket</span>.<span class="prop">remoteAddress</span>;
+  ws.<span class="prop">isAlive</span> = <span class="bool">true</span>;
+  ws.<span class="prop">rooms</span> = <span class="kw">new</span> <span class="cls">Set</span>();
+  ws.<span class="prop">userId</span> = <span class="kw">null</span>; <span class="cmt">// Set after auth message</span>
+  <span class="kw">return</span> ws;
+}
+
+<span class="cmt">// Broadcast to all connected clients</span>
+<span class="kw">function</span> <span class="fn">broadcast</span>(payload, excludeId = <span class="kw">null</span>) {
+  <span class="kw">const</span> data = <span class="cls">JSON</span>.<span class="fn">stringify</span>(payload);
+  wss.<span class="prop">clients</span>.<span class="fn">forEach</span>((client) => {
+    <span class="kw">if</span> (client.<span class="prop">readyState</span> === client.<span class="prop">OPEN</span> && client.<span class="prop">id</span> !== excludeId) {
+      client.<span class="fn">send</span>(data);
+    }
+  });
+}
+
+<span class="cmt">// Type-based message router</span>
+<span class="kw">function</span> <span class="fn">handleMessage</span>(ws, rawData) {
+  <span class="kw">let</span> msg;
+  <span class="kw">try</span> {
+    msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(rawData);
+  } <span class="kw">catch</span> {
+    ws.<span class="fn">close</span>(<span class="num">1007</span>, <span class="str">'Invalid JSON'</span>);
+    <span class="kw">return</span>;
+  }
+
+  <span class="kw">const</span> handlers = {
+    <span class="str">'auth'</span>: <span class="fn">handleAuth</span>,
+    <span class="str">'chat:message'</span>: <span class="fn">handleChatMessage</span>,
+    <span class="str">'room:join'</span>: <span class="fn">handleRoomJoin</span>,
+  };
+
+  <span class="kw">const</span> handler = handlers[msg.<span class="prop">type</span>];
+  <span class="kw">if</span> (handler) {
+    <span class="fn">handler</span>(ws, msg);
+  } <span class="kw">else</span> {
+    ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'error'</span>, message: <span class="str">`Unknown type: </span><span class="op">${</span>msg.<span class="prop">type</span><span class="op">}</span><span class="str">`</span> }));
+  }
+}
+
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws, req) => {
+  <span class="fn">initClient</span>(ws, req);
+  console.<span class="fn">log</span>(<span class="str">`[CONNECT] </span><span class="op">${</span>ws.<span class="prop">id</span><span class="op">}</span><span class="str"> from </span><span class="op">${</span>ws.<span class="prop">ip</span><span class="op">}</span><span class="str"> | Total: </span><span class="op">${</span>wss.<span class="prop">clients</span>.<span class="prop">size</span><span class="op">}</span><span class="str">`</span>);
+
+  ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'connected'</span>, id: ws.<span class="prop">id</span> }));
+
+  ws.<span class="fn">on</span>(<span class="str">'message'</span>, (data) => <span class="fn">handleMessage</span>(ws, data));
+
+  ws.<span class="fn">on</span>(<span class="str">'pong'</span>, () => { ws.<span class="prop">isAlive</span> = <span class="bool">true</span>; }); <span class="cmt">// Keepalive ack</span>
+
+  ws.<span class="fn">on</span>(<span class="str">'close'</span>, (code, reason) => {
+    console.<span class="fn">log</span>(<span class="str">`[DISCONNECT] </span><span class="op">${</span>ws.<span class="prop">id</span><span class="op">}</span><span class="str"> code:</span><span class="op">${</span>code<span class="op">}</span><span class="str">`</span>);
+  });
+
+  ws.<span class="fn">on</span>(<span class="str">'error'</span>, (err) => {
+    console.<span class="fn">error</span>(<span class="str">`[ERROR] </span><span class="op">${</span>ws.<span class="prop">id</span><span class="op">}</span><span class="str">:`, err.<span class="prop">message</span>);
+    ws.<span class="fn">terminate</span>(); <span class="cmt">// Force-close on error</span>
+  });
+});
+
+server.<span class="fn">listen</span>(<span class="num">8080</span>, () => console.<span class="fn">log</span>(<span class="str">'Server on :8080'</span>));</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <strong>ws.terminate() vs ws.close()</strong>
+      <code>ws.close()</code> initiates a clean close handshake (sends a close frame, waits for ack). <code>ws.terminate()</code> destroys the socket immediately with no handshake. Use <code>terminate()</code> for stuck/zombie connections, <code>close()</code> for graceful shutdowns.
+    </div>
+  </div>
+
+  <h2>Sending to a Specific Client by ID</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Targeted Send</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">function</span> <span class="fn">sendToClient</span>(targetId, payload) {
+  <span class="kw">for</span> (<span class="kw">const</span> client <span class="kw">of</span> wss.<span class="prop">clients</span>) {
+    <span class="kw">if</span> (client.<span class="prop">id</span> === targetId && client.<span class="prop">readyState</span> === client.<span class="prop">OPEN</span>) {
+      client.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>(payload));
+      <span class="kw">return true</span>;
+    }
+  }
+  <span class="kw">return false</span>; <span class="cmt">// Client not found or disconnected</span>
+}
+
+<span class="cmt">// For large-scale apps, maintain a Map for O(1) lookup</span>
+<span class="kw">const</span> clients = <span class="kw">new</span> <span class="cls">Map</span>(); <span class="cmt">// userId → ws</span>
+
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws) => {
+  ws.<span class="fn">on</span>(<span class="str">'message'</span>, (data) => {
+    <span class="kw">const</span> msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(data);
+    <span class="kw">if</span> (msg.<span class="prop">type</span> === <span class="str">'auth'</span>) {
+      clients.<span class="fn">set</span>(msg.<span class="prop">userId</span>, ws);
+      ws.<span class="prop">userId</span> = msg.<span class="prop">userId</span>;
+    }
+  });
+  ws.<span class="fn">on</span>(<span class="str">'close'</span>, () => clients.<span class="fn">delete</span>(ws.<span class="prop">userId</span>));
+});</pre>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 You want to send a notification to a specific user. Your server has 50,000 connections. What's the right data structure?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. Iterate wss.clients forEach on every send</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">B. A Map&lt;userId, ws&gt; for O(1) direct lookup</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. An Array with Array.find() on each send</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. Query the database to find the socket</button>
+    <div class="quiz-feedback" id="qfb-3">✅ Correct! Map gives O(1) lookup. Iterating wss.clients on every targeted send is O(n) — at 50k clients, that's 50k iterations per notification. Always index your clients by the ID you'll query on.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(2)">← Browser API</button>
+    <button class="nav-next" onclick="goTo(4)">Events & Message Types →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 4: EVENTS & MESSAGES ====== -->
+<div class="module" id="mod-4">
+  <div class="module-badge">Module 05 · Building Servers</div>
+  <h1 class="module-title">Events & Message Types</h1>
+  <p class="module-subtitle">Design your message protocol like an API — typed, versioned, and robust. This is where most amateur implementations fall apart.</p>
+
+  <h2>The Message Envelope Pattern</h2>
+  <p>Never send raw strings or untyped JSON. Every WebSocket message should follow a consistent envelope structure that your router can dispatch.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Message Envelope Schema</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre>{
+  <span class="str">"type"</span>: <span class="str">"namespace:action"</span>,    <span class="cmt">// Required: namespaced event type</span>
+  <span class="str">"id"</span>: <span class="str">"msg_abc123"</span>,            <span class="cmt">// Optional: for request-response correlation</span>
+  <span class="str">"ts"</span>: <span class="num">1715000000000</span>,           <span class="cmt">// Timestamp (client time — don't trust, use server time)</span>
+  <span class="str">"payload"</span>: { ... }             <span class="cmt">// The actual data</span>
+}
+
+<span class="cmt">// Examples:</span>
+{ <span class="str">"type"</span>: <span class="str">"chat:message"</span>,    <span class="str">"payload"</span>: { <span class="str">"room"</span>: <span class="str">"general"</span>, <span class="str">"text"</span>: <span class="str">"hey"</span> } }
+{ <span class="str">"type"</span>: <span class="str">"room:join"</span>,       <span class="str">"payload"</span>: { <span class="str">"roomId"</span>: <span class="str">"room_xyz"</span> } }
+{ <span class="str">"type"</span>: <span class="str">"user:typing"</span>,     <span class="str">"payload"</span>: { <span class="str">"userId"</span>: <span class="str">"u_abc"</span>, <span class="str">"isTyping"</span>: <span class="bool">true</span> } }
+{ <span class="str">"type"</span>: <span class="str">"error"</span>,           <span class="str">"payload"</span>: { <span class="str">"code"</span>: <span class="str">"AUTH_REQUIRED"</span>, <span class="str">"message"</span>: <span class="str">"..."</span> } }</pre>
+  </div>
+
+  <h2>Request-Response Over WebSockets</h2>
+  <p>WebSockets are fire-and-forget by default. To implement request-response (like RPC), correlate messages with an ID and use a promise map.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Client — RPC Pattern</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">class</span> <span class="cls">WSClient</span> {
+  <span class="fn">constructor</span>(url) {
+    <span class="kw">this</span>.<span class="prop">ws</span> = <span class="kw">new</span> <span class="cls">WebSocket</span>(url);
+    <span class="kw">this</span>.<span class="prop">pending</span> = <span class="kw">new</span> <span class="cls">Map</span>(); <span class="cmt">// id → { resolve, reject, timeout }</span>
+
+    <span class="kw">this</span>.<span class="prop">ws</span>.<span class="prop">onmessage</span> = ({ data }) => {
+      <span class="kw">const</span> msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(data);
+      <span class="kw">if</span> (msg.<span class="prop">id</span> && <span class="kw">this</span>.<span class="prop">pending</span>.<span class="fn">has</span>(msg.<span class="prop">id</span>)) {
+        <span class="kw">const</span> { resolve, reject, timeout } = <span class="kw">this</span>.<span class="prop">pending</span>.<span class="fn">get</span>(msg.<span class="prop">id</span>);
+        <span class="fn">clearTimeout</span>(timeout);
+        <span class="kw">this</span>.<span class="prop">pending</span>.<span class="fn">delete</span>(msg.<span class="prop">id</span>);
+        msg.<span class="prop">error</span> ? <span class="fn">reject</span>(msg.<span class="prop">error</span>) : <span class="fn">resolve</span>(msg.<span class="prop">payload</span>);
+      }
+    };
+  }
+
+  <span class="fn">request</span>(type, payload, timeoutMs = <span class="num">5000</span>) {
+    <span class="kw">const</span> id = <span class="fn">crypto</span>.<span class="fn">randomUUID</span>();
+    <span class="kw">return new</span> <span class="cls">Promise</span>((resolve, reject) => {
+      <span class="kw">const</span> timeout = <span class="fn">setTimeout</span>(() => {
+        <span class="kw">this</span>.<span class="prop">pending</span>.<span class="fn">delete</span>(id);
+        <span class="fn">reject</span>(<span class="kw">new</span> <span class="cls">Error</span>(<span class="str">`Request </span><span class="op">${</span>id<span class="op">}</span><span class="str"> timed out`</span>));
+      }, timeoutMs);
+
+      <span class="kw">this</span>.<span class="prop">pending</span>.<span class="fn">set</span>(id, { resolve, reject, timeout });
+      <span class="kw">this</span>.<span class="prop">ws</span>.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type, id, payload }));
+    });
+  }
+}
+
+<span class="cmt">// Usage:</span>
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="cls">WSClient</span>(<span class="str">'wss://api.example.com/ws'</span>);
+<span class="kw">const</span> result = <span class="kw">await</span> client.<span class="fn">request</span>(<span class="str">'user:getProfile'</span>, { userId: <span class="str">'u123'</span> });
+console.<span class="fn">log</span>(result); <span class="cmt">// { name: 'Sam', ... }</span></pre>
+  </div>
+
+  <h2>Binary Messages with Protocol Buffers</h2>
+  <p>For high-frequency data (games, telemetry, financial data), JSON is too slow and verbose. Use binary encoding for performance-critical paths.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Binary — GameState with ArrayBuffer</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// Encode a player position update as compact binary</span>
+<span class="kw">function</span> <span class="fn">encodePlayerUpdate</span>(playerId, x, y, angle) {
+  <span class="kw">const</span> buffer = <span class="kw">new</span> <span class="cls">ArrayBuffer</span>(<span class="num">14</span>); <span class="cmt">// 2 + 4 + 4 + 4 bytes</span>
+  <span class="kw">const</span> view = <span class="kw">new</span> <span class="cls">DataView</span>(buffer);
+  view.<span class="fn">setUint16</span>(<span class="num">0</span>, playerId);         <span class="cmt">// 2 bytes</span>
+  view.<span class="fn">setFloat32</span>(<span class="num">2</span>, x);              <span class="cmt">// 4 bytes</span>
+  view.<span class="fn">setFloat32</span>(<span class="num">6</span>, y);              <span class="cmt">// 4 bytes</span>
+  view.<span class="fn">setFloat32</span>(<span class="num">10</span>, angle);          <span class="cmt">// 4 bytes</span>
+  <span class="kw">return</span> buffer; <span class="cmt">// 14 bytes vs ~60 bytes for equivalent JSON</span>
+}
+
+<span class="cmt">// Decode on the receiving end</span>
+<span class="kw">function</span> <span class="fn">decodePlayerUpdate</span>(buffer) {
+  <span class="kw">const</span> view = <span class="kw">new</span> <span class="cls">DataView</span>(buffer);
+  <span class="kw">return</span> {
+    playerId: view.<span class="fn">getUint16</span>(<span class="num">0</span>),
+    x: view.<span class="fn">getFloat32</span>(<span class="num">2</span>),
+    y: view.<span class="fn">getFloat32</span>(<span class="num">6</span>),
+    angle: view.<span class="fn">getFloat32</span>(<span class="num">10</span>)
+  };
+}
+
+<span class="cmt">// For production: use protobuf.js, msgpack, or CBOR
+// npm install protobufjs   — most common, has schema validation</span></pre>
+  </div>
+
+  <h2>Message Size & Validation</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Server — Message Validation</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre>wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws) => {
+  ws.<span class="fn">on</span>(<span class="str">'message'</span>, (data, isBinary) => {
+    <span class="cmt">// 1. Size check — prevent memory exhaustion</span>
+    <span class="kw">if</span> (data.<span class="prop">length</span> > <span class="num">64 * 1024</span>) { <span class="cmt">// 64KB max</span>
+      ws.<span class="fn">close</span>(<span class="num">1009</span>, <span class="str">'Message too large'</span>);
+      <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// 2. Binary vs text routing</span>
+    <span class="kw">if</span> (isBinary) {
+      <span class="fn">handleBinaryMessage</span>(ws, data);
+      <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// 3. JSON parse with error handling</span>
+    <span class="kw">let</span> msg;
+    <span class="kw">try</span> {
+      msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(data.<span class="fn">toString</span>());
+    } <span class="kw">catch</span> (e) {
+      ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'error'</span>, code: <span class="str">'INVALID_JSON'</span> }));
+      <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// 4. Schema validation (use Zod, Joi, or ajv in production)</span>
+    <span class="kw">if</span> (!msg.<span class="prop">type</span> || <span class="kw">typeof</span> msg.<span class="prop">type</span> !== <span class="str">'string'</span>) {
+      ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'error'</span>, code: <span class="str">'MISSING_TYPE'</span> }));
+      <span class="kw">return</span>;
+    }
+
+    <span class="fn">router</span>(ws, msg);
+  });
+});</pre>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <strong>Never Trust Client Messages</strong>
+      Validate every field server-side. Clients can send anything. A missing <code>type</code>, a malformed payload, or a massive message can crash your server if you don't guard against it. Use a schema validator like <strong>Zod</strong> for TypeScript codebases.
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 You're building a trading platform. Price updates arrive 100 times/second per instrument. Which encoding should you use?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. JSON strings — they're human-readable and easy to debug</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">B. Binary encoding (msgpack or protobuf) — far lower overhead at high frequency</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. CSV strings — smaller than JSON</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. It doesn't matter — WebSockets handle it automatically</button>
+    <div class="quiz-feedback" id="qfb-4">✅ Correct! At 100 msg/s, encoding overhead compounds rapidly. A 60-byte JSON price update becomes ~14 bytes in binary — at 100/s across 10,000 clients, that's a massive bandwidth difference. Binary encoding is essential for high-frequency financial or game data.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(3)">← Node.js Server</button>
+    <button class="nav-next" onclick="goTo(5)">Connection Lifecycle →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 5: LIFECYCLE ====== -->
+<div class="module" id="mod-5">
+  <div class="module-badge">Module 06 · Building Servers</div>
+  <h1 class="module-title">Connection Lifecycle</h1>
+  <p class="module-subtitle">Connections die. Networks fail. Load balancers restart. Building resilient WebSocket apps means handling the full lifecycle — especially reconnection.</p>
+
+  <h2>Keepalive: Ping / Pong</h2>
+  <p>TCP connections silently die when networks are unreliable. Ping/pong is the heartbeat that detects zombie connections before they pile up.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Server — Heartbeat (ws library)</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> HEARTBEAT_INTERVAL = <span class="num">30_000</span>; <span class="cmt">// 30 seconds</span>
+
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws) => {
+  ws.<span class="prop">isAlive</span> = <span class="bool">true</span>;
+  ws.<span class="fn">on</span>(<span class="str">'pong'</span>, () => { ws.<span class="prop">isAlive</span> = <span class="bool">true</span>; });
+});
+
+<span class="cmt">// Ping all clients every 30s, terminate those that don't pong</span>
+<span class="kw">const</span> heartbeatTimer = <span class="fn">setInterval</span>(() => {
+  wss.<span class="prop">clients</span>.<span class="fn">forEach</span>((ws) => {
+    <span class="kw">if</span> (!ws.<span class="prop">isAlive</span>) {
+      console.<span class="fn">log</span>(<span class="str">`[ZOMBIE] Terminating </span><span class="op">${</span>ws.<span class="prop">id</span><span class="op">}</span><span class="str">`</span>);
+      <span class="kw">return</span> ws.<span class="fn">terminate</span>(); <span class="cmt">// Didn't pong — dead connection</span>
+    }
+    ws.<span class="prop">isAlive</span> = <span class="bool">false</span>; <span class="cmt">// Reset — wait for next pong</span>
+    ws.<span class="fn">ping</span>();           <span class="cmt">// ws library sends WebSocket ping frame</span>
+  });
+}, HEARTBEAT_INTERVAL);
+
+<span class="cmt">// Clean up timer on server close</span>
+wss.<span class="fn">on</span>(<span class="str">'close'</span>, () => <span class="fn">clearInterval</span>(heartbeatTimer));</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <strong>Application-Level Heartbeat</strong>
+      Some environments (mobile networks, corporate proxies) silently drop idle connections after 60-90 seconds. If your WebSocket library doesn't support native ping/pong in the browser, implement an application-level heartbeat: send <code>{"type":"ping"}</code> every 25 seconds and expect a <code>{"type":"pong"}</code> back.
+    </div>
+  </div>
+
+  <h2>Reconnection with Exponential Backoff</h2>
+  <p>This is one of the most critical pieces of production WebSocket code. Naive reconnection (retry every 1s) can DDoS your own server when all clients reconnect simultaneously after a restart.</p>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Client — Production Reconnection Manager</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">class</span> <span class="cls">ReconnectingWebSocket</span> {
+  <span class="fn">constructor</span>(url, options = {}) {
+    <span class="kw">this</span>.<span class="prop">url</span> = url;
+    <span class="kw">this</span>.<span class="prop">options</span> = {
+      minDelay: <span class="num">1000</span>,      <span class="cmt">// 1s initial delay</span>
+      maxDelay: <span class="num">30_000</span>,    <span class="cmt">// 30s max delay</span>
+      factor: <span class="num">2</span>,           <span class="cmt">// Multiply delay by 2 each attempt</span>
+      jitter: <span class="bool">true</span>,        <span class="cmt">// Randomize to avoid thundering herd</span>
+      maxRetries: <span class="cls">Infinity</span>,
+      ...options
+    };
+    <span class="kw">this</span>.<span class="prop">attempts</span> = <span class="num">0</span>;
+    <span class="kw">this</span>.<span class="prop">shouldReconnect</span> = <span class="bool">true</span>;
+    <span class="kw">this</span>.<span class="prop">messageQueue</span> = []; <span class="cmt">// Buffer messages during reconnect</span>
+    <span class="kw">this</span>.<span class="fn">connect</span>();
+  }
+
+  <span class="fn">connect</span>() {
+    <span class="kw">this</span>.<span class="prop">ws</span> = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="kw">this</span>.<span class="prop">url</span>);
+
+    <span class="kw">this</span>.<span class="prop">ws</span>.<span class="prop">onopen</span> = () => {
+      <span class="kw">this</span>.<span class="prop">attempts</span> = <span class="num">0</span>; <span class="cmt">// Reset on success</span>
+      <span class="cmt">// Flush queued messages</span>
+      <span class="kw">while</span> (<span class="kw">this</span>.<span class="prop">messageQueue</span>.<span class="prop">length</span>) {
+        <span class="kw">this</span>.<span class="prop">ws</span>.<span class="fn">send</span>(<span class="kw">this</span>.<span class="prop">messageQueue</span>.<span class="fn">shift</span>());
+      }
+      <span class="kw">this</span>.<span class="prop">onopen</span>?.();
+    };
+
+    <span class="kw">this</span>.<span class="prop">ws</span>.<span class="prop">onmessage</span> = (e) => <span class="kw">this</span>.<span class="prop">onmessage</span>?.(e);
+
+    <span class="kw">this</span>.<span class="prop">ws</span>.<span class="prop">onclose</span> = (e) => {
+      <span class="kw">this</span>.<span class="prop">onclose</span>?.(e);
+      <span class="cmt">// Don't reconnect on intentional close (1000/1001)</span>
+      <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">shouldReconnect</span> && e.<span class="prop">code</span> !== <span class="num">1000</span>) {
+        <span class="kw">this</span>.<span class="fn">scheduleReconnect</span>();
+      }
+    };
+  }
+
+  <span class="fn">scheduleReconnect</span>() {
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">attempts</span> >= <span class="kw">this</span>.<span class="prop">options</span>.<span class="prop">maxRetries</span>) <span class="kw">return</span>;
+
+    <span class="kw">let</span> delay = Math.<span class="fn">min</span>(
+      <span class="kw">this</span>.<span class="prop">options</span>.<span class="prop">minDelay</span> * Math.<span class="fn">pow</span>(<span class="kw">this</span>.<span class="prop">options</span>.<span class="prop">factor</span>, <span class="kw">this</span>.<span class="prop">attempts</span>),
+      <span class="kw">this</span>.<span class="prop">options</span>.<span class="prop">maxDelay</span>
+    );
+
+    <span class="cmt">// Jitter: randomize ±25% to spread reconnections</span>
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">options</span>.<span class="prop">jitter</span>) {
+      delay = delay * (<span class="num">0.75</span> + Math.<span class="fn">random</span>() * <span class="num">0.5</span>);
+    }
+
+    <span class="kw">this</span>.<span class="prop">attempts</span>++;
+    console.<span class="fn">log</span>(<span class="str">`Reconnecting in </span><span class="op">${</span>Math.<span class="fn">round</span>(delay)<span class="op">}</span><span class="str">ms (attempt </span><span class="op">${</span><span class="kw">this</span>.<span class="prop">attempts</span><span class="op">}</span><span class="str">)`</span>);
+    <span class="fn">setTimeout</span>(() => <span class="kw">this</span>.<span class="fn">connect</span>(), delay);
+  }
+
+  <span class="fn">send</span>(data) {
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">ws</span>.<span class="prop">readyState</span> === WebSocket.<span class="acc">OPEN</span>) {
+      <span class="kw">this</span>.<span class="prop">ws</span>.<span class="fn">send</span>(data);
+    } <span class="kw">else</span> {
+      <span class="kw">this</span>.<span class="prop">messageQueue</span>.<span class="fn">push</span>(data); <span class="cmt">// Buffer until reconnected</span>
+    }
+  }
+
+  <span class="fn">close</span>() {
+    <span class="kw">this</span>.<span class="prop">shouldReconnect</span> = <span class="bool">false</span>; <span class="cmt">// Prevent auto-reconnect</span>
+    <span class="kw">this</span>.<span class="prop">ws</span>.<span class="fn">close</span>(<span class="num">1000</span>, <span class="str">'User closed'</span>);
+  }
+}</pre>
+  </div>
+
+  <h2>🛠️ Interactive: Reconnection Visualizer</h2>
+  <div class="demo-box">
+    <div class="demo-title">Exponential Backoff Simulator</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Simulate a connection drop and watch the backoff strategy in action.</p>
+    <button class="demo-btn" onclick="startReconnectSim()">Simulate Drop & Reconnect</button>
+    <button class="demo-btn muted" onclick="resetReconnectSim()">Reset</button>
+    <div id="reconnectSteps" style="margin-top:14px;"></div>
+  </div>
+
+  <h2>Graceful Server Shutdown</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Server — Graceful Shutdown</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">async function</span> <span class="fn">gracefulShutdown</span>(signal) {
+  console.<span class="fn">log</span>(<span class="str">`Received </span><span class="op">${</span>signal<span class="op">}</span><span class="str">, shutting down...`</span>);
+
+  <span class="cmt">// 1. Notify all clients — give them time to reconnect elsewhere</span>
+  wss.<span class="prop">clients</span>.<span class="fn">forEach</span>((ws) => {
+    <span class="kw">if</span> (ws.<span class="prop">readyState</span> === ws.<span class="prop">OPEN</span>) {
+      ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'server:shutdown'</span>, reconnectIn: <span class="num">2000</span> }));
+      ws.<span class="fn">close</span>(<span class="num">1001</span>, <span class="str">'Server going away'</span>);
+    }
+  });
+
+  <span class="cmt">// 2. Wait for connections to close (with timeout)</span>
+  <span class="kw">await new</span> <span class="cls">Promise</span>((resolve) => <span class="fn">setTimeout</span>(resolve, <span class="num">2000</span>));
+
+  <span class="cmt">// 3. Force terminate any remaining connections</span>
+  wss.<span class="prop">clients</span>.<span class="fn">forEach</span>((ws) => ws.<span class="fn">terminate</span>());
+
+  <span class="cmt">// 4. Close the WS server, then HTTP server</span>
+  wss.<span class="fn">close</span>(() => server.<span class="fn">close</span>(() => process.<span class="fn">exit</span>(<span class="num">0</span>)));
+}
+
+process.<span class="fn">on</span>(<span class="str">'SIGTERM'</span>, () => <span class="fn">gracefulShutdown</span>(<span class="str">'SIGTERM'</span>));
+process.<span class="fn">on</span>(<span class="str">'SIGINT'</span>,  () => <span class="fn">gracefulShutdown</span>(<span class="str">'SIGINT'</span>));</pre>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 Your server restarts and 10,000 clients all reconnect simultaneously. What prevents this from crashing your server?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. HTTP load balancing distributes them automatically</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">B. Jitter — randomizing each client's reconnect delay spreads the load over time</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. Exponential backoff alone prevents the thundering herd</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. WebSockets have built-in rate limiting</button>
+    <div class="quiz-feedback" id="qfb-5">✅ Correct! Exponential backoff alone still creates a thundering herd if all clients start at the same time (e.g. server restart). Jitter — adding a random offset to each delay — spreads reconnections over time and prevents the stampede. Both together = production-grade reconnection.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(4)">← Events & Messages</button>
+    <button class="nav-next" onclick="goTo(6)">Rooms, Presence & Chat →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 6: ROOMS ====== -->
+<div class="module" id="mod-6">
+  <div class="module-badge">Module 07 · Real-World Patterns</div>
+  <h1 class="module-title">Rooms, Presence & Chat</h1>
+  <p class="module-subtitle">The foundational patterns behind every real-time app — channels, presence tracking, and broadcasting to subsets of clients.</p>
+
+  <h2>Implementing Rooms from Scratch</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Server — Room Manager</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">class</span> <span class="cls">RoomManager</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">this</span>.<span class="prop">rooms</span> = <span class="kw">new</span> <span class="cls">Map</span>(); <span class="cmt">// roomId → Set&lt;ws&gt;</span>
+  }
+
+  <span class="fn">join</span>(ws, roomId) {
+    <span class="kw">if</span> (!<span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">has</span>(roomId)) {
+      <span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">set</span>(roomId, <span class="kw">new</span> <span class="cls">Set</span>());
+    }
+    <span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">get</span>(roomId).<span class="fn">add</span>(ws);
+    ws.<span class="prop">rooms</span>.<span class="fn">add</span>(roomId); <span class="cmt">// Track on socket too</span>
+
+    <span class="kw">this</span>.<span class="fn">broadcast</span>(roomId, {
+      type: <span class="str">'room:joined'</span>,
+      userId: ws.<span class="prop">userId</span>,
+      roomId,
+      memberCount: <span class="kw">this</span>.<span class="fn">getRoom</span>(roomId).<span class="prop">size</span>
+    }, ws.<span class="prop">id</span>); <span class="cmt">// Exclude the joiner from this notification</span>
+  }
+
+  <span class="fn">leave</span>(ws, roomId) {
+    <span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">get</span>(roomId)?.<span class="fn">delete</span>(ws);
+    ws.<span class="prop">rooms</span>.<span class="fn">delete</span>(roomId);
+
+    <span class="cmt">// Clean up empty rooms</span>
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">get</span>(roomId)?.size === <span class="num">0</span>) {
+      <span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">delete</span>(roomId);
+    }
+
+    <span class="kw">this</span>.<span class="fn">broadcast</span>(roomId, { type: <span class="str">'room:left'</span>, userId: ws.<span class="prop">userId</span>, roomId });
+  }
+
+  <span class="fn">leaveAll</span>(ws) {
+    <span class="kw">for</span> (<span class="kw">const</span> roomId <span class="kw">of</span> ws.<span class="prop">rooms</span>) {
+      <span class="kw">this</span>.<span class="fn">leave</span>(ws, roomId);
+    }
+  }
+
+  <span class="fn">broadcast</span>(roomId, payload, excludeId = <span class="kw">null</span>) {
+    <span class="kw">const</span> room = <span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">get</span>(roomId);
+    <span class="kw">if</span> (!room) <span class="kw">return</span>;
+
+    <span class="kw">const</span> data = <span class="cls">JSON</span>.<span class="fn">stringify</span>(payload);
+    room.<span class="fn">forEach</span>((ws) => {
+      <span class="kw">if</span> (ws.<span class="prop">id</span> !== excludeId && ws.<span class="prop">readyState</span> === ws.<span class="prop">OPEN</span>) {
+        ws.<span class="fn">send</span>(data);
+      }
+    });
+  }
+
+  <span class="fn">getRoom</span>(roomId) { <span class="kw">return</span> <span class="kw">this</span>.<span class="prop">rooms</span>.<span class="fn">get</span>(roomId) || <span class="kw">new</span> <span class="cls">Set</span>(); }
+  <span class="fn">getRoomCount</span>(roomId) { <span class="kw">return</span> <span class="kw">this</span>.<span class="fn">getRoom</span>(roomId).<span class="prop">size</span>; }
+}
+
+<span class="kw">const</span> rooms = <span class="kw">new</span> <span class="cls">RoomManager</span>();
+<span class="cmt">// On disconnect: rooms.leaveAll(ws)</span></pre>
+  </div>
+
+  <h2>Presence System</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Presence Tracking</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">class</span> <span class="cls">PresenceManager</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">this</span>.<span class="prop">online</span> = <span class="kw">new</span> <span class="cls">Map</span>(); <span class="cmt">// userId → { status, lastSeen, meta }</span>
+  }
+
+  <span class="fn">join</span>(userId, meta = {}) {
+    <span class="kw">this</span>.<span class="prop">online</span>.<span class="fn">set</span>(userId, {
+      status: <span class="str">'online'</span>,
+      lastSeen: <span class="cls">Date</span>.<span class="fn">now</span>(),
+      ...meta
+    });
+    <span class="kw">this</span>.<span class="fn">notifyChange</span>(userId, <span class="str">'online'</span>);
+  }
+
+  <span class="fn">leave</span>(userId) {
+    <span class="kw">this</span>.<span class="prop">online</span>.<span class="fn">delete</span>(userId);
+    <span class="kw">this</span>.<span class="fn">notifyChange</span>(userId, <span class="str">'offline'</span>);
+  }
+
+  <span class="fn">getOnlineUsers</span>() {
+    <span class="kw">return</span> [...<span class="kw">this</span>.<span class="prop">online</span>.<span class="fn">entries</span>()].<span class="fn">map</span>(([id, data]) => ({ id, ...data }));
+  }
+
+  <span class="fn">notifyChange</span>(userId, status) {
+    <span class="cmt">// Broadcast to all connected clients</span>
+    <span class="fn">broadcast</span>({ type: <span class="str">'presence:change'</span>, userId, status });
+  }
+}</pre>
+  </div>
+
+  <h2>🛠️ Live Chat + Presence Simulator</h2>
+  <div class="demo-box">
+    <div class="demo-title">Multi-Room Chat Simulator</div>
+    <div class="rooms-grid">
+      <div class="room-btn active" onclick="switchRoom('general',this)">#general</div>
+      <div class="room-btn" onclick="switchRoom('engineering',this)">#engineering</div>
+      <div class="room-btn" onclick="switchRoom('random',this)">#random</div>
+    </div>
+    <div style="margin:10px 0;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace">
+      🟢 Online: <span id="onlineCount">2</span> users
+    </div>
+    <div class="chat-sim">
+      <div class="chat-panel" style="flex:2">
+        <div class="chat-panel-header">
+          <span class="status-dot connected"></span> #<span id="currentRoomLabel">general</span>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChatMsg()"/>
+          <button class="chat-send" onclick="sendChatMsg()">Send</button>
+        </div>
+      </div>
+      <div class="chat-panel" style="flex:1">
+        <div class="chat-panel-header">👥 Presence</div>
+        <div class="presence-list" id="presenceList"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Typing Indicators — The Right Way</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Client — Throttled Typing Events</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">let</span> typingTimeout;
+<span class="kw">let</span> isTyping = <span class="bool">false</span>;
+
+inputEl.<span class="fn">addEventListener</span>(<span class="str">'input'</span>, () => {
+  <span class="kw">if</span> (!isTyping) {
+    isTyping = <span class="bool">true</span>;
+    ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'user:typing'</span>, isTyping: <span class="bool">true</span> }));
+  }
+
+  <span class="fn">clearTimeout</span>(typingTimeout);
+  typingTimeout = <span class="fn">setTimeout</span>(() => {
+    isTyping = <span class="bool">false</span>;
+    ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'user:typing'</span>, isTyping: <span class="bool">false</span> }));
+  }, <span class="num">2000</span>); <span class="cmt">// Stop typing after 2s of inactivity</span>
+});
+
+<span class="cmt">// Never send typing events on every keystroke — throttle to max 1/sec</span></pre>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(5)">← Connection Lifecycle</button>
+    <button class="nav-next" onclick="goTo(7)">Auth & Security →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 7: SECURITY ====== -->
+<div class="module" id="mod-7">
+  <div class="module-badge">Module 08 · Real-World Patterns</div>
+  <h1 class="module-title">Authentication & Security</h1>
+  <p class="module-subtitle">WebSockets bypass most HTTP security middleware. Auth, rate limiting, and origin validation must be explicitly implemented.</p>
+
+  <h2>Why WebSocket Auth Is Different</h2>
+  <p>HTTP cookies are sent with the WebSocket upgrade request — but you can't set custom headers from the browser's WebSocket API. This changes how you authenticate.</p>
+
+  <div class="callout danger">
+    <div class="callout-icon">🚨</div>
+    <div class="callout-body">
+      <strong>Common Mistake: No Authentication</strong>
+      Many developers secure their REST API but forget their WebSocket endpoint. An unauthenticated WS endpoint is an open door — anyone can connect and receive real-time data or send commands.
+    </div>
+  </div>
+
+  <h2>Auth Strategy 1: JWT in First Message (Recommended)</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Client — Auth on Connect</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> ws = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">'wss://api.example.com/ws'</span>);
+
+ws.<span class="prop">onopen</span> = () => {
+  <span class="cmt">// First message must always be auth — server disconnects if missing</span>
+  ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({
+    type: <span class="str">'auth'</span>,
+    token: localStorage.<span class="fn">getItem</span>(<span class="str">'access_token'</span>)
+  }));
+};
+
+ws.<span class="prop">onmessage</span> = ({ data }) => {
+  <span class="kw">const</span> msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(data);
+  <span class="kw">if</span> (msg.<span class="prop">type</span> === <span class="str">'auth:success'</span>) {
+    <span class="cmt">// Now safe to send other messages</span>
+    <span class="fn">onAuthenticated</span>();
+  }
+  <span class="kw">if</span> (msg.<span class="prop">type</span> === <span class="str">'auth:failed'</span>) {
+    ws.<span class="fn">close</span>(); <span class="cmt">// Server will also close</span>
+  }
+};</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Server — Auth Middleware</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> jwt = <span class="fn">require</span>(<span class="str">'jsonwebtoken'</span>);
+<span class="kw">const</span> AUTH_TIMEOUT_MS = <span class="num">5000</span>; <span class="cmt">// Must auth within 5 seconds</span>
+
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws) => {
+  ws.<span class="prop">authenticated</span> = <span class="bool">false</span>;
+
+  <span class="cmt">// Start auth timer — disconnect if not authed in time</span>
+  <span class="kw">const</span> authTimer = <span class="fn">setTimeout</span>(() => {
+    <span class="kw">if</span> (!ws.<span class="prop">authenticated</span>) {
+      ws.<span class="fn">close</span>(<span class="num">4001</span>, <span class="str">'Auth timeout'</span>);
+    }
+  }, AUTH_TIMEOUT_MS);
+
+  ws.<span class="fn">on</span>(<span class="str">'message'</span>, (data) => {
+    <span class="kw">const</span> msg = <span class="cls">JSON</span>.<span class="fn">parse</span>(data);
+
+    <span class="cmt">// Block all non-auth messages until authenticated</span>
+    <span class="kw">if</span> (!ws.<span class="prop">authenticated</span> && msg.<span class="prop">type</span> !== <span class="str">'auth'</span>) {
+      ws.<span class="fn">close</span>(<span class="num">4001</span>, <span class="str">'Authentication required'</span>);
+      <span class="kw">return</span>;
+    }
+
+    <span class="kw">if</span> (msg.<span class="prop">type</span> === <span class="str">'auth'</span>) {
+      <span class="kw">try</span> {
+        <span class="kw">const</span> payload = jwt.<span class="fn">verify</span>(msg.<span class="prop">token</span>, process.<span class="prop">env</span>.<span class="prop">JWT_SECRET</span>);
+        ws.<span class="prop">userId</span> = payload.<span class="prop">sub</span>;
+        ws.<span class="prop">authenticated</span> = <span class="bool">true</span>;
+        <span class="fn">clearTimeout</span>(authTimer);
+        ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'auth:success'</span>, userId: ws.<span class="prop">userId</span> }));
+      } <span class="kw">catch</span> (e) {
+        ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'auth:failed'</span>, reason: <span class="str">'invalid_token'</span> }));
+        ws.<span class="fn">close</span>(<span class="num">4001</span>, <span class="str">'Invalid token'</span>);
+      }
+      <span class="kw">return</span>;
+    }
+
+    <span class="fn">router</span>(ws, msg); <span class="cmt">// Authenticated — process normally</span>
+  });
+});</pre>
+  </div>
+
+  <h2>Auth Strategy 2: Token in Query String (Simpler, Less Secure)</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Query String Token</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// Client — pass token as query param (gets sent in HTTP upgrade request):</span>
+<span class="kw">const</span> token = <span class="fn">getAccessToken</span>();
+<span class="kw">const</span> ws = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">`wss://api.example.com/ws?token=</span><span class="op">${</span>token<span class="op">}</span><span class="str">`</span>);
+
+<span class="cmt">// Server — validate on upgrade before accepting</span>
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws, req) => {
+  <span class="kw">const</span> params = <span class="kw">new</span> <span class="cls">URL</span>(req.<span class="prop">url</span>, <span class="str">'http://localhost'</span>).<span class="prop">searchParams</span>;
+  <span class="kw">const</span> token = params.<span class="fn">get</span>(<span class="str">'token'</span>);
+
+  <span class="kw">try</span> {
+    <span class="kw">const</span> payload = jwt.<span class="fn">verify</span>(token, process.<span class="prop">env</span>.<span class="prop">JWT_SECRET</span>);
+    ws.<span class="prop">userId</span> = payload.<span class="prop">sub</span>;
+  } <span class="kw">catch</span> {
+    ws.<span class="fn">close</span>(<span class="num">4001</span>, <span class="str">'Unauthorized'</span>);
+    <span class="kw">return</span>;
+  }
+});
+<span class="cmt">// ⚠️ Tokens in URLs appear in server logs — use short-lived tokens here</span></pre>
+  </div>
+
+  <h2>Origin Validation</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Server — Origin Check</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> ALLOWED_ORIGINS = [
+  <span class="str">'https://app.yourapp.com'</span>,
+  <span class="str">'https://www.yourapp.com'</span>,
+];
+
+<span class="kw">const</span> wss = <span class="kw">new</span> <span class="cls">WebSocketServer</span>({
+  server,
+  <span class="fn">verifyClient</span>({ origin, req }, cb) {
+    <span class="kw">if</span> (!ALLOWED_ORIGINS.<span class="fn">includes</span>(origin)) {
+      cb(<span class="bool">false</span>, <span class="num">403</span>, <span class="str">'Forbidden Origin'</span>);
+      <span class="kw">return</span>;
+    }
+    cb(<span class="bool">true</span>);
+  }
+});</pre>
+  </div>
+
+  <h2>Rate Limiting WebSocket Messages</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Per-Client Rate Limiter (Token Bucket)</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">class</span> <span class="cls">TokenBucket</span> {
+  <span class="fn">constructor</span>(capacity, refillRate) {
+    <span class="kw">this</span>.<span class="prop">capacity</span> = capacity;    <span class="cmt">// Max burst</span>
+    <span class="kw">this</span>.<span class="prop">tokens</span> = capacity;
+    <span class="kw">this</span>.<span class="prop">refillRate</span> = refillRate; <span class="cmt">// Tokens per second</span>
+    <span class="kw">this</span>.<span class="prop">lastRefill</span> = <span class="cls">Date</span>.<span class="fn">now</span>();
+  }
+
+  <span class="fn">consume</span>(count = <span class="num">1</span>) {
+    <span class="kw">this</span>.<span class="fn">refill</span>();
+    <span class="kw">if</span> (<span class="kw">this</span>.<span class="prop">tokens</span> &lt; count) <span class="kw">return false</span>; <span class="cmt">// Rate limited</span>
+    <span class="kw">this</span>.<span class="prop">tokens</span> -= count;
+    <span class="kw">return true</span>;
+  }
+
+  <span class="fn">refill</span>() {
+    <span class="kw">const</span> now = <span class="cls">Date</span>.<span class="fn">now</span>();
+    <span class="kw">const</span> elapsed = (now - <span class="kw">this</span>.<span class="prop">lastRefill</span>) / <span class="num">1000</span>;
+    <span class="kw">this</span>.<span class="prop">tokens</span> = Math.<span class="fn">min</span>(<span class="kw">this</span>.<span class="prop">capacity</span>, <span class="kw">this</span>.<span class="prop">tokens</span> + elapsed * <span class="kw">this</span>.<span class="prop">refillRate</span>);
+    <span class="kw">this</span>.<span class="prop">lastRefill</span> = now;
+  }
+}
+
+<span class="cmt">// Usage on connection:</span>
+ws.<span class="prop">limiter</span> = <span class="kw">new</span> <span class="cls">TokenBucket</span>(<span class="num">20</span>, <span class="num">5</span>); <span class="cmt">// Burst 20, 5/sec sustained</span>
+
+ws.<span class="fn">on</span>(<span class="str">'message'</span>, (data) => {
+  <span class="kw">if</span> (!ws.<span class="prop">limiter</span>.<span class="fn">consume</span>()) {
+    ws.<span class="fn">send</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>({ type: <span class="str">'error'</span>, code: <span class="str">'RATE_LIMITED'</span> }));
+    <span class="kw">return</span>;
+  }
+  <span class="fn">handleMessage</span>(ws, data);
+});</pre>
+  </div>
+
+  <h2>🛠️ Rate Limit Visualizer</h2>
+  <div class="demo-box">
+    <div class="demo-title">Token Bucket Simulator</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Capacity: 20 tokens. Refill: 5/sec. Watch what happens under different send rates.</p>
+    <button class="demo-btn" onclick="startRateSim(2)">Slow (2/sec)</button>
+    <button class="demo-btn" onclick="startRateSim(6)">Normal (6/sec)</button>
+    <button class="demo-btn danger" onclick="startRateSim(30)">Flood (30/sec)</button>
+    <button class="demo-btn muted" onclick="stopRateSim()">Stop</button>
+    <div style="margin-top:16px;">
+      <div class="rate-meter"><div class="rate-label">Tokens</div><div class="rate-bar"><div class="rate-fill" id="rateFill" style="width:100%"></div></div><div class="rate-val" id="rateVal">20/20</div></div>
+      <div class="rate-meter"><div class="rate-label">Sent</div><div class="rate-bar"><div class="rate-fill" id="sentFill" style="width:0%"></div></div><div class="rate-val" id="sentVal">0</div></div>
+      <div class="rate-meter"><div class="rate-label">Blocked</div><div class="rate-bar"><div class="rate-fill danger" id="blockedFill" style="width:0%;background:var(--danger)"></div></div><div class="rate-val" id="blockedVal">0</div></div>
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 A client sends their JWT token in the WebSocket URL query string. What's the primary security risk?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. The token can be intercepted by WebSocket proxies</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">B. The token appears in server access logs and browser history — use short-lived tokens</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. Query strings aren't supported in WebSocket URLs</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. JWT tokens can't be validated before the handshake</button>
+    <div class="quiz-feedback" id="qfb-7">✅ Correct! URLs are logged by web servers, proxies, and CDNs — a long-lived token in a URL is a liability. The mitigation: use short-lived one-time tokens (exchange a session token for a ws-token from your REST API first, valid for 30-60 seconds).</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(6)">← Rooms & Presence</button>
+    <button class="nav-next" onclick="goTo(8)">Scaling WebSockets →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 8: SCALING ====== -->
+<div class="module" id="mod-8">
+  <div class="module-badge">Module 09 · Real-World Patterns</div>
+  <h1 class="module-title">Scaling WebSockets</h1>
+  <p class="module-subtitle">Single-server WebSockets break at scale. Here's how real systems handle thousands to millions of concurrent connections.</p>
+
+  <h2>The Scaling Problem</h2>
+  <p>WebSocket connections are stateful — a client is connected to one specific server instance. When you add a second server instance, Client A on Server 1 can't receive messages from Client B on Server 2.</p>
+
+  <div class="arch-visual">
+    <div class="arch-node primary"><div class="icon">👤</div><div class="label">Client A</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node"><div class="icon">🖥️</div><div class="label">Server 1</div></div>
+    <div class="arch-arrow" style="color:var(--danger)">✗</div>
+    <div class="arch-node"><div class="icon">🖥️</div><div class="label">Server 2</div></div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node primary"><div class="icon">👤</div><div class="label">Client B</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:-8px;">❌ Message from Client A cannot reach Client B on a different server</p>
+
+  <h2>Solution: Redis Pub/Sub as Message Broker</h2>
+  <p>Each server subscribes to a Redis channel. When a message needs to be delivered, publish it to Redis — every server receives it and delivers to its locally connected clients.</p>
+
+  <div class="arch-visual" style="flex-direction:column;gap:12px;">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div class="arch-node primary"><div class="icon">👤</div><div class="label">Client A</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node"><div class="icon">🖥️</div><div class="label">Server 1</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node secondary" style="min-width:100px"><div class="icon">🔴</div><div class="label">Redis Pub/Sub</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node"><div class="icon">🖥️</div><div class="label">Server 2</div></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node primary"><div class="icon">👤</div><div class="label">Client B</div></div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Redis Pub/Sub Integration</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> Redis = <span class="fn">require</span>(<span class="str">'ioredis'</span>);
+<span class="kw">const</span> pub = <span class="kw">new</span> <span class="cls">Redis</span>(process.<span class="prop">env</span>.<span class="prop">REDIS_URL</span>);
+<span class="kw">const</span> sub = <span class="kw">new</span> <span class="cls">Redis</span>(process.<span class="prop">env</span>.<span class="prop">REDIS_URL</span>); <span class="cmt">// Separate client for subscribe</span>
+
+<span class="cmt">// Subscribe to channels relevant to this server's clients</span>
+<span class="kw">async function</span> <span class="fn">subscribeToRoom</span>(roomId) {
+  <span class="kw">await</span> sub.<span class="fn">subscribe</span>(<span class="str">`room:</span><span class="op">${</span>roomId<span class="op">}</span><span class="str">`</span>);
+}
+
+<span class="cmt">// When Redis message arrives, deliver to local clients</span>
+sub.<span class="fn">on</span>(<span class="str">'message'</span>, (channel, message) => {
+  <span class="kw">const</span> roomId = channel.<span class="fn">replace</span>(<span class="str">'room:'</span>, <span class="str">''</span>);
+  <span class="kw">const</span> payload = <span class="cls">JSON</span>.<span class="fn">parse</span>(message);
+
+  <span class="cmt">// Deliver only to clients in this room ON THIS SERVER</span>
+  rooms.<span class="fn">broadcast</span>(roomId, payload);
+});
+
+<span class="cmt">// When a message needs broadcasting: publish to Redis</span>
+<span class="kw">function</span> <span class="fn">publishToRoom</span>(roomId, payload) {
+  pub.<span class="fn">publish</span>(<span class="str">`room:</span><span class="op">${</span>roomId<span class="op">}</span><span class="str">`</span>, <span class="cls">JSON</span>.<span class="fn">stringify</span>(payload));
+  <span class="cmt">// Redis fan-out → all servers receive → each delivers to local clients</span>
+}</pre>
+  </div>
+
+  <h2>Sticky Sessions (Alternative Approach)</h2>
+  <p>Some load balancers support sticky sessions — routing a client to the same server every time using a cookie or IP hash. This is simpler but has serious drawbacks.</p>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>Approach</th><th>Pros</th><th>Cons</th></tr>
+      <tr>
+        <td><strong>Redis Pub/Sub</strong></td>
+        <td>Fully stateless servers, any client can reach any other</td>
+        <td>Redis becomes a bottleneck, added latency per message</td>
+      </tr>
+      <tr>
+        <td><strong>Sticky Sessions</strong></td>
+        <td>Simple, no message broker needed</td>
+        <td>Uneven load, server restart drops all that server's clients</td>
+      </tr>
+      <tr>
+        <td><strong>Consistent Hashing</strong></td>
+        <td>Deterministic routing, no broker</td>
+        <td>Complex to implement, resharding on scale-up</td>
+      </tr>
+    </table>
+  </div>
+
+  <h2>Nginx Load Balancer Config for WebSockets</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">nginx.conf</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre>upstream websocket_backend {
+    <span class="cmt"># ip_hash enables sticky sessions by default</span>
+    ip_hash;
+    server backend1.internal:8080;
+    server backend2.internal:8080;
+    server backend3.internal:8080;
+}
+
+server {
+    listen 443 ssl;
+    server_name api.example.com;
+
+    location /ws {
+        proxy_pass http://websocket_backend;
+
+        <span class="cmt"># Critical: enable WebSocket upgrade proxying</span>
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+
+        <span class="cmt"># Pass client IP through</span>
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+
+        <span class="cmt"># Keepalive timeouts (default 60s is too short)</span>
+        proxy_read_timeout 3600s;   <span class="cmt"># 1 hour</span>
+        proxy_send_timeout 3600s;
+    }
+}</pre>
+  </div>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body">
+      <strong>Connection Limits at Scale</strong>
+      Each WebSocket connection holds an OS file descriptor. Default Linux limits are 1024 per process. For production at scale: increase <code>ulimit -n</code> to 65536+, tune <code>/etc/sysctl.conf</code> for <code>net.ipv4.tcp_max_syn_backlog</code>, and consider uWebSockets.js for highest density. A single optimized server can handle 100k+ concurrent connections.
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 You have 3 WebSocket servers behind a load balancer (no sticky sessions). Client A on Server 1 sends a message to room "general". Clients B and C are on Server 2 and 3 respectively. How do B and C receive the message?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">A. Server 1 sends the message directly to Server 2 and Server 3 via HTTP</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">B. Server 1 publishes to Redis; all servers receive the Redis message and deliver to their local clients</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. The load balancer routes the message to the correct servers</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. WebSockets support mesh networking between servers natively</button>
+    <div class="quiz-feedback" id="qfb-8">✅ Correct! Redis pub/sub is the standard pattern. Server 1 publishes to `room:general`. Both Server 2 and Server 3 are subscribed to that channel, receive the message, and fan it out to their locally connected clients in that room.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(7)">← Auth & Security</button>
+    <button class="nav-next" onclick="goTo(9)">Socket.io vs Raw WS →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 9: SOCKET.IO ====== -->
+<div class="module" id="mod-9">
+  <div class="module-badge">Module 10 · Production</div>
+  <h1 class="module-title">Socket.io vs Raw WebSockets</h1>
+  <p class="module-subtitle">You'll be asked this in interviews. Know the trade-offs cold — and know when to use each.</p>
+
+  <h2>What Socket.io Adds on Top of WebSockets</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Feature</th><th>Raw WS</th><th>Socket.io</th></tr>
+      <tr><td>Auto-reconnect</td><td>❌ Manual</td><td>✅ Built-in with backoff</td></tr>
+      <tr><td>Rooms</td><td>❌ Manual</td><td>✅ Built-in</td></tr>
+      <tr><td>Namespaces</td><td>❌ Manual</td><td>✅ Built-in</td></tr>
+      <tr><td>Event emitter API</td><td>❌ Manual routing</td><td>✅ <code>socket.on('event', cb)</code></td></tr>
+      <tr><td>Acknowledgments</td><td>❌ Manual</td><td>✅ Built-in callbacks</td></tr>
+      <tr><td>Fallback transports</td><td>❌ WS only</td><td>✅ Falls back to polling</td></tr>
+      <tr><td>Binary support</td><td>✅ Native</td><td>✅ With overhead</td></tr>
+      <tr><td>Payload overhead</td><td>🟢 ~2 bytes/frame</td><td>🟡 42+ bytes/frame</td></tr>
+      <tr><td>Protocol compatibility</td><td>✅ Any WS client</td><td>❌ Requires Socket.io client</td></tr>
+      <tr><td>Scaling</td><td>✅ Standard Redis</td><td>🟡 Needs socket.io-redis adapter</td></tr>
+    </table>
+  </div>
+
+  <h2>Socket.io Code Comparison</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Socket.io — Server</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">const</span> { <span class="cls">Server</span> } = <span class="fn">require</span>(<span class="str">'socket.io'</span>);
+<span class="kw">const</span> io = <span class="kw">new</span> <span class="cls">Server</span>(httpServer, { cors: { origin: <span class="str">'*'</span> } });
+
+io.<span class="prop">use</span>(<span class="kw">async</span> (socket, next) => {
+  <span class="cmt">// Middleware: runs before connection event</span>
+  <span class="kw">const</span> token = socket.<span class="prop">handshake</span>.<span class="prop">auth</span>.<span class="prop">token</span>;
+  <span class="kw">try</span> {
+    socket.<span class="prop">user</span> = jwt.<span class="fn">verify</span>(token, SECRET);
+    <span class="fn">next</span>();
+  } <span class="kw">catch</span> {
+    <span class="fn">next</span>(<span class="kw">new</span> <span class="cls">Error</span>(<span class="str">'unauthorized'</span>));
+  }
+});
+
+io.<span class="fn">on</span>(<span class="str">'connection'</span>, (socket) => {
+  console.<span class="fn">log</span>(<span class="str">`Connected: </span><span class="op">${</span>socket.<span class="prop">id</span><span class="op">}</span><span class="str">`</span>);
+
+  socket.<span class="fn">on</span>(<span class="str">'join-room'</span>, (roomId) => {
+    socket.<span class="fn">join</span>(roomId);  <span class="cmt">// Built-in room management</span>
+  });
+
+  socket.<span class="fn">on</span>(<span class="str">'chat-message'</span>, ({ room, text }, ack) => {
+    io.<span class="fn">to</span>(room).<span class="fn">emit</span>(<span class="str">'chat-message'</span>, {
+      from: socket.<span class="prop">user</span>.<span class="prop">sub</span>, text, ts: <span class="cls">Date</span>.<span class="fn">now</span>()
+    });
+    <span class="fn">ack</span>({ status: <span class="str">'delivered'</span> }); <span class="cmt">// Acknowledgment callback</span>
+  });
+
+  socket.<span class="fn">on</span>(<span class="str">'disconnect'</span>, () => {
+    <span class="cmt">// Automatically removed from all rooms</span>
+  });
+});</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Socket.io — Client</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="kw">import</span> { io } <span class="kw">from</span> <span class="str">'socket.io-client'</span>;
+
+<span class="kw">const</span> socket = <span class="fn">io</span>(<span class="str">'wss://api.example.com'</span>, {
+  auth: { token: <span class="fn">getAccessToken</span>() },
+  reconnection: <span class="bool">true</span>,
+  reconnectionDelay: <span class="num">1000</span>,
+  reconnectionDelayMax: <span class="num">30000</span>,
+});
+
+socket.<span class="fn">emit</span>(<span class="str">'join-room'</span>, <span class="str">'general'</span>);
+
+socket.<span class="fn">emit</span>(<span class="str">'chat-message'</span>, { room: <span class="str">'general'</span>, text: <span class="str">'hey!'</span> }, (ack) => {
+  console.<span class="fn">log</span>(<span class="str">'Delivered:'</span>, ack); <span class="cmt">// { status: 'delivered' }</span>
+});
+
+socket.<span class="fn">on</span>(<span class="str">'chat-message'</span>, (msg) => {
+  <span class="fn">renderMessage</span>(msg);
+});</pre>
+  </div>
+
+  <h2>When to Use Each</h2>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4 style="color:var(--accent)">Use Raw WebSockets When:</h4>
+      <ul class="pro">
+        <li>You need maximum performance (games, trading)</li>
+        <li>Binary protocols (audio, video, telemetry)</li>
+        <li>Non-browser clients (mobile native, IoT)</li>
+        <li>You need protocol compatibility across clients</li>
+        <li>You want full control over the wire format</li>
+      </ul>
+    </div>
+    <div class="compare-card">
+      <h4 style="color:var(--accent3)">Use Socket.io When:</h4>
+      <ul class="pro">
+        <li>Rapid prototyping or MVP development</li>
+        <li>Teams unfamiliar with WS primitives</li>
+        <li>Rooms, namespaces needed out of the box</li>
+        <li>Browser-only clients are acceptable</li>
+        <li>You value built-in reconnection and acks</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body">
+      <strong>Interview Answer Template</strong>
+      "Socket.io abstracts WebSockets with rooms, namespaces, auto-reconnect, and event-based routing — ideal for rapid development. Raw WebSockets give you full protocol control, lower overhead, and better interoperability. At scale or with non-browser clients, I'd use raw WebSockets with a custom protocol. For a product MVP, Socket.io saves significant engineering time."
+    </div>
+  </div>
+
+  <div class="quiz-box">
+    <div class="quiz-q">🧠 A mobile app (iOS/Android native) needs to connect to your real-time backend. Why does Socket.io become problematic here?</div>
+    <button class="quiz-opt" onclick="checkQuiz(this,true)">A. Native iOS/Android apps don't have a Socket.io client — you'd need raw WebSockets or a third-party port</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">B. Socket.io doesn't support TLS (wss://)</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">C. Mobile networks don't support WebSocket connections</button>
+    <button class="quiz-opt" onclick="checkQuiz(this,false)">D. Socket.io is JavaScript-only so it can run in React Native</button>
+    <div class="quiz-feedback" id="qfb-9">✅ Correct! Socket.io uses its own protocol on top of WebSockets — a native client must implement that protocol or use the official JS client via React Native/WebView. For true native iOS (Swift) or Android (Kotlin) clients, raw WebSockets are the correct choice. The protocol must be standard WS that any client can speak.</div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(8)">← Scaling</button>
+    <button class="nav-next" onclick="goTo(10)">Production Deployment →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 10: PRODUCTION ====== -->
+<div class="module" id="mod-10">
+  <div class="module-badge">Module 11 · Production</div>
+  <h1 class="module-title">Production Deployment</h1>
+  <p class="module-subtitle">WebSockets behave differently in production. Proxies, firewalls, cloud load balancers — all have opinions about long-lived connections.</p>
+
+  <h2>Always Use wss:// (TLS) in Production</h2>
+  <div class="callout danger">
+    <div class="callout-icon">🔒</div>
+    <div class="callout-body">
+      <strong>Never Deploy Unencrypted WebSockets</strong>
+      Plain <code>ws://</code> is interceptable by anyone on the network. Corporate proxies often block unencrypted WebSocket connections entirely. Always use <code>wss://</code> — terminate TLS at your load balancer or nginx, then proxy plaintext to your servers internally.
+    </div>
+  </div>
+
+  <h2>AWS Application Load Balancer (ALB) Config</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">AWS ALB — Terraform</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt"># ALB natively supports WebSockets — no extra config needed
+# Key settings to get right:</span>
+
+resource <span class="str">"aws_lb_target_group"</span> <span class="str">"ws"</span> {
+  name         = <span class="str">"websocket-tg"</span>
+  port         = <span class="num">8080</span>
+  protocol     = <span class="str">"HTTP"</span>  <span class="cmt"># ALB terminates TLS, sends HTTP to targets</span>
+  target_type  = <span class="str">"ip"</span>
+
+  <span class="cmt"># Stickiness for stateful WS connections</span>
+  stickiness {
+    type            = <span class="str">"lb_cookie"</span>
+    cookie_duration = <span class="num">86400</span>  <span class="cmt"># 24 hours</span>
+    enabled         = <span class="bool">true</span>
+  }
+
+  health_check {
+    path                = <span class="str">"/health"</span>
+    interval            = <span class="num">30</span>
+    healthy_threshold   = <span class="num">2</span>
+    unhealthy_threshold = <span class="num">3</span>
+  }
+
+  <span class="cmt"># Idle timeout: max time a WS connection can be silent
+  # Default 60s will kill idle connections! Set to match your ping interval</span>
+}
+
+resource <span class="str">"aws_lb"</span> <span class="str">"ws"</span> {
+  load_balancer_type         = <span class="str">"application"</span>
+  idle_timeout               = <span class="num">3600</span>  <span class="cmt"># 1 hour — must exceed your ping interval</span>
+}</pre>
+  </div>
+
+  <h2>Monitoring in Production</h2>
+  <div class="code-block">
+    <div class="code-header"><span class="code-lang">Key Metrics to Track</span><button class="code-copy" onclick="copyCode(this)">copy</button></div>
+    <pre><span class="cmt">// Expose metrics endpoint for Prometheus/Datadog</span>
+<span class="kw">const</span> metrics = {
+  activeConnections: <span class="num">0</span>,
+  totalConnected: <span class="num">0</span>,
+  totalDisconnected: <span class="num">0</span>,
+  totalMessages: <span class="num">0</span>,
+  totalErrors: <span class="num">0</span>,
+  zombiesTerminated: <span class="num">0</span>,
+};
+
+wss.<span class="fn">on</span>(<span class="str">'connection'</span>, (ws) => {
+  metrics.<span class="prop">activeConnections</span>++;
+  metrics.<span class="prop">totalConnected</span>++;
+
+  ws.<span class="fn">on</span>(<span class="str">'message'</span>, () => metrics.<span class="prop">totalMessages</span>++);
+  ws.<span class="fn">on</span>(<span class="str">'close'</span>, () => {
+    metrics.<span class="prop">activeConnections</span>--;
+    metrics.<span class="prop">totalDisconnected</span>++;
+  });
+  ws.<span class="fn">on</span>(<span class="str">'error'</span>, () => metrics.<span class="prop">totalErrors</span>++);
+});
+
+<span class="cmt">// Key alerts to set up:
+// - activeConnections drops suddenly → server crash / network issue
+// - zombiesTerminated spikes → network reliability problem
+// - totalErrors/sec exceeds threshold → auth failures or bugs
+// - p99 message latency > 100ms → server overload</span></pre>
+  </div>
+
+  <h2>Deployment Checklist</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Category</th><th>Checklist Item</th><th>Why</th></tr>
+      <tr><td>TLS</td><td>wss:// enforced everywhere</td><td>Security, proxy compatibility</td></tr>
+      <tr><td>Timeouts</td><td>LB idle timeout > ping interval</td><td>Prevents LB killing live connections</td></tr>
+      <tr><td>Keepalive</td><td>Server-side ping every 25-30s</td><td>Detects zombie connections</td></tr>
+      <tr><td>Auth</td><td>Auth within 5s or disconnect</td><td>Prevents unauthenticated squatters</td></tr>
+      <tr><td>Rate Limit</td><td>Per-connection message throttle</td><td>Prevents floods, abuse</td></tr>
+      <tr><td>Max Message Size</td><td>64KB limit enforced</td><td>Prevents memory exhaustion</td></tr>
+      <tr><td>Origin Check</td><td>verifyClient validates Origin header</td><td>Prevents cross-site WS hijacking</td></tr>
+      <tr><td>Graceful Shutdown</td><td>SIGTERM → notify clients → drain → exit</td><td>Clean deployments, no dropped messages</td></tr>
+      <tr><td>Reconnection</td><td>Client has backoff + jitter</td><td>Prevents thundering herd on restart</td></tr>
+      <tr><td>Logging</td><td>Connect/disconnect/errors logged with client ID</td><td>Debugging production issues</td></tr>
+      <tr><td>File Descriptors</td><td>ulimit -n ≥ 65536</td><td>Each WS = 1 FD</td></tr>
+      <tr><td>Monitoring</td><td>activeConnections metric exported</td><td>Alerting on connection drops</td></tr>
+    </table>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(9)">← Socket.io vs Raw WS</button>
+    <button class="nav-next" onclick="goTo(11)">Interview Prep →</button>
+  </div>
+</div>
+
+<!-- ====== MODULE 11: INTERVIEW PREP ====== -->
+<div class="module" id="mod-11">
+  <div class="module-badge">Module 12 · Interview Prep</div>
+  <h1 class="module-title">Interview Prep</h1>
+  <p class="module-subtitle">The questions you'll actually be asked — with engineer-level answers. Click any question to reveal the answer.</p>
+
+  <h2>Common Interview Questions</h2>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q1: What's the difference between WebSockets and HTTP long polling?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p>Long polling is a hack on top of HTTP: the client sends a request, the server holds it open until there's data, responds, then the client immediately sends another request. It simulates push but creates constant request churn, TCP overhead, and server thread exhaustion.</p>
+      <p>WebSockets upgrade a single HTTP connection to a persistent TCP channel. After the handshake, either party can push data anytime with ~2 bytes of framing overhead vs ~700 bytes per HTTP request. WebSockets are also full-duplex — both sides can write simultaneously. Long polling is fundamentally half-duplex — you can't receive while sending a request.</p>
+      <strong style="color:var(--accent3)">TL;DR:</strong> WebSockets are a real-time protocol. Long polling is polling in disguise. Use WebSockets when you need true bidirectional, low-latency communication.
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q2: How would you design a chat system for 1 million concurrent users?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p><strong>Layer 1 — Connection Servers:</strong> Dedicated WS gateway servers (not your application servers). Each handles 50-100k connections. 10-20 servers at this scale. They hold connections and forward messages — no business logic here.</p>
+      <p><strong>Layer 2 — Message Broker:</strong> Redis Pub/Sub or Kafka. When a message is sent, the gateway publishes to the broker. All gateways subscribed to that channel receive and fan out to local connections. Kafka is preferred for durability and replay.</p>
+      <p><strong>Layer 3 — Application Servers:</strong> Handle authentication, business logic, DB writes. Gateways call these via internal HTTP/gRPC. Stateless and horizontally scalable.</p>
+      <p><strong>Layer 4 — Storage:</strong> Cassandra or DynamoDB for message history (append-heavy), Redis for presence/typing indicators (ephemeral), PostgreSQL for user/room metadata.</p>
+      <strong style="color:var(--accent3)">Key insight:</strong> Separate connection handling from business logic. Your WebSocket gateway is a dumb pipe — keep it that way.
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q3: How do you handle WebSocket authentication?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p>Two main strategies:</p>
+      <p><strong>1. JWT in first message (preferred):</strong> Client connects, immediately sends <code>{"type":"auth","token":"..."}</code>. Server validates JWT and associates the userId with the socket. Server disconnects (code 4001) if no auth message within 5 seconds or token is invalid. This keeps auth logic in the application layer.</p>
+      <p><strong>2. Query string token:</strong> <code>wss://api.example.com/ws?token=...</code>. Server reads from <code>req.url</code> during the upgrade. Simpler, but tokens appear in logs — use only with short-lived (30-60s) one-time-use tokens generated from your REST API.</p>
+      <p><strong>Cookies:</strong> Sent automatically with the upgrade request — works if you have HttpOnly session cookies. But doesn't work for cross-origin setups without careful CORS configuration.</p>
+      <strong style="color:var(--accent3)">Never:</strong> Leave a WebSocket endpoint unauthenticated. Any open WS endpoint is a real-time data firehose — protect it.
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q4: What is the thundering herd problem and how do you solve it?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p>When a server restarts, all disconnected clients try to reconnect simultaneously — creating a stampede that can overwhelm the just-restarted server and cause cascading failures.</p>
+      <p><strong>Solution: Exponential backoff + jitter.</strong></p>
+      <ul>
+        <li><strong>Exponential backoff:</strong> Start at 1s, double each attempt (1s → 2s → 4s → 8s → ... max 30s). This spreads reconnections over time proportional to how many retries have happened.</li>
+        <li><strong>Jitter:</strong> Randomize each client's delay by ±25%. Without jitter, even exponential backoff creates synchronized waves — all clients on attempt 3 retry at exactly 4 seconds. Jitter breaks synchronization.</li>
+      </ul>
+      <code>delay = min(maxDelay, baseDelay * 2^attempt) * (0.75 + random() * 0.5)</code>
+      <p style="margin-top:8px"><strong style="color:var(--accent3)">Production addition:</strong> Send a <code>{"type":"server:shutdown","reconnectIn":2000}</code> message before restarting — tells clients exactly when to reconnect and can include a specific server address to redirect to.</p>
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q5: How would you implement presence (online/offline) at scale?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p><strong>Small scale (single server):</strong> Keep a Map of userId → status in memory. Update on connect/disconnect, fan out change events to relevant clients.</p>
+      <p><strong>Large scale (multiple servers):</strong></p>
+      <ul>
+        <li>On connect: SET userId in Redis with 35-second TTL. Publish <code>presence:online</code> event to Redis.</li>
+        <li>Server sends ping every 25 seconds. On pong: EXPIRE userId in Redis (renew TTL).</li>
+        <li>If user doesn't pong: terminate connection. Redis TTL expires naturally → triggers keyspace notification → publish <code>presence:offline</code>.</li>
+        <li>All servers subscribe to presence channel, fan out to connected clients.</li>
+      </ul>
+      <strong style="color:var(--accent3)">Key insight:</strong> Redis TTL is your heartbeat tracker at scale. Keyspace notifications replace the need for explicit "user went offline" events — Redis triggers them when TTL expires.
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q6: What are WebSocket subprotocols and when do you use them?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p>Subprotocols are application-level protocol identifiers negotiated during the handshake. The client proposes a list, the server picks one and echoes it back in the <code>Sec-WebSocket-Protocol</code> header.</p>
+      <code>new WebSocket(url, ['json-v2', 'json-v1'])</code>
+      <p style="margin-top:8px">Use them when:</p>
+      <ul>
+        <li>You're versioning your WS protocol and need backward compatibility</li>
+        <li>You support multiple message formats (e.g. JSON and msgpack)</li>
+        <li>Third-party clients need to know the protocol (STOMP, MQTT over WS)</li>
+      </ul>
+      <p>For most internal apps, you don't need subprotocols — your protocol is implicit. They're most useful when building public APIs consumed by third-party clients.</p>
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q7: How do you handle message ordering in a distributed WS system?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p>WebSockets on a single connection guarantee ordering (TCP guarantees order within a stream). The problem arises at the distributed level.</p>
+      <p><strong>The issue:</strong> Client sends message 1 → published to Redis → Server A delivers to B. Client sends message 2 → published to Redis → Server B delivers to A. Due to network/processing variance, message 2 might arrive before message 1 on the recipient side.</p>
+      <p><strong>Solutions:</strong></p>
+      <ul>
+        <li><strong>Sequence numbers:</strong> Attach a monotonically increasing seq to each message. Client buffers and reorders before rendering.</li>
+        <li><strong>Timestamp + last-write-wins:</strong> For state sync (cursors, presence), last timestamp wins.</li>
+        <li><strong>Kafka ordering:</strong> Partition messages by room/user ID — all messages in a partition are strictly ordered. Each partition delivered to one consumer.</li>
+        <li><strong>For chat:</strong> Server assigns sequence numbers from a Redis counter (<code>INCR room:general:seq</code>). Clients request missing messages if seq gaps detected.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="interview-q">
+    <div class="interview-q-header" onclick="toggleQ(this)">
+      Q8: WebSockets vs Server-Sent Events — when do you choose SSE?
+      <span class="arrow">▶</span>
+    </div>
+    <div class="interview-q-body">
+      <p>SSE is a unidirectional server-push protocol over HTTP. It's built into browsers as <code>EventSource</code> and works over HTTP/2 multiplexing (multiple streams on one TCP connection).</p>
+      <p><strong>Choose SSE when:</strong></p>
+      <ul>
+        <li>You only need server → client data (news feeds, live scores, log streaming, progress bars)</li>
+        <li>Client sends data only via regular HTTP requests (not over the same connection)</li>
+        <li>You want automatic reconnection with <code>Last-Event-ID</code> support built in</li>
+        <li>HTTP/2 server push efficiency matters</li>
+      </ul>
+      <p><strong>Choose WebSockets when:</strong></p>
+      <ul>
+        <li>Client needs to send data over the same persistent connection</li>
+        <li>High-frequency bidirectional data (games, collaboration)</li>
+        <li>Binary data (WebSockets are more efficient for binary)</li>
+      </ul>
+      <strong style="color:var(--accent3)">Rule of thumb:</strong> If you're building chat → WebSocket. If you're building a live dashboard → SSE. SSE is simpler, cheaper, and works over standard HTTP — don't over-engineer with WebSockets when SSE is sufficient.
+    </div>
+  </div>
+
+  <h2>System Design: Live Collaborative Document (like Google Docs)</h2>
+  <div class="callout info">
+    <div class="callout-icon">🏗️</div>
+    <div class="callout-body">
+      <strong>Design Challenge — Talk Through This</strong>
+      Key components: Operational Transformation (OT) or CRDTs for conflict-free concurrent edits, WebSocket server per document cluster, Redis for presence, Kafka for operation log durability, PostgreSQL snapshots every N operations, client-side optimistic updates with server reconciliation. Mention vector clocks or Lamport timestamps for causality.
+    </div>
+  </div>
+
+  <h2>Vocabulary Cheat Sheet</h2>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td><strong>Full-duplex</strong></td><td>Both parties can send/receive simultaneously (vs half-duplex: one at a time)</td></tr>
+      <tr><td><strong>Frame</strong></td><td>The basic unit of WebSocket data — has a 2-14 byte header + payload</td></tr>
+      <tr><td><strong>Masking</strong></td><td>XOR scrambling client→server frames — security against proxy poisoning</td></tr>
+      <tr><td><strong>Heartbeat</strong></td><td>Periodic ping/pong to detect and clean up dead connections</td></tr>
+      <tr><td><strong>Thundering herd</strong></td><td>All clients reconnecting simultaneously after server restart</td></tr>
+      <tr><td><strong>Jitter</strong></td><td>Random delay added to reconnection timers to prevent herd synchronization</td></tr>
+      <tr><td><strong>Fan-out</strong></td><td>Delivering a single message to multiple recipients</td></tr>
+      <tr><td><strong>Backpressure</strong></td><td>Slowing producers when consumers can't keep up (bufferedAmount)</td></tr>
+      <tr><td><strong>Subprotocol</strong></td><td>Application-level protocol negotiated during WS handshake</td></tr>
+      <tr><td><strong>STOMP</strong></td><td>Simple Text Oriented Messaging Protocol — common WS subprotocol for message queues</td></tr>
+      <tr><td><strong>OT</strong></td><td>Operational Transformation — algorithm for concurrent collaborative editing</td></tr>
+      <tr><td><strong>CRDT</strong></td><td>Conflict-free Replicated Data Type — distributed data structure for collaboration</td></tr>
+    </table>
+  </div>
+
+  <div class="callout success">
+    <div class="callout-icon">🎓</div>
+    <div class="callout-body">
+      <strong>You've Completed WebSockets Mastery</strong>
+      You now understand the protocol, handshake, browser API, server implementation, message design, lifecycle management, rooms, presence, authentication, scaling, Socket.io trade-offs, production deployment, and can answer interview questions cold. Go build something real with this.
+    </div>
+  </div>
+
+  <div class="module-nav">
+    <button class="nav-prev" onclick="goTo(10)">← Production Deployment</button>
+    <div style="font-size:13px;color:var(--accent3);font-weight:700">🏁 Course Complete</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ===== NAVIGATION =====
+let currentMod = 0;
+const totalMods = 12;
+const completed = new Set();
+
+function goTo(idx) {
+  completed.add(currentMod);
+  document.getElementById(`mod-${currentMod}`).classList.remove('active');
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  
+  currentMod = idx;
+  document.getElementById(`mod-${idx}`).classList.add('active');
+  document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  
+  completed.forEach(i => {
+    document.querySelectorAll('.nav-item')[i].classList.add('completed');
+    document.querySelectorAll('.nav-item')[i].querySelector('.nav-num').textContent = '✓';
+  });
+
+  const pct = Math.round((completed.size / totalMods) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${completed.size} / ${totalMods} modules`;
+  
+  window.scrollTo(0, 0);
+  document.getElementById('main').scrollTo(0, 0);
+  
+  // Mobile: close sidebar
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+document.querySelectorAll('.nav-item').forEach((el, i) => {
+  el.addEventListener('click', () => goTo(i));
+});
+
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+// ===== QUIZ =====
+function checkQuiz(btn, correct) {
+  const qBox = btn.closest('.quiz-box');
+  qBox.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+  if (correct) {
+    btn.classList.add('correct');
+    const fb = qBox.querySelector('.quiz-feedback');
+    fb.classList.add('show');
+    fb.style.background = 'rgba(0,255,179,0.08)';
+    fb.style.border = '1px solid rgba(0,255,179,0.2)';
+    fb.style.color = 'var(--accent3)';
+  } else {
+    btn.classList.add('wrong');
+    const fb = qBox.querySelector('.quiz-feedback');
+    fb.classList.add('show');
+    fb.style.background = 'rgba(255,56,96,0.08)';
+    fb.style.border = '1px solid rgba(255,56,96,0.2)';
+    fb.style.color = 'var(--danger)';
+    fb.textContent = '❌ Not quite — re-read the section above and try again. (Quiz resets on page reload)';
+  }
+}
+
+// ===== COPY CODE =====
+function copyCode(btn) {
+  const code = btn.closest('.code-block').querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 2000);
+  });
+}
+
+// ===== INTERVIEW ACCORDION =====
+function toggleQ(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('show');
+  document.querySelectorAll('.interview-q-body').forEach(b => b.classList.remove('show'));
+  document.querySelectorAll('.interview-q-header').forEach(h => h.classList.remove('open'));
+  if (!isOpen) {
+    body.classList.add('show');
+    header.classList.add('open');
+  }
+}
+
+// ===== WS SIMULATOR (Module 2) =====
+let simConnected = false;
+let simTimer;
+
+function log0(msg, type='sys') {
+  const log = document.getElementById('simLog0');
+  const el = document.createElement('div');
+  el.className = `log-entry ${type}`;
+  el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+
+function setStatus(state) {
+  const dot = document.getElementById('dot0');
+  const label = document.getElementById('stateLabel0');
+  if (state === 'connected') {
+    dot.className = 'status-dot connected';
+    label.textContent = 'OPEN (readyState: 1)';
+  } else if (state === 'connecting') {
+    dot.className = 'status-dot connecting';
+    label.textContent = 'CONNECTING (readyState: 0)';
+  } else {
+    dot.className = 'status-dot';
+    label.textContent = 'CLOSED (readyState: 3)';
+  }
+}
+
+function simConnect() {
+  if (simConnected) { log0('Already connected', 'sys'); return; }
+  setStatus('connecting');
+  log0('→ new WebSocket("wss://demo.example.com/ws")', 'sys');
+  log0('→ TCP handshake initiating...', 'sys');
+  setTimeout(() => {
+    log0('→ HTTP Upgrade request sent', 'sys');
+    log0('  GET /ws HTTP/1.1', 'sys');
+    log0('  Upgrade: websocket', 'sys');
+    log0('  Sec-WebSocket-Key: xHxDl2Iq3...', 'sys');
+  }, 300);
+  setTimeout(() => {
+    log0('← 101 Switching Protocols', 'sys');
+    log0('← Sec-WebSocket-Accept: validated ✓', 'sys');
+    simConnected = true;
+    setStatus('connected');
+    log0('✅ onopen fired — readyState: OPEN', 'recv');
+    log0('← recv: {"type":"connected","id":"ws_abc123"}', 'recv');
+    // Simulate server pings
+    simTimer = setInterval(() => {
+      if (simConnected) log0('← recv: {"type":"ping"} (server heartbeat)', 'sys');
+    }, 8000);
+  }, 900);
+}
+
+function simSend() {
+  if (!simConnected) { log0('❌ Error: readyState is not OPEN', 'err'); return; }
+  log0('→ send: "ping"', 'sent');
+  setTimeout(() => log0('← recv: "pong" (echo)', 'recv'), 80);
+}
+
+function simSendCustom() {
+  const val = document.getElementById('simMsgInput').value.trim();
+  if (!val) return;
+  if (!simConnected) { log0('❌ Error: WebSocket not open', 'err'); return; }
+  log0(`→ send: ${val}`, 'sent');
+  setTimeout(() => log0(`← recv: echo: ${val}`, 'recv'), 80);
+  document.getElementById('simMsgInput').value = '';
+}
+
+function simClose() {
+  if (!simConnected) { log0('Already closed', 'sys'); return; }
+  log0('→ ws.close(1000, "Normal closure")', 'sent');
+  log0('→ Sending close frame...', 'sys');
+  setTimeout(() => {
+    clearInterval(simTimer);
+    simConnected = false;
+    setStatus('closed');
+    log0('← Close frame received from server', 'sys');
+    log0('✅ onclose fired — code: 1000, wasClean: true', 'recv');
+  }, 200);
+}
+
+// ===== RECONNECT SIMULATOR =====
+let reconnectSimRunning = false;
+
+function startReconnectSim() {
+  if (reconnectSimRunning) return;
+  reconnectSimRunning = true;
+  const container = document.getElementById('reconnectSteps');
+  container.innerHTML = '';
+  
+  const attempts = [
+    { delay: 0, result: 'drop', label: 'Connection dropped (code 1006)' },
+    { delay: 1000, result: 'fail', label: 'Attempt 1 — retry in 1s' },
+    { delay: 2000, result: 'fail', label: 'Attempt 2 — retry in 2s' },
+    { delay: 4000, result: 'fail', label: 'Attempt 3 — retry in 4s' },
+    { delay: 8000, result: 'fail', label: 'Attempt 4 — retry in 7.8s (jitter)' },
+    { delay: 16000, result: 'success', label: 'Attempt 5 — Connected! Reset counter.' },
+  ];
+
+  let cumDelay = 0;
+  attempts.forEach((a, i) => {
+    cumDelay += i === 0 ? 0 : a.delay / 8;
+    setTimeout(() => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px;font-family:JetBrains Mono,monospace;';
+      const color = a.result === 'success' ? 'var(--accent3)' : a.result === 'drop' ? 'var(--danger)' : 'var(--warn)';
+      const icon = a.result === 'success' ? '✅' : a.result === 'drop' ? '❌' : '⏳';
+      row.innerHTML = `<span style="color:${color}">${icon}</span><span style="color:var(--text2)">${a.label}</span>`;
+      
+      if (a.result !== 'drop') {
+        const bar = document.createElement('div');
+        bar.style.cssText = 'flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;';
+        const fill = document.createElement('div');
+        fill.style.cssText = `height:100%;background:${color};border-radius:2px;width:0%;transition:width ${a.delay/8000}s linear;`;
+        bar.appendChild(fill);
+        row.appendChild(bar);
+        container.appendChild(row);
+        setTimeout(() => fill.style.width = '100%', 50);
+      } else {
+        container.appendChild(row);
+      }
+      
+      if (a.result === 'success') reconnectSimRunning = false;
+    }, cumDelay * 1000);
+  });
+}
+
+function resetReconnectSim() {
+  reconnectSimRunning = false;
+  document.getElementById('reconnectSteps').innerHTML = '';
+}
+
+// ===== CHAT SIMULATOR =====
+let currentRoom = 'general';
+const rooms = { general: [], engineering: [], random: [] };
+const users = ['Alice', 'Bob', 'You'];
+
+const roomMessages = {
+  general: [
+    {sender:'Alice',text:'hey everyone 👋'},
+    {sender:'Bob',text:'what\'s up!'},
+  ],
+  engineering: [
+    {sender:'Alice',text:'anyone seen the new WS spec?'},
+  ],
+  random: [
+    {sender:'Bob',text:'lol this simulator is fire'},
+  ]
+};
+
+function renderChat() {
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML = '';
+  (roomMessages[currentRoom] || []).forEach(m => {
+    const div = document.createElement('div');
+    div.className = `msg ${m.sender.toLowerCase() === 'alice' ? 'alice' : m.sender.toLowerCase() === 'bob' ? 'bob' : ''}`;
+    div.innerHTML = `<span class="sender">${m.sender}:</span> ${m.text}`;
+    msgs.appendChild(div);
+  });
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function renderPresence() {
+  const list = document.getElementById('presenceList');
+  list.innerHTML = '';
+  users.forEach(u => {
+    const b = document.createElement('div');
+    b.className = 'presence-badge active';
+    b.innerHTML = `<div class="dot"></div>${u}`;
+    list.appendChild(b);
+  });
+}
+
+function switchRoom(room, btn) {
+  currentRoom = room;
+  document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('currentRoomLabel').textContent = room;
+  renderChat();
+}
+
+function sendChatMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  if (!roomMessages[currentRoom]) roomMessages[currentRoom] = [];
+  roomMessages[currentRoom].push({ sender: 'You', text });
+  input.value = '';
+  renderChat();
+  
+  // Simulate a response
+  const responses = ['nice!','got it','👍','makes sense','agreed!','interesting...'];
+  const repliers = ['Alice','Bob'];
+  setTimeout(() => {
+    roomMessages[currentRoom].push({
+      sender: repliers[Math.floor(Math.random()*2)],
+      text: responses[Math.floor(Math.random()*responses.length)]
+    });
+    renderChat();
+  }, 600 + Math.random()*800);
+}
+
+renderChat();
+renderPresence();
+
+// ===== RATE LIMIT SIM =====
+let rateSimInterval;
+let rateTokens = 20;
+let rateSent = 0;
+let rateBlocked = 0;
+const RATE_CAP = 20;
+const RATE_REFILL = 5;
+let rateLastRefill = Date.now();
+
+function updateRateUI() {
+  const pct = (rateTokens / RATE_CAP) * 100;
+  const fill = document.getElementById('rateFill');
+  fill.style.width = pct + '%';
+  fill.className = 'rate-fill' + (pct < 25 ? ' danger' : pct < 50 ? ' warn' : '');
+  document.getElementById('rateVal').textContent = Math.floor(rateTokens) + '/' + RATE_CAP;
+  
+  const maxOp = Math.max(rateSent, 1);
+  document.getElementById('sentFill').style.width = Math.min((rateSent/100)*100, 100) + '%';
+  document.getElementById('sentVal').textContent = rateSent;
+  document.getElementById('blockedFill').style.width = Math.min((rateBlocked/100)*100, 100) + '%';
+  document.getElementById('blockedVal').textContent = rateBlocked;
+}
+
+function startRateSim(msgPerSec) {
+  stopRateSim();
+  const interval = 1000 / msgPerSec;
+  
+  rateSimInterval = setInterval(() => {
+    // Refill
+    const now = Date.now();
+    const elapsed = (now - rateLastRefill) / 1000;
+    rateTokens = Math.min(RATE_CAP, rateTokens + elapsed * RATE_REFILL);
+    rateLastRefill = now;
+    
+    // Consume
+    if (rateTokens >= 1) {
+      rateTokens -= 1;
+      rateSent++;
+    } else {
+      rateBlocked++;
+    }
+    updateRateUI();
+  }, interval);
+}
+
+function stopRateSim() {
+  clearInterval(rateSimInterval);
+  rateTokens = 20; rateSent = 0; rateBlocked = 0;
+  rateLastRefill = Date.now();
+  updateRateUI();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本語マスター - Kana Mastery Course</title>
+<style>
+:root{--bg:#f8f9fa;--bg2:#ffffff;--text:#1a1a2e;--text2:#4a4a6a;--primary:#6366f1;--primary2:#818cf8;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--border:#e2e8f0;--shadow:0 4px 6px -1px rgba(0,0,0,0.1);--radius:12px;--transition:all 0.3s ease}
+[data-theme="dark"]{--bg:#0f172a;--bg2:#1e293b;--text:#f1f5f9;--text2:#94a3b8;--primary:#818cf8;--primary2:#a5b4fc;--border:#334155;--shadow:0 4px 6px -1px rgba(0,0,0,0.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Hiragino Sans','Meiryo',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:var(--transition)}
+.app{max-width:1200px;margin:0 auto;padding:20px;min-height:100vh}
+nav{background:var(--bg2);border-radius:var(--radius);padding:12px 20px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:var(--shadow);position:sticky;top:0;z-index:100}
+nav a{padding:8px 16px;border-radius:8px;cursor:pointer;text-decoration:none;color:var(--text2);font-weight:500;transition:var(--transition);border:none;background:none;font-size:14px}
+nav a:hover,nav a.active{background:var(--primary);color:#fff}
+.theme-toggle{margin-left:auto;padding:8px 12px;border-radius:8px;cursor:pointer;background:var(--bg);border:1px solid var(--border);color:var(--text);font-size:16px}
+.section{display:none;animation:fadeIn 0.3s ease}
+.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:2.5rem;margin-bottom:16px;background:linear-gradient(135deg,var(--primary),var(--primary2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-size:1.8rem;margin-bottom:12px;color:var(--text)}
+h3{font-size:1.3rem;margin-bottom:8px;color:var(--text2)}
+.card{background:var(--bg2);border-radius:var(--radius);padding:24px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.btn{padding:12px 24px;border-radius:8px;border:none;cursor:pointer;font-weight:600;transition:var(--transition);font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary2);transform:translateY(-2px)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warning{background:var(--warning);color:#fff}
+.btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+.btn-outline:hover{background:var(--primary);color:#fff}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+.grid{display:grid;gap:16px}
+.grid-2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.grid-3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.grid-4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.grid-5{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.flashcard{perspective:1000px;height:240px;cursor:pointer}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform 0.6s;transform-style:preserve-3d}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;backface-visibility:hidden;border-radius:var(--radius);display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg2);box-shadow:var(--shadow);border:2px solid var(--border)}
+.flashcard-back{transform:rotateY(180deg)}
+.flashcard-char{font-size:6rem;font-weight:bold;color:var(--primary)}
+.flashcard-read{font-size:2rem;color:var(--text2);margin-top:8px}
+.flashcard-romaji{font-size:1.5rem;color:var(--text2);margin-top:4px}
+.progress-bar{height:12px;background:var(--bg);border-radius:6px;overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary2));transition:width 0.5s ease;border-radius:6px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+.stat-card{background:var(--bg);padding:16px;border-radius:8px;text-align:center}
+.stat-value{font-size:2rem;font-weight:bold;color:var(--primary)}
+.stat-label{font-size:0.85rem;color:var(--text2);margin-top:4px}
+.passage{font-size:1.2rem;line-height:2;padding:20px;background:var(--bg);border-radius:8px;border-left:4px solid var(--primary);margin-bottom:12px}
+.passage-sentence{display:inline;margin:0 4px}
+.romaji-text{color:var(--text2);font-size:0.9em;display:none}
+.romaji-text.visible{display:inline}
+.option-btn{width:100%;padding:16px;margin:8px 0;border:2px solid var(--border);border-radius:8px;background:var(--bg2);cursor:pointer;font-size:1.1rem;transition:var(--transition);text-align:left}
+.option-btn:hover{border-color:var(--primary);background:var(--bg)}
+.option-btn.correct{border-color:var(--success);background:#ecfdf5;color:#059669}
+.option-btn.wrong{border-color:var(--danger);background:#fef2f2;color:#dc2626}
+.timer{font-size:2rem;font-weight:bold;color:var(--danger);text-align:center;margin:12px 0}
+.input-answer{padding:12px 16px;font-size:1.2rem;border:2px solid var(--border);border-radius:8px;width:100%;max-width:300px;background:var(--bg2);color:var(--text);transition:var(--transition)}
+.input-answer:focus{outline:none;border-color:var(--primary)}
+.input-answer.correct{border-color:var(--success);background:#ecfdf5}
+.input-answer.wrong{border-color:var(--danger);background:#fef2f2}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:600;margin:2px}
+.badge-success{background:#ecfdf5;color:#059669}
+.badge-warning{background:#fef3c7;color:#92400e}
+.badge-danger{background:#fef2f2;color:#dc2626}
+.badge-primary{background:#eef2ff;color:#4338ca}
+.kana-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:8px}
+.kana-cell{background:var(--bg);padding:12px;border-radius:8px;text-align:center;cursor:pointer;transition:var(--transition);border:2px solid transparent}
+.kana-cell:hover{border-color:var(--primary);transform:scale(1.05)}
+.kana-cell.mastered{border-color:var(--success);background:#ecfdf5}
+.kana-cell.learning{border-color:var(--warning);background:#fef3c7}
+.kana-cell.unseen{opacity:0.6}
+.kana-char{font-size:1.5rem;font-weight:bold}
+.kana-roma{font-size:0.75rem;color:var(--text2);margin-top:4px}
+.result-screen{text-align:center;padding:40px 20px}
+.result-score{font-size:4rem;font-weight:bold;color:var(--primary);margin:20px 0}
+.result-message{font-size:1.5rem;color:var(--text2);margin-bottom:24px}
+.lesson-card{cursor:pointer;transition:var(--transition)}
+.lesson-card:hover{transform:translateY(-4px);box-shadow:0 10px 15px -3px rgba(0,0,0,0.1)}
+.locked{opacity:0.5;pointer-events:none;filter:grayscale(0.5)}
+.comprehension-q{margin:16px 0;padding:16px;background:var(--bg);border-radius:8px}
+.comprehension-q p{margin-bottom:12px;font-weight:600}
+.flex{display:flex}.flex-wrap{flex-wrap:wrap}.gap-2{gap:8px}.gap-4{gap:16px}.items-center{align-items:center}.justify-between{justify-content:space-between}.justify-center{justify-content:center}
+.mb-1{margin-bottom:8px}.mb-2{margin-bottom:16px}.mb-3{margin-bottom:24px}.mb-4{margin-bottom:32px}
+.mt-1{margin-top:8px}.mt-2{margin-top:16px}.mt-3{margin-top:24px}
+.text-center{text-align:center}.text-sm{font-size:0.875rem}.text-lg{font-size:1.125rem}.text-xl{font-size:1.25rem}
+.hidden{display:none!important}
+.w-full{width:100%}
+select{padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:14px}
+.tooltip{position:relative}.tooltip::after{content:attr(data-tip);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:4px 8px;border-radius:4px;font-size:12px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.tooltip:hover::after{opacity:1}
+.kana-row{display:flex;gap:4px;margin-bottom:4px}
+.kana-box{width:60px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);border-radius:8px;border:1px solid var(--border);font-size:1.3rem;font-weight:bold;transition:var(--transition)}
+.kana-box .roma{font-size:0.65rem;color:var(--text2);font-weight:400}
+@media(max-width:768px){h1{font-size:1.8rem}.flashcard{height:200px}.flashcard-char{font-size:4rem}nav{padding:8px 12px}nav a{padding:6px 10px;font-size:12px}.grid-5{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}}
+</style>
+</head>
+<body>
+<div class="app">
+<nav id="mainNav">
+  <a href="#" data-nav="home">🏠 Home</a>
+  <a href="#" data-nav="lessons">📚 Lessons</a>
+  <a href="#" data-nav="flashcards">🃏 Flashcards</a>
+  <a href="#" data-nav="drills">✏️ Drills</a>
+  <a href="#" data-nav="passages">📖 Passages</a>
+  <a href="#" data-nav="review">🔄 Review</a>
+  <a href="#" data-nav="progress">📊 Progress</a>
+  <a href="#" data-nav="finaltest">🎯 Final Test</a>
+  <button class="theme-toggle" id="themeToggle">🌓</button>
+</nav>
+
+<div id="home" class="section active">
+  <div class="card">
+    <h1>日本語マスター</h1>
+    <p class="text-xl mb-2">Master Japanese Hiragana and Katakana through interactive lessons, flashcards, drills, and extensive passage reading.</p>
+    <div class="grid grid-2 mb-3">
+      <div class="card lesson-card" onclick="navigateTo('lessons')">
+        <h3>📚 Lesson Flow</h3>
+        <p>Structured progression from basic kana to advanced passage reading</p>
+      </div>
+      <div class="card lesson-card" onclick="navigateTo('flashcards')">
+        <h3>🃏 Flashcards</h3>
+        <p>Character recognition with flip animations and keyboard support</p>
+      </div>
+      <div class="card lesson-card" onclick="navigateTo('drills')">
+        <h3>✏️ Drill Modes</h3>
+        <p>Multiple choice, typing, timed challenges, and hidden recall</p>
+      </div>
+      <div class="card lesson-card" onclick="navigateTo('passages')">
+        <h3>📖 Passage Reading</h3>
+        <p>30+ passages of increasing length and complexity</p>
+      </div>
+      <div class="card lesson-card" onclick="navigateTo('review')">
+        <h3>🔄 Spaced Review</h3>
+        <p>Adaptive review focusing on your weak characters</p>
+      </div>
+      <div class="card lesson-card" onclick="navigateTo('finaltest')">
+        <h3>🎯 Final Test</h3>
+        <p>Comprehensive assessment to verify mastery</p>
+      </div>
+    </div>
+    <div id="homeStats"></div>
+  </div>
+</div>
+
+<div id="lessons" class="section">
+  <h1>📚 Lesson Flow</h1>
+  <div id="lessonIntro" class="mb-3">
+    <p class="mb-2">Complete lessons in order. Each section unlocks after mastery.</p>
+  </div>
+  <div id="lessonList"></div>
+  <div id="lessonArea" class="hidden">
+    <div class="card" id="lessonCard"></div>
+    <div class="flex justify-between mt-2">
+      <button class="btn btn-danger" onclick="exitLesson()">Exit Lesson</button>
+    </div>
+  </div>
+</div>
+
+<div id="flashcards" class="section">
+  <h1>🃏 Flashcards</h1>
+  <div class="card mb-2">
+    <div class="flex gap-2 mb-2">
+      <select id="fcSet"><option value="hiragana">Hiragana</option><option value="katakana">Katakana</option><option value="extensions">Extensions</option><option value="all">All Characters</option></select>
+      <select id="fcMode"><option value="char2read">Character → Reading</option><option value="read2char">Reading → Character</option></select>
+      <label class="flex items-center gap-2"><input type="checkbox" id="fcRomaji" checked> Show Romaji</label>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="fcProgress" style="width:0%"></div></div>
+    <div class="text-center mt-2"><span id="fcCounter">0/0</span></div>
+  </div>
+  <div id="flashcardContainer"></div>
+  <div class="flex justify-between mt-2">
+    <button class="btn btn-outline" id="fcPrev">← Previous</button>
+    <button class="btn btn-primary" id="fcNext">Next →</button>
+  </div>
+  <p class="text-sm text-center mt-2">Press Space/Enter to flip, ← → to navigate</p>
+</div>
+
+<div id="drills" class="section">
+  <h1>✏️ Drill Modes</h1>
+  <div class="grid grid-2 mb-3">
+    <div class="card lesson-card" onclick="startDrill('mc')">
+      <h3>Multiple Choice</h3>
+      <p>Choose the correct reading</p>
+    </div>
+    <div class="card lesson-card" onclick="startDrill('sound2char')">
+      <h3>Sound → Character</h3>
+      <p>Match romaji to kana</p>
+    </div>
+    <div class="card lesson-card" onclick="startDrill('typing')">
+      <h3>Typing Input</h3>
+      <p>Type the romaji for each kana</p>
+    </div>
+    <div class="card lesson-card" onclick="startDrill('timed')">
+      <h3>Timed Challenge</h3>
+      <p>How many in 60 seconds?</p>
+    </div>
+    <div class="card lesson-card" onclick="startDrill('mixed')">
+      <h3>Mixed Review</h3>
+      <p>Random character types</p>
+    </div>
+    <div class="card lesson-card" onclick="startDrill('hidden')">
+      <h3>Hidden Recall</h3>
+      <p>Reveal answer only when ready</p>
+    </div>
+  </div>
+  <div id="drillArea" class="hidden">
+    <div class="card" id="drillCard"></div>
+    <div class="flex justify-between mt-2">
+      <button class="btn btn-outline" id="drillSkip">Skip</button>
+      <button class="btn btn-primary" id="drillSubmit">Check</button>
+      <button class="btn btn-danger" id="drillExit">Exit</button>
+    </div>
+    <div id="drillResult"></div>
+  </div>
+</div>
+
+<div id="passages" class="section">
+  <h1>📖 Passage Reading Mode</h1>
+  <div class="card mb-2">
+    <div class="flex gap-2 mb-2 flex-wrap">
+      <select id="passType"><option value="all">All Passages</option><option value="hiragana">Hiragana Only</option><option value="katakana">Katakana Only</option><option value="mixed">Mixed Script</option></select>
+      <select id="passDiff"><option value="all">All Levels</option><option value="1">Beginner</option><option value="2">Intermediate</option><option value="3">Advanced</option></select>
+      <label class="flex items-center gap-2"><input type="checkbox" id="passRomaji"> Show Romaji</label>
+      <label class="flex items-center gap-2"><input type="checkbox" id="passTimer"> Timed Challenge</label>
+    </div>
+    <div class="flex gap-2 mb-2">
+      <button class="btn btn-primary" id="passPrev">← Previous</button>
+      <span id="passCounter" class="flex items-center">1/30</span>
+      <button class="btn btn-primary" id="passNext">Next →</button>
+    </div>
+    <div id="passTimerDisplay" class="timer hidden">00:00</div>
+    <div id="passComprehension" class="hidden"></div>
+  </div>
+  <div id="passageDisplay" class="card"></div>
+  <div id="passageReplay" class="hidden">
+    <div class="card text-center">
+      <h3>🔄 Passage Replay</h3>
+      <p class="mb-2">Read through again without help</p>
+      <button class="btn btn-primary" id="passReplayBtn">Start Replay</button>
+    </div>
+  </div>
+</div>
+
+<div id="review" class="section">
+  <h1>🔄 Review Mode</h1>
+  <div id="reviewIntro" class="card">
+    <h3>Spaced Repetition Review</h3>
+    <p class="mb-2">Focus on your weakest characters. The more you miss, the more you'll see them.</p>
+    <div id="reviewStats"></div>
+    <button class="btn btn-primary mt-2" id="startReview">Start Review Session</button>
+  </div>
+  <div id="reviewArea" class="hidden">
+    <div class="card" id="reviewCard"></div>
+    <div class="flex justify-between mt-2">
+      <button class="btn btn-outline" id="reviewAgain">Again</button>
+      <button class="btn btn-warning" id="reviewHard">Hard</button>
+      <button class="btn btn-success" id="reviewGood">Good</button>
+      <button class="btn btn-primary" id="reviewEasy">Easy</button>
+    </div>
+    <div class="progress-bar mt-2"><div class="progress-fill" id="reviewProgress" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div id="progress" class="section">
+  <h1>📊 Progress Dashboard</h1>
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>Overall Statistics</h3>
+      <div id="overallStats"></div>
+    </div>
+    <div class="card">
+      <h3>Section Mastery</h3>
+      <div id="sectionMastery"></div>
+    </div>
+    <div class="card">
+      <h3>Weak Characters</h3>
+      <div id="weakChars"></div>
+    </div>
+    <div class="card">
+      <h3>Study History</h3>
+      <div id="studyHistory"></div>
+    </div>
+  </div>
+  <div class="card mt-3">
+    <h3>Character Heatmap</h3>
+    <div id="charHeatmap"></div>
+  </div>
+  <div class="card mt-3">
+    <button class="btn btn-danger" id="resetBtn">🗑️ Reset All Progress</button>
+  </div>
+</div>
+
+<div id="finaltest" class="section">
+  <h1>🎯 Final Test</h1>
+  <div id="testIntro" class="card">
+    <h3>Comprehensive Mastery Assessment</h3>
+    <p class="mb-2">This test covers all hiragana, katakana, extensions, and passage reading. You must achieve 90% accuracy to pass.</p>
+    <div class="mb-2">
+      <p>• 50 character recognition questions</p>
+      <p>• 20 katakana extension questions</p>
+      <p>• 10 typing questions</p>
+      <p>• 5 passage comprehension questions</p>
+    </div>
+    <button class="btn btn-primary" id="startTest">Start Final Test</button>
+  </div>
+  <div id="testArea" class="hidden">
+    <div class="card" id="testQuestion"></div>
+    <div class="flex justify-between mt-2">
+      <span id="testProgress">Question 1/85</span>
+      <button class="btn btn-primary" id="testSubmit">Submit</button>
+    </div>
+  </div>
+  <div id="testResult" class="hidden"></div>
+</div>
+
+<div id="reset" class="section">
+  <div class="card text-center">
+    <h2>⚠️ Reset Progress</h2>
+    <p class="mb-3">This will erase ALL progress, scores, and statistics. This cannot be undone.</p>
+    <button class="btn btn-danger" id="confirmReset">Yes, Reset Everything</button>
+    <button class="btn btn-outline mt-2" onclick="navigateTo('home')">Cancel</button>
+  </div>
+</div>
+</div>
+
+<script>
+const APP_DATA = {
+  hiragana: {
+    basic: [
+      ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],
+      ['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
+      ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],
+      ['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
+      ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],
+      ['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
+      ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],
+      ['や','ya'],['ゆ','yu'],['よ','yo'],
+      ['ら','ra'],['り','ri'],['る','ru'],['れ','re'],['ろ','ro'],
+      ['わ','wa'],['を','wo'],['ん','n']
+    ],
+    dakuten: [
+      ['が','ga'],['ぎ','gi'],['ぐ','gu'],['げ','ge'],['ご','go'],
+      ['ざ','za'],['じ','ji'],['ず','zu'],['ぜ','ze'],['ぞ','zo'],
+      ['だ','da'],['ぢ','di'],['づ','du'],['で','de'],['ど','do'],
+      ['ば','ba'],['び','bi'],['ぶ','bu'],['べ','be'],['ぼ','bo'],
+      ['ぱ','pa'],['ぴ','pi'],['ぷ','pu'],['ぺ','pe'],['ぽ','po']
+    ],
+    combos: [
+      ['きゃ','kya'],['きゅ','kyu'],['きょ','kyo'],
+      ['しゃ','sha'],['しゅ','shu'],['しょ','sho'],
+      ['ちゃ','cha'],['ちゅ','chu'],['ちょ','cho'],
+      ['にゃ','nya'],['にゅ','nyu'],['にょ','nyo'],
+      ['ひゃ','hya'],['ひゅ','hyu'],['ひょ','hyo'],
+      ['みゃ','mya'],['みゅ','myu'],['みょ','myo'],
+      ['りゃ','rya'],['りゅ','ryu'],['りょ','ryo'],
+      ['ぎゃ','gya'],['ぎゅ','gyu'],['ぎょ','gyo'],
+      ['じゃ','ja'],['じゅ','ju'],['じょ','jo'],
+      ['びゃ','bya'],['びゅ','byu'],['びょ','byo'],
+      ['ぴゃ','pya'],['ぴゅ','pyu'],['ぴょ','pyo']
+    ]
+  },
+  katakana: {
+    basic: [
+      ['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],
+      ['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],
+      ['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],
+      ['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],
+      ['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],
+      ['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],
+      ['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],
+      ['ヤ','ya'],['ユ','yu'],['ヨ','yo'],
+      ['ラ','ra'],['リ','ri'],['ル','ru'],['レ','re'],['ロ','ro'],
+      ['ワ','wa'],['ヲ','wo'],['ン','n']
+    ],
+    dakuten: [
+      ['ガ','ga'],['ギ','gi'],['グ','gu'],['ゲ','ge'],['ゴ','go'],
+      ['ザ','za'],['ジ','ji'],['ズ','zu'],['ゼ','ze'],['ゾ','zo'],
+      ['ダ','da'],['ヂ','di'],['ヅ','du'],['デ','de'],['ド','do'],
+      ['バ','ba'],['ビ','bi'],['ブ','bu'],['ベ','be'],['ボ','bo'],
+      ['パ','pa'],['ピ','pi'],['プ','pu'],['ペ','pe'],['ポ','po']
+    ],
+    combos: [
+      ['キャ','kya'],['キュ','kyu'],['キョ','kyo'],
+      ['シャ','sha'],['シュ','shu'],['ショ','sho'],
+      ['チャ','cha'],['チュ','chu'],['チョ','cho'],
+      ['ニャ','nya'],['ニュ','nyu'],['ニョ','nyo'],
+      ['ヒャ','hya'],['ヒュ','hyu'],['ヒョ','hyo'],
+      ['ミャ','mya'],['ミュ','myu'],['ミョ','myo'],
+      ['リャ','rya'],['リュ','ryu'],['リョ','ryo'],
+      ['ギャ','gya'],['ギュ','gyu'],['ギョ','gyo'],
+      ['ジャ','ja'],['ジュ','ju'],['ジョ','jo'],
+      ['ビャ','bya'],['ビュ','byu'],['ビョ','byo'],
+      ['ピャ','pya'],['ピュ','pyu'],['ピョ','pyo']
+    ],
+    extensions: [
+      ['ツァ','tsa'],['ファ','fa'],['ウィ','wi'],['ティ','ti'],['フィ','fi'],
+      ['ディ','di'],['トゥ','tu'],['ドゥ','du'],['デュ','dyu'],['ウェ','we'],
+      ['シェ','she'],['チェ','che'],['ツェ','tse'],['フェ','fe'],['ジェ','je'],
+      ['ウォ','wo'],['ツォ','tso'],['フォ','fo'],
+      ['ツィ','tsi'],['ヴィ','vi'],['ヴェ','ve'],['ヴォ','vo']
+    ]
+  }
+};
+
+const PASSAGES = [
+  {id:1,type:'hiragana',diff:1,title:'あさの ひととき',
+   text:'いちにち が はじまります。ひが のぼります。とり が なきます。わたし は かいだん を おります。きょうも あたらしい ひ です。くうき が すんでいます。こえ が きこえます。',
+   sentences:5,
+   q:'What time of day is described?',opts:['Morning','Evening','Night'],ans:0},
+  {id:2,type:'hiragana',diff:1,title:'どうぶつの せかい',
+   text:'ねこ が ねています。いぬ が はしります。うま が あるきます。さる が きの うえ に います。うさぎ が にんじん を たべます。',
+   sentences:5,
+   q:'What is the rabbit eating?',opts:['Apple','Carrot','Fish'],ans:1},
+  {id:3,type:'hiragana',diff:1,title:'しぜんの ちから',
+   text:'やま の うえ から かわ が みえます。みず は きれい です。さかな が およいで います。ことり が うたいます。かぜ が ふきます。',
+   sentences:5,
+   q:'What can be seen from the mountain?',opts:['A city','A river','A train'],ans:1},
+  {id:4,type:'hiragana',diff:2,title:'まちの いちにち',
+   text:'まち は とても にぎやか です。ひと が たくさん います。じてんしゃ と くるま が とおります。みせ の まえ で こども が わらっています。おとが きこえて きます。',
+   sentences:5,
+   q:'How is the city described?',opts:['Quiet','Busy','Empty'],ans:1},
+  {id:5,type:'hiragana',diff:2,title:'ともだちとの やくそく',
+   text:'きょうは ともだち と あいます。こうえん で まちます。ボール で あそびます。そのあと で ほん を よみます。たのしい ひ に なります。',
+   sentences:5,
+   q:'Where will they meet?',opts:['School','Park','Station'],ans:1},
+  {id:6,type:'hiragana',diff:2,title:'がっこうの ひ',
+   text:'せんせい が はなします。こども は ききます。こくばん に かきます。しつもん を します。じゅぎょう が おわります。みんな が うれしそうです。',
+   sentences:6,
+   q:'Who is speaking?',opts:['A student','A teacher','A parent'],ans:1},
+  {id:7,type:'hiragana',diff:2,title:'たべもの の はなし',
+   text:'わたし は ごはん を たべます。さかな と やさい が あります。みそしる も すき です。あとで おちゃ を のみます。とても おいしい です。',
+   sentences:5,
+   q:'What drink is mentioned?',opts:['Coffee','Juice','Tea'],ans:2},
+  {id:8,type:'hiragana',diff:3,title:'かぞくの ゆうがた',
+   text:'ゆうがた に かぞく が あつまります。おかあさん が りょうり を つくります。おとうさん は しんぶん を よみます。いもうと は え を かきます。わたし は おんがく を ききます。みんなで だんらん の じかん です。',
+   sentences:7,
+   q:'What is the younger sister doing?',opts:['Reading','Drawing','Cooking'],ans:1},
+  {id:9,type:'hiragana',diff:3,title:'ゆきの ひ',
+   text:'あさ おきると ゆき が ふっていました。まど の そと は まっしろ です。こどもたち が にわ で あそびます。ゆきだるま を つくります。とても さむい です が たのしい です。かえってから あたたかい ココア を のみます。',
+   sentences:6,
+   q:'What do they make in the yard?',opts:['A sandcastle','A snowman','A fire'],ans:1},
+  {id:10,type:'hiragana',diff:3,title:'としょかん',
+   text:'としょかん は しずか です。ほん が たくさん あります。わたし は まんが を よみます。となり の ひと も ほん を よんでいます。じかん を わすれます。ゆうがた に なります。また あした こよう と おもいます。',
+   sentences:7,
+   q:'What is the library like?',opts:['Loud','Quiet','Crowded'],ans:1},
+  {id:11,type:'katakana',diff:1,title:'スポーツ',
+   text:'サッカー は たのしい です。やきゅう も すき です。バスケットボール を みます。テニス を します。スポーツ は からだ に いい です。',
+   sentences:5,
+   q:'Which sport is mentioned first?',opts:['Baseball','Soccer','Basketball'],ans:1},
+  {id:12,type:'katakana',diff:1,title:'コンピュータ',
+   text:'コンピュータ は べんり です。インターネット で じょうほう を しらべます。メール を かきます。ゲーム も します。テクノロジー は すばらしい です。',
+   sentences:5,
+   q:'What do they do on the internet?',opts:['Watch movies','Search information','Shop'],ans:1},
+  {id:13,type:'katakana',diff:2,title:'レストラン',
+   text:'レストラン で ばんごはん を たべます。メニュー を みます。パスタ と サラダ を ちゅうもん します。ワイン も のみます。デザート は ケーキ です。おいしい です。',
+   sentences:6,
+   q:'What is for dessert?',opts:['Ice cream','Cake','Fruit'],ans:1},
+  {id:14,type:'katakana',diff:2,title:'ホテル',
+   text:'ホテル に とまります。ルーム は きれいです。ベッド で ねます。モーニングサービス があります。チェックアウト は じゅうじ です。また きたい です。',
+   sentences:5,
+   q:'When is checkout?',opts:['9 AM','10 AM','11 AM'],ans:1},
+  {id:15,type:'katakana',diff:2,title:'コンサート',
+   text:'コンサート に いきます。ギター と ピアノ の おと が します。シンガー の こえ が きれいです。みんな で うたいます。アンコール が はじまります。すばらしい よる です。',
+   sentences:6,
+   q:'What instruments are mentioned?',opts:['Guitar and piano','Drums and flute','Violin and cello'],ans:0},
+  {id:16,type:'katakana',diff:2,title:'カフェ',
+   text:'カフェ で ひるやすみ です。コーヒー を のみます。サンドイッチ を たべます。ほん を よみます。じかん が はやい です。リラックス できます。',
+   sentences:5,
+   q:'Where is the lunch break?',opts:['Restaurant','Cafe','Park'],ans:1},
+  {id:17,type:'katakana',diff:3,title:'ショッピング',
+   text:'デパート で かいもの を します。ふく を きます。かばん と くつ も みます。レジ で しはらいます。バッグ に いれます。たんじょうび の プレゼント です。とても たのしい です。',
+   sentences:7,
+   q:'What are they buying at the register?',opts:['Food','Clothes and accessories','Books'],ans:1},
+  {id:18,type:'katakana',diff:3,title:'カメラ',
+   text:'カメラ で しゃしん を とります。レンズ を とりかえます。シャッター を おします。フラッシュ が ひかります。メモリーカード に ほぞん します。あと で みます。いい しゃしん が とれました。',
+   sentences:6,
+   q:'Where are photos saved?',opts:['Phone','Memory card','Computer'],ans:1},
+  {id:19,type:'katakana',diff:3,title:'タクシー',
+   text:'タクシー を よびます。ドライバー が きます。ナビ で みち を しらべます。しんごう で とまります。うんちん を はらいます。ドア が あきます。ありがとう を いいます。',
+   sentences:7,
+   q:'How does the driver check the route?',opts:['Map','Navigation system','Phone'],ans:1},
+  {id:20,type:'mixed',diff:1,title:'わたしの いちにち',
+   text:'毎朝六時に起きます。朝ごはんを食べて、電車に乗ります。会社で仕事をします。昼ごはんは食堂で食べます。午後は会議があります。六時に帰ります。夜は本を読みます。',
+   sentences:7,
+   q:'Where do they eat lunch?',opts:['Restaurant','Cafeteria','Home'],ans:1},
+  {id:21,type:'mixed',diff:1,title:'りょこうの けいかく',
+   text:'来週京都に行きます。新幹線に乗ります。ホテルは駅の近くにあります。お寺と神社を見ます。着物も借ります。写真も撮ります。楽しみです。',
+   sentences:6,
+   q:'What transportation will they take?',opts:['Plane','Bus','Bullet train'],ans:2},
+  {id:22,type:'mixed',diff:2,title:'がっきの れんしゅう',
+   text:'ピアノのレッスンをしています。先生はとても優しいです。毎日練習します。難しい曲もあります。でも頑張ります。来月コンサートがあります。うまく弾けるように練習します。',
+   sentences:7,
+   q:'When is the concert?',opts:['Next week','Next month','Next year'],ans:1},
+  {id:23,type:'mixed',diff:2,title:'としょかんの ひ',
+   text:'今日は図書館で勉強します。静かな場所が好きです。歴史の本を読みます。ノートにメモを取ります。お茶を飲みます。友だちも来ました。一緒に勉強します。三時までいます。',
+   sentences:8,
+   q:'What subject book are they reading?',opts:['Science','History','Math'],ans:1},
+  {id:24,type:'mixed',diff:2,title:'スポーツクラブ',
+   text:'スポーツクラブに通っています。水泳とジムに行きます。コーチが教えてくれます。泳ぐのが好きです。走ると汗をかきます。シャワーを浴びます。体が軽くなります。健康に良いです。',
+   sentences:8,
+   q:'What activities are mentioned?',opts:['Swimming and gym','Tennis and running','Yoga and dance'],ans:0},
+  {id:25,type:'mixed',diff:2,title:'りょうりクラス',
+   text:'料理教室に参加しています。イタリア料理を習います。パスタの作り方を教わります。ソースも作ります。みんなで食べます。美味しいと言います。楽しかったです。来週も行きます。',
+   sentences:8,
+   q:'What cuisine are they learning?',opts:['Japanese','Italian','French'],ans:1},
+  {id:26,type:'mixed',diff:3,title:'はるの こうえん',
+   text:'春の公園は美しいです。桜が咲いています。ピンクの花びらが空から降ります。家族でピクニックをします。お弁当を食べます。子供たちはボールで遊びます。犬も走っています。写真を撮ります。春は最高の季節です。',
+   sentences:10,
+   q:'What is falling from the sky?',opts:['Rain','Snow','Pink petals'],ans:2},
+  {id:27,type:'mixed',diff:3,title:'なつの うみ',
+   text:'夏休みに海に行きました。青い空と青い海が広がっていました。砂浜で遊びました。スイカを食べました。波に乗りました。日焼けしました。アイスクリームも食べました。夕方になると空がオレンジ色になりました。素敵な一日でした。',
+   sentences:9,
+   q:'What color did the sky become in the evening?',opts:['Purple','Orange','Red'],ans:1},
+  {id:28,type:'mixed',diff:3,title:'あきの しゅうかく',
+   text:'秋は収穫の季節です。田んぼが金色になりました。農家が米を刈ります。りんごも取れます。ぶどうも甘くなります。市場に行きました。野菜を買いました。おいしい料理を作りました。秋の味覚は素晴らしいです。',
+   sentences:8,
+   q:'What color did the rice fields become?',opts:['Green','Golden','Brown'],ans:1},
+  {id:29,type:'mixed',diff:3,title:'ふゆの ゆきまつり',
+   text:'冬に雪まつりがあります。大きな雪像が作られます。ライトアップされます。夜は幻想的です。アイススケートもできます。ホットチョコレートを飲みます。寒いですけど楽しいです。毎年楽しみにしています。',
+   sentences:8,
+   q:'What can you do at the festival besides looking?',opts:['Ice skate','Swim','Ski'],ans:0},
+  {id:30,type:'mixed',diff:3,title:'まちの ともだち',
+   text:'外国人の友だちができました。日本語を教えます。英語も教わります。文化の違いに興味があります。お互いの国の話をします。一緒に映画を見ます。食事にも行きます。言葉の壁を越えて仲良くなりました。',
+   sentences:7,
+   q:'How did they become friends?',opts:['Through work','Crossing language barriers','Online'],ans:1},
+  {id:31,type:'mixed',diff:3,title:'でんしゃの たび',
+   text:'電車に乗って旅行しました。窓の外の景色がきれいでした。山が見えます。川も見えます。トンネルを抜けます。駅に着きました。荷物を持って降りました。知らない町でした。でもわくわくしました。',
+   sentences:8,
+   q:'How did they feel at the unknown town?',opts:['Scared','Excited','Bored'],ans:1},
+  {id:32,type:'mixed',diff:3,title:'としょかんの ほん',
+   text:'図書館で面白い本を見つけました。冒険の話です。主人公が海を渡ります。島にたどり着きます。宝を探します。危険もあります。でも勇敢です。最後まで読みました。続編も読みたいです。',
+   sentences:9,
+   q:'What is the protagonist searching for?',opts:['Love','Treasure','Food'],ans:1},
+  {id:33,type:'mixed',diff:3,title:'がっこうの えんそく',
+   text:'学校から遠足に行きました。山に登りました。頂上からの景色は最高でした。お弁当を食べました。クラスで写真を撮りました。帰りは疲れました。でも楽しかったです。次の遠足も待ち遠しいです。',
+   sentences:7,
+   q:'Where was the school trip?',opts:['Beach','Museum','Mountain'],ans:2},
+  {id:34,type:'mixed',diff:3,title:'おんがくの ちから',
+   text:'音楽には力があります。悲しい時に聞くと慰められます。嬉しい時にはもっと楽しくなります。楽器を弾くのも好きです。ピアノとギターを練習しています。いつか自分の曲を作りたいです。',
+   sentences:5,
+   q:'What instruments do they practice?',opts:['Piano and guitar','Violin and drums','Flute and sax'],ans:0},
+  {id:35,type:'mixed',diff:3,title:'まちの ながれ',
+   text:'この町は静かです。朝は鳥の声が聞こえます。昼は子供たちが遊びます。夕方はオレンジ色の空になります。夜は星が見えます。自然と調和しています。住みやすい町です。ずっとここにいたいと思います。',
+   sentences:6,
+   q:'What time can you hear birds?',opts:['Night','Morning','Afternoon'],ans:1},
+  {id:36,type:'mixed',diff:3,title:'パソコンの しごと',
+   text:'今日は一日パソコンで仕事をしました。メールを書いて、会議の準備をします。インターネットで情報を探します。とても忙しいです。夕方にコーヒーを飲んで休みます。画面を見ると目が疲れます。',
+   sentences:6,
+   q:'What do they drink in the evening?',opts:['Tea','Juice','Coffee'],ans:2},
+  {id:37,type:'mixed',diff:3,title:'デパートの セール',
+   text:'週末はデパートのセールに行きました。人がたくさんいました。カバンとシャツを買いました。レストランでランチを食べました。ケーキも注文しました。とてもお得でした。',
+   sentences:6,
+   q:'What did they order at the restaurant?',opts:['Pizza','Cake','Salad'],ans:1},
+  {id:38,type:'mixed',diff:3,title:'えいがかん',
+   text:'昨日は映画館でアクション映画を見ました。スクリーンが大きくて、音がすごかったです。ポップコーンを食べながら見ました。主人公はとても強かったです。感動しました。',
+   sentences:5,
+   q:'What kind of movie did they watch?',opts:['Comedy','Action','Horror'],ans:1},
+  {id:39,type:'mixed',diff:3,title:'みらいの ゆめ',
+   text:'私の夢はエンジニアになることです。新しいロボットを作りたいです。世界中の人を助けるロボットです。そのために一生懸命勉強しています。未来はきっと明るいです。',
+   sentences:5,
+   q:'What does the person want to become?',opts:['Doctor','Teacher','Engineer'],ans:2}
+];
+
+let state = {
+  currentSection: 'home',
+  progress: {},
+  flashcardIndex: 0,
+  flashcardSet: [],
+  drillMode: null,
+  drillIndex: 0,
+  drillCorrect: 0,
+  drillTotal: 0,
+  passIndex: 0,
+  passFiltered: [],
+  reviewQueue: [],
+  reviewIndex: 0,
+  testIndex: 0,
+  testCorrect: 0,
+  testTotal: 0,
+  timerInterval: null,
+  timerSeconds: 0
+};
+
+function loadProgress() {
+  try {
+    const d = localStorage.getItem('kanaMaster');
+    if (d) state.progress = JSON.parse(d);
+    if (!state.progress.mistakes) state.progress.mistakes = {};
+    if (!state.progress.accuracy) state.progress.accuracy = {};
+    if (!state.progress.completed) state.progress.completed = {};
+    if (!state.progress.streak) state.progress.streak = 0;
+    if (!state.progress.lastStudy) state.progress.lastStudy = null;
+  } catch(e) { state.progress = {mistakes:{},accuracy:{},completed:{},streak:0,lastStudy:null}; }
+}
+function saveProgress() { localStorage.setItem('kanaMaster', JSON.stringify(state.progress)); }
+
+function getAllKana() {
+  let arr = [];
+  arr = arr.concat(APP_DATA.hiragana.basic, APP_DATA.hiragana.dakuten, APP_DATA.hiragana.combos);
+  arr = arr.concat(APP_DATA.katakana.basic, APP_DATA.katakana.dakuten, APP_DATA.katakana.combos, APP_DATA.katakana.extensions);
+  return arr;
+}
+function getKanaByType(type) {
+  if (type==='hiragana') return [...APP_DATA.hiragana.basic,...APP_DATA.hiragana.dakuten,...APP_DATA.hiragana.combos];
+  if (type==='katakana') return [...APP_DATA.katakana.basic,...APP_DATA.katakana.dakuten,...APP_DATA.katakana.combos];
+  if (type==='extensions') return APP_DATA.katakana.extensions;
+  return getAllKana();
+}
+function shuffle(arr) { let a=[...arr]; for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+function navigateTo(section) {
+  state.currentSection = section;
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(section).classList.add('active');
+  document.querySelectorAll('nav a').forEach(a=>{
+    a.classList.toggle('active',a.dataset.nav===section);
+  });
+  if(section==='home') renderHome();
+  if(section==='lessons') renderLessons();
+  if(section==='flashcards') initFlashcards();
+  if(section==='passages') initPassages();
+  if(section==='review') initReview();
+  if(section==='progress') renderProgress();
+}
+
+function recordMistake(char) {
+  if(!state.progress.mistakes[char]) state.progress.mistakes[char]=0;
+  state.progress.mistakes[char]++;
+  saveProgress();
+}
+function recordCorrect(char) {
+  if(state.progress.mistakes[char]>0) state.progress.mistakes[char]--;
+  if(!state.progress.accuracy[char]) state.progress.accuracy[char]={c:0,t:0};
+  state.progress.accuracy[char].c++;
+  state.progress.accuracy[char].t++;
+  saveProgress();
+}
+function recordAttempt(char, correct) {
+  if(!state.progress.accuracy[char]) state.progress.accuracy[char]={c:0,t:0};
+  state.progress.accuracy[char].t++;
+  if(correct) state.progress.accuracy[char].c++;
+  else recordMistake(char);
+  saveProgress();
+}
+
+function renderHome() {
+  const s = state.progress;
+  const totalLessons = 5;
+  const completed = Object.keys(s.completed).length;
+  const pct = Math.round(completed/totalLessons*100);
+  document.getElementById('homeStats').innerHTML = `
+    <div class="card">
+      <h3>Your Progress</h3>
+      <div class="stats-grid mt-2">
+        <div class="stat-card"><div class="stat-value">${pct}%</div><div class="stat-label">Course Complete</div></div>
+        <div class="stat-card"><div class="stat-value">${s.streak||0}</div><div class="stat-label">Day Streak</div></div>
+        <div class="stat-card"><div class="stat-value">${completed}/${totalLessons}</div><div class="stat-label">Lessons Done</div></div>
+      </div>
+    </div>`;
+}
+
+function renderLessons() {
+  const lessons = [
+    {id:'hiragana',title:'Hiragana Basics',desc:'Learn all 46 basic hiragana characters',icon:'あ'},
+    {id:'hiragana_adv',title:'Hiragana Advanced',desc:'Dakuten and combo characters',icon:'が'},
+    {id:'katakana',title:'Katakana Basics',desc:'Learn all 46 basic katakana characters',icon:'ア'},
+    {id:'katakana_adv',title:'Katakana Advanced',desc:'Dakuten and combo characters',icon:'ガ'},
+    {id:'extensions',title:'Katakana Extensions',desc:'Loanword combinations: tsa, fa, wi, ti, etc.',icon:'ツァ'},
+    {id:'mixed_words',title:'Mixed Script Words',desc:'Read words mixing hiragana and katakana',icon:'日'},
+    {id:'passages',title:'Passage Reading',desc:'Read 35 passages of increasing difficulty',icon:'📖'}
+  ];
+  let html = '<div class="grid grid-2">';
+  lessons.forEach((l,i)=>{
+    const unlocked = i===0 || state.progress.completed[lessons[i-1].id];
+    const done = state.progress.completed[l.id];
+    html += `<div class="card lesson-card ${done?'badge-success':''} ${!unlocked?'locked':''}" onclick="${unlocked?`startLesson('${l.id}')`:''}">
+      <div class="flex items-center gap-4">
+        <span style="font-size:2rem">${l.icon}</span>
+        <div>
+          <h3>${l.title} ${done?'✅':''} ${!unlocked?'🔒':''}</h3>
+          <p class="text-sm">${l.desc}</p>
+        </div>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  document.getElementById('lessonList').innerHTML = html;
+}
+
+function startLesson(id) {
+  if(id==='hiragana' || id==='hiragana_adv') {
+    let set = id==='hiragana' ? APP_DATA.hiragana.basic : [...APP_DATA.hiragana.dakuten,...APP_DATA.hiragana.combos];
+    runKanaLesson(set, id, 'Hiragana');
+  } else if(id==='katakana' || id==='katakana_adv') {
+    let set = id==='katakana' ? APP_DATA.katakana.basic : [...APP_DATA.katakana.dakuten,...APP_DATA.katakana.combos];
+    runKanaLesson(set, id, 'Katakana');
+  } else if(id==='extensions') {
+    runKanaLesson(APP_DATA.katakana.extensions, id, 'Extensions');
+  } else {
+    state.progress.completed[id] = true;
+    saveProgress();
+    if(id === 'passages' || id === 'mixed_words') {
+      navigateTo('passages');
+    } else {
+      renderLessons();
+    }
+  }
+}
+
+function runKanaLesson(chars, lessonId, title) {
+  document.getElementById('lessonList').classList.add('hidden');
+  document.getElementById('lessonIntro').classList.add('hidden');
+  document.getElementById('lessonArea').classList.remove('hidden');
+  const idx = {val:0, correct:0};
+  function showChar() {
+    if(idx.val >= chars.length) {
+      const pct = chars.length > 0 ? idx.correct/chars.length : 0;
+      if(pct >= 0.9) { state.progress.completed[lessonId]=true; saveProgress(); }
+      document.getElementById('lessonCard').innerHTML = `<div class="result-screen">
+        <h2>Lesson Complete!</h2>
+        <div class="result-score">${idx.correct}/${chars.length}</div>
+        <div class="result-message">${pct>=0.9?'🎉 Mastery achieved!':'Keep practicing!'}</div>
+        <button class="btn btn-primary" onclick="exitLesson()">Back to Lessons</button>
+      </div>`;
+      return;
+    }
+    const [char, roma] = chars[idx.val];
+    document.getElementById('lessonCard').innerHTML = `
+      <div class="text-center">
+        <h3>${title} - ${idx.val+1}/${chars.length}</h3>
+        <div class="flashcard-char" style="font-size:5rem;margin:24px 0">${char}</div>
+        <p class="text-lg mb-2">What is the reading?</p>
+        <div class="grid grid-3" id="lessonOpts"></div>
+      </div>`;
+    let opts = [roma];
+    const all = getAllKana().map(x=>x[1]);
+    while(opts.length<3) { const r=all[Math.floor(Math.random()*all.length)]; if(!opts.includes(r)) opts.push(r); }
+    opts = shuffle(opts);
+    const container = document.getElementById('lessonOpts');
+    opts.forEach(o=>{
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = o;
+      btn.onclick = ()=>{
+        if(o===roma) { btn.classList.add('correct'); idx.correct++; recordCorrect(char); }
+        else { btn.classList.add('wrong'); recordAttempt(char,false); }
+        setTimeout(()=>{idx.val++; showChar();},600);
+      };
+      container.appendChild(btn);
+    });
+  }
+  showChar();
+}
+
+function exitLesson() {
+  document.getElementById('lessonArea').classList.add('hidden');
+  document.getElementById('lessonList').classList.remove('hidden');
+  document.getElementById('lessonIntro').classList.remove('hidden');
+  renderLessons();
+}
+
+function initFlashcards() {
+  const setType = document.getElementById('fcSet').value;
+  state.flashcardSet = shuffle(getKanaByType(setType));
+  state.flashcardIndex = 0;
+  renderFlashcard();
+}
+function renderFlashcard() {
+  const set = state.flashcardSet;
+  if(!set.length) return;
+  const idx = state.flashcardIndex % set.length;
+  const [char, roma] = set[idx];
+  const mode = document.getElementById('fcMode').value;
+  const showRomaji = document.getElementById('fcRomaji').checked;
+  document.getElementById('fcProgress').style.width = `${((idx+1)/set.length)*100}%`;
+  document.getElementById('fcCounter').textContent = `${idx+1}/${set.length}`;
+  const container = document.getElementById('flashcardContainer');
+  container.innerHTML = `<div class="flashcard" id="fcCard" onclick="this.classList.toggle('flipped')">
+    <div class="flashcard-inner">
+      <div class="flashcard-front">
+        ${mode==='char2read'?`<div class="flashcard-char">${char}</div><div class="flashcard-read">Tap to reveal</div>`:`<div class="flashcard-read" style="font-size:2.5rem">${roma}</div><div class="flashcard-read">Tap to reveal</div>`}
+      </div>
+      <div class="flashcard-back">
+        ${mode==='char2read'?`<div class="flashcard-read" style="font-size:2.5rem">${roma}</div>${showRomaji?`<div class="flashcard-romaji">${roma}</div>`:''}`:`<div class="flashcard-char">${char}</div><div class="flashcard-romaji">${roma}</div>`}
+      </div>
+    </div>
+  </div>`;
+}
+document.getElementById('fcSet').onchange = initFlashcards;
+document.getElementById('fcMode').onchange = ()=>{document.getElementById('fcCard').classList.remove('flipped');};
+document.getElementById('fcNext').onclick = ()=>{state.flashcardIndex++; renderFlashcard();};
+document.getElementById('fcPrev').onclick = ()=>{if(state.flashcardIndex>0){state.flashcardIndex--; renderFlashcard();}};
+document.addEventListener('keydown', e=>{
+  if(state.currentSection!=='flashcards') return;
+  if(e.code==='Space'||e.code==='Enter'){e.preventDefault();document.getElementById('fcCard')?.classList.toggle('flipped');}
+  if(e.code==='ArrowRight'){state.flashcardIndex++; renderFlashcard();}
+  if(e.code==='ArrowLeft'){if(state.flashcardIndex>0){state.flashcardIndex--; renderFlashcard();}}
+});
+
+function startDrill(mode) {
+  state.drillMode = mode;
+  state.drillIndex = 0;
+  state.drillCorrect = 0;
+  state.drillTotal = 0;
+  state.drillQuestions = generateDrillQuestions(mode);
+  document.getElementById('drillArea').classList.remove('hidden');
+  showDrillQuestion();
+}
+function generateDrillQuestions(mode) {
+  let qs = [];
+  const all = getAllKana();
+  for(let i=0;i<20;i++){
+    const [char,roma] = all[Math.floor(Math.random()*all.length)];
+    let opts = [roma];
+    while(opts.length<4){
+      const r = all[Math.floor(Math.random()*all.length)][1];
+      if(!opts.includes(r)) opts.push(r);
+    }
+    opts = shuffle(opts);
+    qs.push({char,roma,opts,ans:opts.indexOf(roma)});
+  }
+  return qs;
+}
+function showDrillQuestion() {
+  const qs = state.drillQuestions;
+  if(state.drillIndex >= qs.length) { showDrillResult(); return; }
+  const q = qs[state.drillIndex];
+  const area = document.getElementById('drillCard');
+  if(state.drillMode==='mc'||state.drillMode==='timed'){
+    area.innerHTML = `<div class="text-center">
+      <div class="flashcard-char">${q.char}</div>
+      <p class="text-lg mb-2">Choose the correct reading</p>
+      <div class="grid grid-2" id="drillOpts"></div>
+    </div>`;
+    const container = document.getElementById('drillOpts');
+    q.opts.forEach((o,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = o;
+      btn.onclick = ()=>checkDrillAnswer(i===q.ans, q.char);
+      container.appendChild(btn);
+    });
+    if(state.drillMode==='timed') startDrillTimer(60);
+  } else if(state.drillMode==='sound2char'){
+    area.innerHTML = `<div class="text-center">
+      <div class="flashcard-read" style="font-size:2.5rem">${q.roma}</div>
+      <p class="text-lg mb-2">Choose the correct character</p>
+      <div class="grid grid-2" id="drillOpts"></div>
+    </div>`;
+    const all = getAllKana();
+    let chars = [q.char];
+    while(chars.length<4){const c=all[Math.floor(Math.random()*all.length)][0];if(!chars.includes(c))chars.push(c);}
+    chars = shuffle(chars);
+    const container = document.getElementById('drillOpts');
+    chars.forEach(c=>{
+      const btn = document.createElement('button');
+      btn.className = 'option-btn text-center';
+      btn.textContent = c;
+      btn.onclick = ()=>checkDrillAnswer(c===q.char, q.char);
+      container.appendChild(btn);
+    });
+  } else if(state.drillMode==='typing'){
+    area.innerHTML = `<div class="text-center">
+      <div class="flashcard-char">${q.char}</div>
+      <p class="text-lg mb-2">Type the romaji</p>
+      <input type="text" class="input-answer" id="typingInput" placeholder="Type here..." autocomplete="off">
+    </div>`;
+    document.getElementById('typingInput').focus();
+  } else if(state.drillMode==='hidden'){
+    area.innerHTML = `<div class="text-center">
+      <div class="flashcard-char">${q.char}</div>
+      <p class="text-lg mb-2">Think of the answer, then reveal</p>
+      <button class="btn btn-primary mt-2" onclick="revealHidden()" id="revealBtn">Show Answer</button>
+      <div id="hiddenAnswer" class="hidden mt-2">
+        <div class="flashcard-read" style="font-size:2.5rem">${q.roma}</div>
+        <div class="flex justify-center gap-4 mt-2">
+          <button class="btn btn-danger" onclick="scoreHidden(false, '${q.char}')">Missed it</button>
+          <button class="btn btn-success" onclick="scoreHidden(true, '${q.char}')">Got it</button>
+        </div>
+      </div>
+    </div>`;
+  } else if(state.drillMode==='mixed'){
+    if(Math.random()>0.5){
+      area.innerHTML = `<div class="text-center">
+        <div class="flashcard-char">${q.char}</div>
+        <p class="text-lg mb-2">Choose the correct reading</p>
+        <div class="grid grid-2" id="drillOpts"></div>
+      </div>`;
+      const container = document.getElementById('drillOpts');
+      q.opts.forEach((o,i)=>{
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = o;
+        btn.onclick = ()=>checkDrillAnswer(i===q.ans, q.char);
+        container.appendChild(btn);
+      });
+    } else {
+      area.innerHTML = `<div class="text-center">
+        <div class="flashcard-read" style="font-size:2.5rem">${q.roma}</div>
+        <p class="text-lg mb-2">Choose the correct character</p>
+        <div class="grid grid-2" id="drillOpts"></div>
+      </div>`;
+      const all = getAllKana();
+      let chars = [q.char];
+      while(chars.length<4){const c=all[Math.floor(Math.random()*all.length)][0];if(!chars.includes(c))chars.push(c);}
+      chars = shuffle(chars);
+      const container = document.getElementById('drillOpts');
+      chars.forEach(c=>{
+        const btn = document.createElement('button');
+        btn.className = 'option-btn text-center';
+        btn.textContent = c;
+        btn.onclick = ()=>checkDrillAnswer(c===q.char, q.char);
+        container.appendChild(btn);
+      });
+    }
+  }
+}
+function checkDrillAnswer(correct, char) {
+  state.drillTotal++;
+  if(correct) state.drillCorrect++;
+  recordAttempt(char, correct);
+  if(state.drillMode==='typing'){
+    const input = document.getElementById('typingInput');
+    input.classList.add(correct?'correct':'wrong');
+  }
+  setTimeout(()=>{state.drillIndex++; showDrillQuestion();},400);
+}
+function revealHidden() {
+  document.getElementById('hiddenAnswer').classList.remove('hidden');
+  document.getElementById('revealBtn').classList.add('hidden');
+}
+function scoreHidden(correct, char) {
+  checkDrillAnswer(correct, char);
+}
+function showDrillResult() {
+  const pct = state.drillTotal>0?Math.round(state.drillCorrect/state.drillTotal*100):0;
+  document.getElementById('drillCard').innerHTML = `<div class="result-screen">
+    <h2>Drill Complete</h2>
+    <div class="result-score">${pct}%</div>
+    <div class="result-message">${state.drillCorrect}/${state.drillTotal} correct</div>
+    <button class="btn btn-primary" onclick="navigateTo('drills')">Back to Drills</button>
+  </div>`;
+  stopDrillTimer();
+}
+function isCorrectTyping(input, expected) {
+  input = input.toLowerCase().trim();
+  expected = expected.toLowerCase().trim();
+  if(input === expected) return true;
+  const variants = {
+    'shi': ['shi', 'si'], 'chi': ['chi', 'ti'], 'tsu': ['tsu', 'tu'],
+    'fu': ['fu', 'hu'], 'ji': ['ji', 'zi'], 'zu': ['zu', 'du'],
+    'ja': ['ja', 'zya', 'jya'], 'ju': ['ju', 'zyu', 'jyu'], 'jo': ['jo', 'zyo', 'jyo'],
+    'sha': ['sha', 'sya'], 'shu': ['shu', 'syu'], 'sho': ['sho', 'syo'],
+    'cha': ['cha', 'tya', 'cya'], 'chu': ['chu', 'tyu', 'cyu'], 'cho': ['cho', 'tyo', 'cyo']
+  };
+  if(variants[expected] && variants[expected].includes(input)) return true;
+  return false;
+}
+
+document.getElementById('drillSubmit').onclick = ()=>{
+  if(state.drillMode==='typing'){
+    const q = state.drillQuestions[state.drillIndex];
+    const input = document.getElementById('typingInput');
+    const correct = isCorrectTyping(input.value, q.roma);
+    checkDrillAnswer(correct, q.char);
+  }
+};
+document.getElementById('drillSkip').onclick = ()=>{state.drillIndex++; showDrillQuestion();};
+document.getElementById('drillExit').onclick = ()=>{stopDrillTimer();navigateTo('drills');};
+
+function startDrillTimer(seconds) {
+  stopDrillTimer();
+  state.timerSeconds = seconds;
+  updateTimerDisplay();
+  state.timerInterval = setInterval(()=>{
+    state.timerSeconds--;
+    updateTimerDisplay();
+    if(state.timerSeconds<=0) {
+      stopDrillTimer();
+      showDrillResult();
+    }
+  },1000);
+}
+function stopDrillTimer() { if(state.timerInterval){clearInterval(state.timerInterval);state.timerInterval=null;} }
+function updateTimerDisplay() {
+  const m = Math.floor(state.timerSeconds/60);
+  const s = state.timerSeconds%60;
+  const el = document.getElementById('passTimerDisplay');
+  if(el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function initPassages() {
+  filterPassages();
+  renderPassage();
+}
+function filterPassages() {
+  const type = document.getElementById('passType').value;
+  const diff = document.getElementById('passDiff').value;
+  state.passFiltered = PASSAGES.filter(p=>{
+    if(type!=='all' && p.type!==type && !(type==='mixed' && p.type==='mixed')) return false;
+    if(diff!=='all' && p.diff!==parseInt(diff)) return false;
+    return true;
+  });
+  if(!state.passFiltered.length) state.passFiltered = [...PASSAGES];
+  state.passIndex = 0;
+}
+document.getElementById('passType').onchange = filterPassages;
+document.getElementById('passDiff').onchange = filterPassages;
+document.getElementById('passPrev').onclick = ()=>{if(state.passIndex>0){state.passIndex--;renderPassage();}};
+document.getElementById('passNext').onclick = ()=>{if(state.passIndex<state.passFiltered.length-1){state.passIndex++;renderPassage();}};
+document.getElementById('passRomaji').onchange = ()=>{
+  document.querySelectorAll('.romaji-text').forEach(el=>{
+    el.classList.toggle('visible',document.getElementById('passRomaji').checked);
+  });
+};
+document.getElementById('passTimer').onchange = ()=>{
+  const show = document.getElementById('passTimer').checked;
+  const el = document.getElementById('passTimerDisplay');
+  el.classList.toggle('hidden',!show);
+  if(show){state.timerSeconds=0;updateTimerDisplay();startDrillTimer(9999);}
+  else stopDrillTimer();
+};
+document.getElementById('passReplayBtn').onclick = ()=>{
+  document.getElementById('passRomaji').checked=false;
+  document.querySelectorAll('.romaji-text').forEach(el=>el.classList.remove('visible'));
+  document.getElementById('passageReplay').classList.add('hidden');
+  renderPassage();
+};
+
+function renderPassage() {
+  const filtered = state.passFiltered;
+  if(!filtered.length) return;
+  const p = filtered[state.passIndex];
+  document.getElementById('passCounter').textContent = `${state.passIndex+1}/${filtered.length}`;
+  const romajiVisible = document.getElementById('passRomaji').checked;
+  const sentences = p.text.split(/[。！]/).filter(s=>s.trim());
+  let html = `<h3 class="mb-2">${p.title}</h3>`;
+  html += `<span class="badge badge-primary">${p.type}</span><span class="badge badge-warning">Level ${p.diff}</span>`;
+  html += `<div class="passage mt-2">`;
+  sentences.forEach(s=>{
+    if(s.trim()) html += `<span class="passage-sentence">${s.trim()}。<span class="romaji-text ${romajiVisible?'visible':''}">(${romajiFromKana(s)})</span></span> `;
+  });
+  html += `</div>`;
+  html += `<div class="flex gap-2 mt-2">
+    <button class="btn btn-outline" onclick="toggleRomajiInPassage()">Toggle Romaji</button>
+    <button class="btn btn-primary" onclick="showComprehension()">Comprehension Check</button>
+    <button class="btn btn-warning" onclick="document.getElementById('passageReplay').classList.remove('hidden')">Replay Mode</button>
+  </div>`;
+  document.getElementById('passageDisplay').innerHTML = html;
+  document.getElementById('passComprehension').classList.add('hidden');
+  if(!state.progress.completed['pass_'+p.id]) state.progress.completed['pass_'+p.id] = false;
+}
+function toggleRomajiInPassage() {
+  const cb = document.getElementById('passRomaji');
+  cb.checked = !cb.checked;
+  document.querySelectorAll('.romaji-text').forEach(el=>el.classList.toggle('visible',cb.checked));
+}
+function showComprehension() {
+  const p = state.passFiltered[state.passIndex];
+  if(!p.q) return;
+  const div = document.getElementById('passComprehension');
+  div.classList.remove('hidden');
+  let html = `<div class="comprehension-q">
+    <p>Question: ${p.q}</p>
+    <div class="grid grid-3" id="compOpts"></div>
+  </div>`;
+  div.innerHTML = html;
+  const container = document.getElementById('compOpts');
+  let attempts = 0;
+  p.opts.forEach((o,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = o;
+    btn.onclick = ()=>{
+      attempts++;
+      if(i===p.ans){
+        btn.classList.add('correct');
+        if(attempts === 1) {
+          state.progress.completed['pass_'+p.id] = true;
+          saveProgress();
+        }
+        container.querySelectorAll('.option-btn').forEach(b=>{
+          b.disabled=true;
+          if(b!==btn) b.style.opacity="0.5";
+        });
+      } else {
+        btn.classList.add('wrong');
+        btn.disabled = true;
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+
+function romajiFromKana(text) {
+  if(!window._kanaMap) {
+    window._kanaMap = {};
+    getAllKana().forEach(([char, roma]) => {
+      window._kanaMap[char] = roma;
+    });
+  }
+  let res = '';
+  for(let i=0; i<text.length; i++) {
+    let twoChar = text.substring(i, i+2);
+    if(window._kanaMap[twoChar]) {
+      res += window._kanaMap[twoChar];
+      i++;
+    } else if(text[i]==='っ' || text[i]==='ッ') {
+      let nextKana = '';
+      if(i+1 < text.length) {
+        let nTwo = text.substring(i+1, i+3);
+        let nOne = text[i+1];
+        if(window._kanaMap[nTwo]) nextKana = window._kanaMap[nTwo];
+        else if(window._kanaMap[nOne]) nextKana = window._kanaMap[nOne];
+      }
+      if(nextKana && nextKana.length > 0) res += nextKana[0];
+    } else if(text[i]==='ー') {
+      res += '-';
+    } else if(window._kanaMap[text[i]]) {
+      res += window._kanaMap[text[i]];
+    } else {
+      res += text[i];
+    }
+  }
+  return res;
+}
+
+function initReview() {
+  const weak = getWeakCharacters();
+  document.getElementById('reviewStats').innerHTML = weak.length>0?`<p>You have ${weak.length} characters to review.</p>`:'<p>No weak characters! Great job!</p>';
+}
+function getWeakCharacters() {
+  const mistakes = state.progress.mistakes;
+  return Object.entries(mistakes).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,20).map(([k])=>k);
+}
+document.getElementById('startReview').onclick = startReviewSession;
+function startReviewSession() {
+  const weak = getWeakCharacters();
+  const all = getAllKana();
+  let pool = weak.length>0?all.filter(x=>weak.includes(x[0])||weak.includes(x[1])):all;
+  if(pool.length<10) pool = shuffle(all).slice(0,15);
+  else pool = shuffle(pool).slice(0,15);
+  state.reviewQueue = pool.map(([char,roma])=>({char,roma}));
+  state.reviewIndex = 0;
+  document.getElementById('reviewIntro').classList.add('hidden');
+  document.getElementById('reviewArea').classList.remove('hidden');
+  showReviewCard();
+}
+function showReviewCard() {
+  if(state.reviewIndex >= state.reviewQueue.length) {
+    document.getElementById('reviewCard').innerHTML = `<div class="result-screen">
+      <h2>Review Complete!</h2>
+      <button class="btn btn-primary" onclick="navigateTo('review')">Back</button>
+    </div>`;
+    return;
+  }
+  const q = state.reviewQueue[state.reviewIndex];
+  document.getElementById('reviewProgress').style.width = `${(state.reviewIndex/state.reviewQueue.length)*100}%`;
+  document.getElementById('reviewCard').innerHTML = `<div class="text-center">
+    <div class="flashcard-char">${q.char}</div>
+    <p class="text-lg mt-2">What is the reading?</p>
+    <div class="grid grid-3 mt-2" id="reviewOpts"></div>
+  </div>`;
+  let opts = [q.roma];
+  const all = getAllKana().map(x=>x[1]);
+  while(opts.length<3){const r=all[Math.floor(Math.random()*all.length)];if(!opts.includes(r))opts.push(r);}
+  opts = shuffle(opts);
+  const container = document.getElementById('reviewOpts');
+  opts.forEach(o=>{
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = o;
+    btn.onclick = ()=>{
+      if(o===q.roma) {
+        btn.classList.add('correct');
+        state.reviewIndex++;
+        setTimeout(showReviewCard, 500);
+      } else {
+        btn.classList.add('wrong');
+        recordMistake(q.char);
+      }
+    };
+    container.appendChild(btn);
+  });
+}
+
+function renderProgress() {
+  const p = state.progress;
+  const totalAccuracy = Object.values(p.accuracy).reduce((a,b)=>a+b.c,0);
+  const totalAttempts = Object.values(p.accuracy).reduce((a,b)=>a+b.t,0);
+  const accPct = totalAttempts>0?Math.round(totalAccuracy/totalAttempts*100):0;
+  
+  document.getElementById('overallStats').innerHTML = `
+    <div class="stats-grid mt-2">
+      <div class="stat-card"><div class="stat-value">${accPct}%</div><div class="stat-label">Overall Accuracy</div></div>
+      <div class="stat-card"><div class="stat-value">${totalAttempts}</div><div class="stat-label">Total Attempts</div></div>
+      <div class="stat-card"><div class="stat-value">${p.streak||0}</div><div class="stat-label">Day Streak</div></div>
+    </div>`;
+  
+  const sections = ['hiragana','hiragana_adv','katakana','katakana_adv','extensions','mixed_words','passages'];
+  let mhtml = '';
+  sections.forEach(s=>{
+    const done = p.completed[s];
+    mhtml += `<div class="flex items-center justify-between mb-1">
+      <span>${s}</span>
+      <span class="badge ${done?'badge-success':'badge-warning'}">${done?'Mastered':'In Progress'}</span>
+    </div>`;
+  });
+  document.getElementById('sectionMastery').innerHTML = mhtml;
+  
+  const weak = getWeakCharacters();
+  document.getElementById('weakChars').innerHTML = weak.length>0?
+    weak.map(w=>`<span class="badge badge-danger">${w}</span>`).join(' '):
+    '<p>No weak characters!</p>';
+  
+  document.getElementById('studyHistory').innerHTML = `<p>Last study: ${p.lastStudy||'Never'}</p>`;
+  
+  let heatmap = '<div class="kana-grid">';
+  getAllKana().forEach(([char,roma])=>{
+    const acc = p.accuracy[char];
+    const pct = acc?acc.c/acc.t:0;
+    let cls = 'unseen';
+    if(pct>=0.9) cls='mastered';
+    else if(pct>0.5) cls='learning';
+    heatmap += `<div class="kana-cell ${cls}"><div class="kana-char">${char}</div><div class="kana-roma">${roma}</div></div>`;
+  });
+  heatmap += '</div>';
+  document.getElementById('charHeatmap').innerHTML = heatmap;
+}
+
+document.getElementById('resetBtn').onclick = ()=>navigateTo('reset');
+document.getElementById('confirmReset').onclick = ()=>{
+  localStorage.removeItem('kanaMaster');
+  state.progress = {mistakes:{},accuracy:{},completed:{},streak:0,lastStudy:null};
+  saveProgress();
+  navigateTo('home');
+};
+
+// Final Test
+document.getElementById('startTest').onclick = startFinalTest;
+function startFinalTest() {
+  document.getElementById('testIntro').classList.add('hidden');
+  document.getElementById('testArea').classList.remove('hidden');
+  document.getElementById('testResult').classList.add('hidden');
+  state.testIndex = 0;
+  state.testCorrect = 0;
+  state.testQuestions = generateTestQuestions();
+  state.testTotal = state.testQuestions.length;
+  showTestQuestion();
+}
+function generateTestQuestions() {
+  let qs = [];
+  const all = getAllKana();
+  // 50 char recognition
+  for(let i=0;i<50;i++){
+    const [char,roma] = all[Math.floor(Math.random()*all.length)];
+    let opts = [roma];
+    while(opts.length<4){const r=all[Math.floor(Math.random()*all.length)][1];if(!opts.includes(r))opts.push(r);}
+    opts = shuffle(opts);
+    qs.push({type:'mc',char,roma,opts,ans:opts.indexOf(roma)});
+  }
+  // 20 extension questions
+  APP_DATA.katakana.extensions.forEach(([char,roma])=>{
+    let opts = [roma];
+    while(opts.length<4){const r=all[Math.floor(Math.random()*all.length)][1];if(!opts.includes(r))opts.push(r);}
+    opts = shuffle(opts);
+    qs.push({type:'ext_mc',char,roma,opts,ans:opts.indexOf(roma)});
+  });
+  // 10 typing
+  for(let i=0;i<10;i++){
+    const [char,roma] = all[Math.floor(Math.random()*all.length)];
+    qs.push({type:'typing',char,roma});
+  }
+  // 5 passage comprehension
+  const passages = shuffle(PASSAGES).slice(0,5);
+  passages.forEach(p=>{
+    qs.push({type:'passage',passage:p});
+  });
+  return shuffle(qs);
+}
+function showTestQuestion() {
+  if(state.testIndex >= state.testQuestions.length) { showTestResult(); return; }
+  const q = state.testQuestions[state.testIndex];
+  document.getElementById('testProgress').textContent = `Question ${state.testIndex+1}/${state.testTotal}`;
+  const area = document.getElementById('testQuestion');
+  if(q.type==='mc'||q.type==='ext_mc'){
+    area.innerHTML = `<div class="text-center">
+      <div class="flashcard-char">${q.char}</div>
+      <p class="text-lg mb-2">Choose the correct reading</p>
+      <div class="grid grid-2" id="testOpts"></div>
+    </div>`;
+    const container = document.getElementById('testOpts');
+    q.opts.forEach((o,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = o;
+      btn.onclick = ()=>{
+        if(i===q.ans){state.testCorrect++;btn.classList.add('correct');}
+        else btn.classList.add('wrong');
+        recordAttempt(q.char,i===q.ans);
+        container.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+        setTimeout(()=>{state.testIndex++;showTestQuestion();},800);
+      };
+      container.appendChild(btn);
+    });
+  } else if(q.type==='typing'){
+    area.innerHTML = `<div class="text-center">
+      <div class="flashcard-char">${q.char}</div>
+      <p class="text-lg mb-2">Type the romaji</p>
+      <input type="text" class="input-answer" id="testInput" placeholder="Type here..." autocomplete="off">
+      <button class="btn btn-primary mt-2" id="testSubmitBtn">Check</button>
+    </div>`;
+    document.getElementById('testInput').focus();
+    document.getElementById('testSubmitBtn').onclick = ()=>{
+      const val = document.getElementById('testInput').value;
+      const correct = isCorrectTyping(val, q.roma);
+      if(correct){state.testCorrect++;document.getElementById('testInput').classList.add('correct');}
+      else document.getElementById('testInput').classList.add('wrong');
+      recordAttempt(q.char,correct);
+      setTimeout(()=>{state.testIndex++;showTestQuestion();},800);
+    };
+    document.getElementById('testInput').onkeypress = e=>{if(e.key==='Enter')document.getElementById('testSubmitBtn').click();};
+  } else if(q.type==='passage'){
+    const p = q.passage;
+    const sentences = p.text.split(/[。！]/).filter(s=>s.trim());
+    let html = `<div class="passage mb-2">`;
+    sentences.forEach(s=>{if(s.trim()) html += `<span class="passage-sentence">${s.trim()}。 </span>`;});
+    html += `</div><div class="comprehension-q"><p>${p.q}</p><div class="grid grid-3" id="testPassOpts"></div></div>`;
+    area.innerHTML = html;
+    const container = document.getElementById('testPassOpts');
+    p.opts.forEach((o,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = o;
+      btn.onclick = ()=>{
+        if(i===p.ans){state.testCorrect++;btn.classList.add('correct');}
+        else btn.classList.add('wrong');
+        container.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+        setTimeout(()=>{state.testIndex++;showTestQuestion();},800);
+      };
+      container.appendChild(btn);
+    });
+  }
+}
+function showTestResult() {
+  document.getElementById('testArea').classList.add('hidden');
+  const pct = Math.round(state.testCorrect/state.testTotal*100);
+  const passed = pct>=90;
+  document.getElementById('testResult').classList.remove('hidden');
+  document.getElementById('testResult').innerHTML = `<div class="result-screen">
+    <h2>${passed?'🎉 Congratulations!':'Keep Practicing!'}</h2>
+    <div class="result-score">${pct}%</div>
+    <div class="result-message">${state.testCorrect}/${state.testTotal} correct - ${passed?'You have mastered the kana!':'You need 90% to pass.'}</div>
+    ${passed?'<span class="badge badge-success" style="font-size:1.2rem;padding:8px 24px">MASTERY ACHIEVED</span>':''}
+    <div class="mt-3"><button class="btn btn-primary" onclick="navigateTo('home')">Back to Home</button></div>
+  </div>`;
+}
+
+// Theme toggle
+document.getElementById('themeToggle').onclick = ()=>{
+  const isDark = document.body.getAttribute('data-theme')==='dark';
+  document.body.setAttribute('data-theme',isDark?'light':'dark');
+};
+
+// Nav click handlers
+document.querySelectorAll('[data-nav]').forEach(a=>{
+  a.onclick = e=>{e.preventDefault();navigateTo(a.dataset.nav);};
+});
+
+// Study streak
+function updateStreak() {
+  const today = new Date().toDateString();
+  if(state.progress.lastStudy !== today) {
+    const yesterday = new Date(Date.now()-86400000).toDateString();
+    if(state.progress.lastStudy === yesterday) state.progress.streak++;
+    else if(state.progress.lastStudy) state.progress.streak = 1;
+    state.progress.lastStudy = today;
+    saveProgress();
+  }
+}
+
+// Init
+loadProgress();
+updateStreak();
+renderHome();
+</script>
+</body>
+</html>
+

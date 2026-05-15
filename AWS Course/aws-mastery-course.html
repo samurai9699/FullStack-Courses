@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Mastery — From Zero to Job-Ready</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1e2330;
+    --accent: #ff9900;
+    --accent2: #e8821a;
+    --blue: #3b82f6;
+    --green: #22c55e;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --cyan: #06b6d4;
+    --text: #e8eaf0;
+    --muted: #7a8299;
+    --code-bg: #0d1117;
+    --radius: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 290px; min-width: 290px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0;
+    overflow-y: auto; z-index: 100;
+    transition: transform 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .sidebar-logo { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
+  .sidebar-logo .logo-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+  .sidebar-logo h1 { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1.2; }
+  .sidebar-logo h1 span { color: var(--accent); }
+
+  .progress-bar-wrap { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .progress-label { display: flex; justify-content: space-between; font-size: 11px; font-family: 'Space Mono', monospace; color: var(--muted); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.5s ease; }
+
+  .nav-section { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .nav-section-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 4px 20px 8px; font-family: 'Space Mono', monospace; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; cursor: pointer; transition: all 0.15s;
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(255,153,0,0.06); }
+  .nav-item.done { color: var(--green); }
+  .nav-item.done .nav-check { opacity: 1; }
+  .nav-icon { font-size: 16px; min-width: 20px; text-align: center; }
+  .nav-check { font-size: 12px; margin-left: auto; opacity: 0; transition: opacity 0.3s; }
+  .nav-item.done .nav-check { opacity: 1; }
+
+  /* MAIN */
+  #main { margin-left: 290px; flex: 1; min-height: 100vh; }
+
+  .topbar {
+    position: sticky; top: 0;
+    background: rgba(10,12,15,0.92); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 50;
+  }
+  .topbar-breadcrumb { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+  .topbar-breadcrumb span { color: var(--accent); }
+  .topbar-actions { display: flex; gap: 10px; }
+
+  .btn { padding: 8px 18px; border-radius: var(--radius); font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; border: none; transition: all 0.2s; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #000; }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  .content-area { max-width: 860px; margin: 0 auto; padding: 48px 40px 80px; }
+  .module { display: none; }
+  .module.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .module-hero { margin-bottom: 40px; }
+  .module-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,153,0,0.1); border: 1px solid rgba(255,153,0,0.25); color: var(--accent); font-family: 'Space Mono', monospace; font-size: 11px; padding: 4px 12px; border-radius: 20px; margin-bottom: 16px; letter-spacing: 1px; }
+  .module-title { font-size: 42px; font-weight: 800; line-height: 1.1; margin-bottom: 16px; color: var(--text); }
+  .module-title .highlight { color: var(--accent); }
+  .module-desc { font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 620px; }
+  .module-meta { display: flex; gap: 20px; margin-top: 24px; flex-wrap: wrap; }
+  .meta-chip { display: flex; align-items: center; gap: 6px; font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+  .meta-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+  .section { margin-bottom: 36px; }
+  .section-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .section-title .icon { font-size: 18px; }
+
+  p { font-size: 15px; line-height: 1.75; color: #b8bdd1; margin-bottom: 14px; }
+  strong { color: var(--text); font-weight: 700; }
+
+  .callout { border-radius: var(--radius); padding: 16px 20px; margin: 20px 0; border-left: 3px solid; font-size: 14px; line-height: 1.65; }
+  .callout.info { background: rgba(59,130,246,0.08); border-color: var(--blue); color: #93c5fd; }
+  .callout.warning { background: rgba(255,153,0,0.08); border-color: var(--accent); color: #fcd34d; }
+  .callout.success { background: rgba(34,197,94,0.08); border-color: var(--green); color: #86efac; }
+  .callout.danger { background: rgba(239,68,68,0.08); border-color: var(--red); color: #fca5a5; }
+  .callout strong { color: inherit; }
+
+  .code-block { position: relative; background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); margin: 20px 0; overflow: hidden; }
+  .code-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: #161b22; border-bottom: 1px solid var(--border); }
+  .code-lang { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+  .copy-btn { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-family: 'Space Mono', monospace; padding: 3px 10px; border-radius: 4px; cursor: pointer; transition: all 0.2s; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+  pre { padding: 20px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; color: #e6edf3; }
+
+  .kw { color: #ff7b72; } .str { color: #a5d6ff; } .cmt { color: #5a6a7a; font-style: italic; }
+  .fn { color: #d2a8ff; } .num { color: #79c0ff; } .tag { color: #7ee787; } .attr { color: #ffa657; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; transition: all 0.2s; cursor: default; }
+  .card:hover { border-color: rgba(255,153,0,0.4); transform: translateY(-2px); }
+  .card-icon { font-size: 28px; margin-bottom: 12px; }
+  .card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+  .styled-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+  .styled-table th { background: var(--surface2); color: var(--accent); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+  .styled-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: #b8bdd1; line-height: 1.5; }
+  .styled-table tr:last-child td { border-bottom: none; }
+  .styled-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .steps { margin: 20px 0; }
+  .step { display: flex; gap: 16px; margin-bottom: 24px; position: relative; }
+  .step:not(:last-child)::before { content: ''; position: absolute; left: 18px; top: 40px; bottom: -4px; width: 1px; background: var(--border); }
+  .step-num { width: 36px; height: 36px; min-width: 36px; background: rgba(255,153,0,0.12); border: 1px solid rgba(255,153,0,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 13px; font-weight: 700; color: var(--accent); }
+  .step-content { flex: 1; padding-top: 4px; }
+  .step-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+  .quiz-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 32px 0; }
+  .quiz-header { background: var(--surface2); padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .quiz-header h3 { font-size: 14px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .quiz-counter { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+  .quiz-body { padding: 24px; }
+  .quiz-question { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+  .quiz-option { padding: 14px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 14px; color: #b8bdd1; transition: all 0.2s; display: flex; align-items: center; gap: 12px; }
+  .quiz-option:hover:not(.disabled) { border-color: rgba(255,153,0,0.4); color: var(--text); }
+  .quiz-option.correct { border-color: var(--green); background: rgba(34,197,94,0.08); color: var(--green); }
+  .quiz-option.wrong { border-color: var(--red); background: rgba(239,68,68,0.08); color: var(--red); }
+  .quiz-option.disabled { cursor: default; }
+  .option-letter { width: 26px; height: 26px; min-width: 26px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; color: var(--muted); transition: all 0.2s; }
+  .quiz-option.correct .option-letter { background: var(--green); color: #000; }
+  .quiz-option.wrong .option-letter { background: var(--red); color: #fff; }
+  .quiz-feedback { margin-top: 16px; padding: 14px 18px; border-radius: var(--radius); font-size: 14px; display: none; line-height: 1.6; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: rgba(34,197,94,0.08); border: 1px solid var(--green); color: #86efac; }
+  .quiz-feedback.wrong { background: rgba(239,68,68,0.08); border: 1px solid var(--red); color: #fca5a5; }
+  .quiz-nav { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .quiz-score { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--muted); }
+  .quiz-score .good { color: var(--green); }
+  .quiz-score .bad { color: var(--red); }
+
+  .accordion { margin: 16px 0; }
+  .acc-item { border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; transition: border-color 0.2s; }
+  .acc-item.open { border-color: rgba(255,153,0,0.3); }
+  .acc-header { padding: 14px 18px; background: var(--surface2); cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 14px; font-weight: 600; color: var(--text); transition: background 0.2s; }
+  .acc-header:hover { background: rgba(255,153,0,0.05); }
+  .acc-arrow { transition: transform 0.3s; color: var(--muted); font-size: 12px; }
+  .acc-item.open .acc-arrow { transform: rotate(180deg); color: var(--accent); }
+  .acc-body { display: none; padding: 16px 18px; font-size: 14px; color: var(--muted); line-height: 1.7; border-top: 1px solid var(--border); }
+  .acc-item.open .acc-body { display: block; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .tag-chip { font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 4px 12px; border-radius: 4px; font-weight: 600; }
+  .tag-chip.orange { background: rgba(255,153,0,0.12); color: var(--accent); border: 1px solid rgba(255,153,0,0.25); }
+  .tag-chip.blue { background: rgba(59,130,246,0.12); color: #93c5fd; border: 1px solid rgba(59,130,246,0.25); }
+  .tag-chip.green { background: rgba(34,197,94,0.12); color: #86efac; border: 1px solid rgba(34,197,94,0.25); }
+  .tag-chip.purple { background: rgba(168,85,247,0.12); color: #d8b4fe; border: 1px solid rgba(168,85,247,0.25); }
+  .tag-chip.cyan { background: rgba(6,182,212,0.12); color: #67e8f9; border: 1px solid rgba(6,182,212,0.25); }
+
+  .cheatsheet-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .cs-item { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .cs-cmd { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); margin-bottom: 4px; word-break: break-all; }
+  .cs-desc { font-size: 12px; color: var(--muted); }
+
+  .module-complete { background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02)); border: 1px solid rgba(34,197,94,0.25); border-radius: 12px; padding: 28px; text-align: center; margin-top: 40px; }
+  .complete-icon { font-size: 40px; margin-bottom: 12px; }
+  .complete-title { font-size: 20px; font-weight: 800; color: var(--green); margin-bottom: 8px; }
+  .complete-desc { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+
+  .burger { display: none; background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 16px; }
+
+  @media (max-width: 768px) {
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); }
+    #main { margin-left: 0; }
+    .content-area { padding: 24px 20px 60px; }
+    .module-title { font-size: 28px; }
+    .cheatsheet-grid { grid-template-columns: 1fr; }
+    .burger { display: block; }
+    .topbar { padding: 12px 20px; }
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 32px 0; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(255,153,0,0.1); color: var(--accent); padding: 2px 6px; border-radius: 4px; }
+  ul, ol { padding-left: 20px; margin: 12px 0; }
+  li { font-size: 14px; color: #b8bdd1; line-height: 1.75; margin-bottom: 4px; }
+  li strong { color: var(--text); }
+
+  .arch-diagram { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #7ee787; line-height: 1.8; white-space: pre; overflow-x: auto; margin: 20px 0; }
+</style>
+</head>
+<body>
+
+<!-- ===================== SIDEBAR ===================== -->
+<aside id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-tag">☁ Cloud Course</div>
+    <h1>AWS <span>Mastery</span></h1>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>Overall Progress</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+  <nav>
+    <div class="nav-section">
+      <div class="nav-section-label">Getting Started</div>
+      <div class="nav-item active" data-module="intro" onclick="showModule('intro',this)"><span class="nav-icon">🚀</span> What is AWS?<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="core" onclick="showModule('core',this)"><span class="nav-icon">🌐</span> Core Concepts<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="iam" onclick="showModule('iam',this)"><span class="nav-icon">🔐</span> IAM & Security<span class="nav-check">✓</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Compute & Networking</div>
+      <div class="nav-item" data-module="ec2" onclick="showModule('ec2',this)"><span class="nav-icon">💻</span> EC2 — Compute<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="alb" onclick="showModule('alb',this)"><span class="nav-icon">⚖️</span> ALB & Load Balancing<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="asg" onclick="showModule('asg',this)"><span class="nav-icon">📈</span> Auto Scaling Groups<span class="nav-check">✓</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Storage & Databases</div>
+      <div class="nav-item" data-module="s3" onclick="showModule('s3',this)"><span class="nav-icon">🗂️</span> S3 — Storage<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="rds" onclick="showModule('rds',this)"><span class="nav-icon">🗄️</span> RDS — Databases<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="elasticache" onclick="showModule('elasticache',this)"><span class="nav-icon">⚡</span> ElastiCache<span class="nav-check">✓</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Application Architecture</div>
+      <div class="nav-item" data-module="ecs" onclick="showModule('ecs',this)"><span class="nav-icon">📦</span> ECS & Containers<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="apigw" onclick="showModule('apigw',this)"><span class="nav-icon">🚪</span> API Gateway<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="messaging" onclick="showModule('messaging',this)"><span class="nav-icon">📨</span> SQS & SNS<span class="nav-check">✓</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Operations</div>
+      <div class="nav-item" data-module="cloudwatch" onclick="showModule('cloudwatch',this)"><span class="nav-icon">📊</span> CloudWatch & Observability<span class="nav-check">✓</span></div>
+      <div class="nav-item" data-module="terraform" onclick="showModule('terraform',this)"><span class="nav-icon">🏗️</span> Terraform<span class="nav-check">✓</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Finish Line</div>
+      <div class="nav-item" data-module="interview" onclick="showModule('interview',this)"><span class="nav-icon">🎯</span> Interview Prep<span class="nav-check">✓</span></div>
+    </div>
+  </nav>
+</aside>
+
+<!-- ===================== MAIN ===================== -->
+<main id="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="burger" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-breadcrumb" id="breadcrumb">AWS Mastery / <span>What is AWS?</span></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline" onclick="prevModule()">← Prev</button>
+      <button class="btn btn-primary" onclick="nextModule()">Next →</button>
+    </div>
+  </div>
+
+  <div class="content-area">
+
+    <!-- ======== MODULE 1: INTRO ======== -->
+    <div id="mod-intro" class="module active">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 1 of 15</div>
+        <h1 class="module-title">What is <span class="highlight">AWS</span>?</h1>
+        <p class="module-desc">Amazon Web Services is the world's largest cloud platform. This module demystifies the cloud and explains why AWS dominates the industry.</p>
+        <div class="module-meta">
+          <div class="meta-chip"><div class="dot"></div> ~20 min read</div>
+          <div class="meta-chip"><div class="dot"></div> Beginner</div>
+          <div class="meta-chip"><div class="dot"></div> 1 Quiz</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">☁️</span> The Cloud, Simply Explained</h2>
+        <p>Before AWS existed, companies had to <strong>buy physical servers</strong>, put them in a room, hire people to manage them, and hope nothing broke. This was expensive, slow, and painful.</p>
+        <p>The cloud is simply <strong>someone else's computers</strong> — specifically Amazon's — that you rent over the internet. Instead of buying a server for $10,000, you pay $0.02/hour for one. You use it for 3 hours and pay $0.06. Done.</p>
+        <div class="callout info"><strong>Real analogy:</strong> You don't own a power plant to get electricity. You just plug in and pay for what you use. AWS is the power plant for computing.</div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">⚡</div><div class="card-title">On-demand</div><div class="card-desc">Spin up a server in 60 seconds. No waiting weeks for hardware delivery.</div></div>
+          <div class="card"><div class="card-icon">📏</div><div class="card-title">Scalable</div><div class="card-desc">Handle 10 users or 10 million. Scale up or down instantly.</div></div>
+          <div class="card"><div class="card-icon">💰</div><div class="card-title">Pay-as-you-go</div><div class="card-desc">Only pay for what you actually use. No upfront capital costs.</div></div>
+          <div class="card"><div class="card-icon">🌍</div><div class="card-title">Global</div><div class="card-desc">Deploy apps close to your users anywhere in the world.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📊</span> Why AWS and Not Others?</h2>
+        <p>AWS launched in 2006 — years before Google Cloud or Azure — and now holds the largest cloud market share. Most companies use it, meaning most job listings mention it.</p>
+        <table class="styled-table">
+          <thead><tr><th>Provider</th><th>Market Share</th><th>Best Known For</th></tr></thead>
+          <tbody>
+            <tr><td><strong>AWS</strong></td><td>~31%</td><td>Broadest service catalog, enterprise adoption</td></tr>
+            <tr><td>Azure</td><td>~25%</td><td>Microsoft ecosystem, Active Directory</td></tr>
+            <tr><td>Google Cloud</td><td>~11%</td><td>Data/ML services, Kubernetes origin</td></tr>
+          </tbody>
+        </table>
+        <div class="callout warning"><strong>For your first job:</strong> AWS skills are the most transferable. Learning AWS concepts teaches you cloud fundamentals that apply everywhere.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🗺️</span> The AWS Console</h2>
+        <p>The AWS Console is the web UI at <code>console.aws.amazon.com</code>. Think of it as a control panel for all your cloud resources. When you start a job, you'll use this dashboard daily.</p>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Create a Free Account</div><div class="step-desc">Go to aws.amazon.com. The Free Tier gives you 750 hours/month of EC2, 5GB of S3, and an RDS instance — enough to learn everything in this course without paying.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Understand the Dashboard</div><div class="step-desc">The top search bar lets you find any service. The region selector (top right) shows where your resources live. The services menu groups everything by category: Compute, Storage, Database, etc.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Bookmark These Services</div><div class="step-desc">EC2, S3, RDS, IAM, VPC. These five cover 90% of what you'll encounter in a junior/mid-level role.</div></div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-intro">
+        <div class="quiz-header"><h3>⚡ Quick Check — Module 1</h3><span class="quiz-counter" id="qcounter-intro">Q 1 / 3</span></div>
+        <div class="quiz-body" id="qbody-intro"></div>
+        <div class="quiz-nav"><span class="quiz-score" id="qscore-intro">Score: —</span><button class="btn btn-outline" id="qnext-intro" onclick="nextQuestion('intro')" style="display:none;">Next Question →</button></div>
+      </div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 1 Complete!</div><div class="complete-desc">You now understand what AWS is and why it matters. Let's go deeper into core concepts.</div><button class="btn btn-primary" onclick="nextModule()">Continue to Core Concepts →</button></div>
+    </div>
+
+    <!-- ======== MODULE 2: CORE CONCEPTS ======== -->
+    <div id="mod-core" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 2 of 15</div>
+        <h1 class="module-title">AWS <span class="highlight">Core Concepts</span></h1>
+        <p class="module-desc">Regions, Availability Zones, VPCs — the building blocks everything else runs on. Understanding this is the difference between a junior and a mid-level engineer.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~30 min read</div><div class="meta-chip"><div class="dot"></div> Foundational</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🌍</span> Regions & Availability Zones</h2>
+        <p>AWS has <strong>physical data centers</strong> all over the world. They're organized into a two-level hierarchy you must understand.</p>
+        <div class="arch-diagram">  ┌─────────────────────────────────────────────────┐
+  │              AWS REGION (e.g. us-east-1)        │
+  │                                                  │
+  │   ┌──────────────┐    ┌──────────────┐          │
+  │   │   AZ: us-    │    │   AZ: us-    │  ...     │
+  │   │  east-1a     │    │  east-1b     │          │
+  │   │              │    │              │          │
+  │   │  [DataCenter]│    │  [DataCenter]│          │
+  │   │  [DataCenter]│    │  [DataCenter]│          │
+  │   └──────────────┘    └──────────────┘          │
+  │         Connected via high-speed private links   │
+  └─────────────────────────────────────────────────┘</div>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">🌍 What is a Region? <span class="acc-arrow">▼</span></div><div class="acc-body">A Region is a <strong>geographic location</strong> that contains multiple data centers. Examples: <code>us-east-1</code> (N. Virginia), <code>eu-west-1</code> (Ireland), <code>ap-southeast-1</code> (Singapore). When you create a resource like an EC2 instance, it lives in a specific Region. Choose the Region closest to your users for the lowest latency.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">🏢 What is an Availability Zone (AZ)? <span class="acc-arrow">▼</span></div><div class="acc-body">An AZ is one or more <strong>physical data centers</strong> within a Region. Each Region has 2–6 AZs. They're physically separated (different buildings, different power supplies, different flood zones) but connected with very fast, low-latency networking. The magic: if one AZ goes down due to a fire or power failure, your app keeps running in another AZ. This is called <strong>high availability</strong>.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">🔣 Region naming convention <span class="acc-arrow">▼</span></div><div class="acc-body">Regions follow the pattern: <code>[area]-[direction]-[number]</code>.<br><br>• <code>us-east-1</code> → United States, East coast, first region<br>• <code>eu-west-2</code> → Europe, West, second region (London)<br>• <code>ap-southeast-1</code> → Asia Pacific, Southeast (Singapore)<br><br>AZs append a letter: <code>us-east-1a</code>, <code>us-east-1b</code>, <code>us-east-1c</code></div></div>
+        </div>
+        <div class="callout warning"><strong>Interview gotcha:</strong> "AZ" and "Region" are NOT interchangeable. An AZ is inside a Region. A Region has multiple AZs. Confusing these in an interview is an instant red flag.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔒</span> VPC — Your Private Network</h2>
+        <p>A <strong>Virtual Private Cloud (VPC)</strong> is an isolated virtual network you control. Think of it as your own private section of AWS where you decide who can access what.</p>
+        <p>Every AWS account gets a default VPC automatically. Inside a VPC, you create <strong>subnets</strong> — smaller network chunks that live inside an AZ.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🌐</div><div class="card-title">Public Subnet</div><div class="card-desc">Has a route to the internet. Your web servers and load balancers go here. Users can reach them.</div></div>
+          <div class="card"><div class="card-icon">🔒</div><div class="card-title">Private Subnet</div><div class="card-desc">No direct internet access. Your app servers and databases go here. Only your infrastructure can reach them.</div></div>
+          <div class="card"><div class="card-icon">🚪</div><div class="card-title">Internet Gateway</div><div class="card-desc">The "door" that connects your VPC to the public internet. Attach one to enable internet access.</div></div>
+          <div class="card"><div class="card-icon">🛣️</div><div class="card-title">Route Table</div><div class="card-desc">Rules that tell network traffic where to go. Each subnet has one.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔀</span> NAT Gateway & VPC Endpoints</h2>
+        <p>Private subnets can't reach the internet by default. But sometimes they need to — to download packages, pull container images, or call external APIs. That's what NAT Gateways solve.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔄</div><div class="card-title">NAT Gateway</div><div class="card-desc">Lives in a public subnet. Lets private subnet resources reach the internet (outbound only) while blocking inbound connections. Essential for ECS tasks pulling images from ECR.</div></div>
+          <div class="card"><div class="card-icon">🔌</div><div class="card-title">VPC Gateway Endpoint</div><div class="card-desc">Free. Routes traffic to S3 and DynamoDB through the AWS network backbone — never touching the public internet. Faster and cheaper.</div></div>
+          <div class="card"><div class="card-icon">🔗</div><div class="card-title">VPC Interface Endpoint</div><div class="card-desc">Creates an elastic network interface (ENI) in your subnet for any AWS service (SQS, SNS, ECR, CloudWatch, etc.). Keeps traffic private. Costs per hour + per GB.</div></div>
+          <div class="card"><div class="card-icon">🛡️</div><div class="card-title">NACL vs Security Group</div><div class="card-desc">NACLs are stateless firewalls at the subnet level. Security Groups are stateful firewalls at the instance level. Always use Security Groups for application-level control.</div></div>
+        </div>
+        <div class="callout info"><strong>Cost tip:</strong> NAT Gateways cost ~$0.045/hour + data processing. For dev environments, consider NAT instances (cheaper) or VPC endpoints to reduce NAT traffic.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> The Global vs Regional vs AZ Pattern</h2>
+        <p>Different AWS services operate at different scopes. This trips up beginners constantly.</p>
+        <table class="styled-table">
+          <thead><tr><th>Scope</th><th>Services</th><th>What it means</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Global</strong></td><td>IAM, Route 53, CloudFront</td><td>Not tied to any region — applies everywhere</td></tr>
+            <tr><td><strong>Regional</strong></td><td>S3, VPC, RDS, SQS, ECS</td><td>Created in a specific region, replicated within it</td></tr>
+            <tr><td><strong>AZ-specific</strong></td><td>EC2 instances, EBS volumes, ElastiCache nodes</td><td>Live inside one AZ — if AZ fails, so does this resource</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>Why this matters:</strong> S3 is regional and automatically replicates across AZs. But your single EC2 instance is in one AZ. If that AZ has issues, your EC2 is down. That's why production apps run EC2 in multiple AZs.</div>
+      </div>
+
+      <div class="quiz-container" id="quiz-core"><div class="quiz-header"><h3>⚡ Quick Check — Module 2</h3><span class="quiz-counter" id="qcounter-core">Q 1 / 3</span></div><div class="quiz-body" id="qbody-core"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-core">Score: —</span><button class="btn btn-outline" id="qnext-core" onclick="nextQuestion('core')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 2 Complete!</div><div class="complete-desc">You now understand the AWS geographical and networking model. Time to set up secure access.</div><button class="btn btn-primary" onclick="nextModule()">Continue to IAM →</button></div>
+    </div>
+
+    <!-- ======== MODULE 3: IAM ======== -->
+    <div id="mod-iam" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 3 of 15</div>
+        <h1 class="module-title">IAM & <span class="highlight">Security</span></h1>
+        <p class="module-desc">Identity and Access Management — who can do what in your AWS account. Getting IAM wrong is how breaches happen. Getting it right is how you impress in interviews.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~25 min read</div><div class="meta-chip"><div class="dot"></div> Critical</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔑</span> IAM Concepts</h2>
+        <p>IAM is <strong>global</strong> (not per region) and controls everything. There are four key building blocks:</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">👤</div><div class="card-title">Users</div><div class="card-desc">A person or application that needs AWS access. Has credentials (password or access keys).</div></div>
+          <div class="card"><div class="card-icon">👥</div><div class="card-title">Groups</div><div class="card-desc">A collection of users. Attach a policy to a group and all users in it get those permissions.</div></div>
+          <div class="card"><div class="card-icon">📋</div><div class="card-title">Policies</div><div class="card-desc">JSON documents that define what is ALLOWED or DENIED. Attached to users, groups, or roles.</div></div>
+          <div class="card"><div class="card-icon">🎭</div><div class="card-title">Roles</div><div class="card-desc">Temporary identity for AWS services or external users. An EC2 instance assumes a Role to access S3 — no hard-coded passwords needed.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📝</span> IAM Policies Explained</h2>
+        <p>A policy is just a JSON document. Here's a real one that allows listing and reading an S3 bucket:</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — IAM Policy</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre>{
+  <span class="attr">"Version"</span>: <span class="str">"2012-10-17"</span>,
+  <span class="attr">"Statement"</span>: [
+    {
+      <span class="attr">"Effect"</span>: <span class="str">"Allow"</span>,
+      <span class="attr">"Action"</span>: [
+        <span class="str">"s3:GetObject"</span>,
+        <span class="str">"s3:ListBucket"</span>
+      ],
+      <span class="attr">"Resource"</span>: [
+        <span class="str">"arn:aws:s3:::my-bucket"</span>,
+        <span class="str">"arn:aws:s3:::my-bucket/*"</span>
+      ]
+    }
+  ]
+}</pre></div>
+        <div class="callout info"><strong>Default Deny:</strong> IAM denies EVERYTHING by default. You must explicitly Allow each action. If you see a permission error in AWS, your IAM policy is missing an Allow for that action.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🎭</span> IAM Roles — The Right Way</h2>
+        <p>One of the most important concepts in AWS security: <strong>never hard-code AWS credentials in your code</strong>. Instead, use IAM Roles.</p>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Create an IAM Role with permissions</div><div class="step-desc">e.g., a Role called <code>MyAppRole</code> with an S3 read policy attached.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Assign the Role to your EC2 instance</div><div class="step-desc">When you launch EC2, you select the IAM Role. The instance "becomes" that Role.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Your app uses the Role automatically</div><div class="step-desc">The AWS SDK automatically fetches temporary credentials from the instance metadata. Zero passwords in your code.</div></div></div>
+        </div>
+        <div class="callout danger"><strong>Never do this:</strong> Storing <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> in your source code or .env files that get committed to GitHub. This is how thousands of accounts get hacked each year. Use Roles for services, environment variables only for local dev.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🛡️</span> Principle of Least Privilege</h2>
+        <p>This is the most important IAM concept to mention in any interview:</p>
+        <p><strong>Give only the permissions actually needed — nothing more.</strong> If your app only reads from S3, don't give it <code>s3:*</code> (all S3 permissions). Give it only <code>s3:GetObject</code>.</p>
+        <div class="callout success"><strong>Interview line:</strong> "I follow the principle of least privilege — every IAM Role or User gets only the permissions needed for their specific task, scoped to specific resources using ARNs."</div>
+      </div>
+
+      <div class="quiz-container" id="quiz-iam"><div class="quiz-header"><h3>⚡ Quick Check — Module 3</h3><span class="quiz-counter" id="qcounter-iam">Q 1 / 3</span></div><div class="quiz-body" id="qbody-iam"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-iam">Score: —</span><button class="btn btn-outline" id="qnext-iam" onclick="nextQuestion('iam')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 3 Complete!</div><div class="complete-desc">Security foundation locked in. Now let's launch actual servers with EC2.</div><button class="btn btn-primary" onclick="nextModule()">Continue to EC2 →</button></div>
+    </div>
+
+    <!-- ======== MODULE 4: EC2 ======== -->
+    <div id="mod-ec2" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 4 of 15</div>
+        <h1 class="module-title">EC2 — <span class="highlight">Elastic Compute</span></h1>
+        <p class="module-desc">EC2 is AWS's virtual server service. You'll use it to host applications, run background jobs, and build anything that needs dedicated compute power.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~35 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> Hands-on + Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">💻</span> What is an EC2 Instance?</h2>
+        <p>An EC2 instance is a <strong>virtual machine</strong> (VM) running in AWS data centers. You choose the operating system, CPU, RAM, and storage. You SSH into it like any Linux server and run your app.</p>
+        <div class="callout info"><strong>Elastic</strong> in the name means you can scale up or down. Start with 1 small instance, and spin up 50 more in minutes if traffic spikes.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📦</span> Instance Types — Choosing the Right Size</h2>
+        <p>AWS has hundreds of instance types. The naming convention tells you everything:</p>
+        <div class="arch-diagram">  t3.micro
+  │ │  │
+  │ │  └── Size: nano, micro, small, medium, large, xlarge, 2xlarge...
+  │ └──── Generation: 1, 2, 3, 4... (higher = newer, better perf/price)
+  └────── Family: t (burstable), m (general), c (compute), r (memory), g (GPU)</div>
+        <table class="styled-table">
+          <thead><tr><th>Family</th><th>Optimized For</th><th>Use Case</th></tr></thead>
+          <tbody>
+            <tr><td><code>t3/t4g</code></td><td>Burstable (cheap)</td><td>Dev/test, small web apps, Free Tier</td></tr>
+            <tr><td><code>m6i/m7i</code></td><td>General purpose</td><td>Most production web apps and APIs</td></tr>
+            <tr><td><code>c6i/c7i</code></td><td>CPU-heavy</td><td>Video processing, batch jobs, high-traffic APIs</td></tr>
+            <tr><td><code>r6i/r7i</code></td><td>Memory-heavy</td><td>In-memory databases (Redis), big data analytics</td></tr>
+            <tr><td><code>g4dn/g5</code></td><td>GPU</td><td>ML training/inference, video rendering</td></tr>
+          </tbody>
+        </table>
+        <div class="callout warning"><strong>For the Free Tier:</strong> Use <code>t2.micro</code> or <code>t3.micro</code>. 750 hours/month free for 12 months.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔥</span> Security Groups — EC2's Firewall</h2>
+        <p>A <strong>Security Group</strong> is a virtual firewall that controls inbound and outbound traffic for your EC2 instance. It works at the instance level.</p>
+        <table class="styled-table">
+          <thead><tr><th>Rule Type</th><th>Protocol</th><th>Port</th><th>Source/Dest</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Inbound</td><td>TCP</td><td>22</td><td>Your IP</td><td>SSH access — NEVER 0.0.0.0/0</td></tr>
+            <tr><td>Inbound</td><td>TCP</td><td>80</td><td>0.0.0.0/0</td><td>HTTP (public web traffic)</td></tr>
+            <tr><td>Inbound</td><td>TCP</td><td>443</td><td>0.0.0.0/0</td><td>HTTPS (public web traffic)</td></tr>
+            <tr><td>Outbound</td><td>All</td><td>All</td><td>0.0.0.0/0</td><td>Allow all outbound (default)</td></tr>
+          </tbody>
+        </table>
+        <div class="callout danger"><strong>Critical security rule:</strong> Never open SSH (port 22) to <code>0.0.0.0/0</code>. Bots will find open SSH ports and attempt brute-force attacks within minutes.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🚀</span> Launching Your First EC2 Instance</h2>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Open EC2 Console → Launch Instance</div><div class="step-desc">Search for EC2 in the console, click "Launch instance".</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Choose AMI</div><div class="step-desc">Select "Amazon Linux 2023 AMI" (marked as Free Tier eligible).</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Choose Instance Type</div><div class="step-desc">Select <code>t2.micro</code> or <code>t3.micro</code> (Free Tier eligible).</div></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-content"><div class="step-title">Create a Key Pair</div><div class="step-desc">Choose RSA, .pem format. Download and save it — you cannot download it again. Store at <code>~/.ssh/</code>.</div></div></div>
+          <div class="step"><div class="step-num">5</div><div class="step-content"><div class="step-title">Configure Security Group</div><div class="step-desc">Allow SSH on port 22 from "My IP" only. Allow HTTP/HTTPS if this is a web server.</div></div></div>
+          <div class="step"><div class="step-num">6</div><div class="step-content"><div class="step-title">Launch → SSH In</div><div class="step-desc">Once running, grab the Public IP. SSH in with: <code>ssh -i ~/.ssh/your-key.pem ec2-user@&lt;PUBLIC-IP&gt;</code></div></div></div>
+        </div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — Connect to EC2</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="cmt"># Set correct permissions on your key file (required!)</span>
+<span class="fn">chmod</span> <span class="num">400</span> ~/.ssh/my-key.pem
+
+<span class="cmt"># SSH into Amazon Linux instance</span>
+<span class="fn">ssh</span> -i ~/.ssh/my-key.pem ec2-user@<span class="num">54.123.45.67</span>
+
+<span class="cmt"># SSH into Ubuntu instance (different username)</span>
+<span class="fn">ssh</span> -i ~/.ssh/my-key.pem ubuntu@<span class="num">54.123.45.67</span></pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">💰</span> EC2 Pricing Models</h2>
+        <table class="styled-table">
+          <thead><tr><th>Model</th><th>Discount vs On-Demand</th><th>When to Use</th></tr></thead>
+          <tbody>
+            <tr><td><strong>On-Demand</strong></td><td>—</td><td>Dev/test, unpredictable workloads, getting started</td></tr>
+            <tr><td><strong>Reserved (1yr)</strong></td><td>~40% off</td><td>Steady production workloads you know will run 24/7</td></tr>
+            <tr><td><strong>Reserved (3yr)</strong></td><td>~60% off</td><td>Long-term stable workloads, significant commitment</td></tr>
+            <tr><td><strong>Spot Instances</strong></td><td>Up to 90% off</td><td>Batch jobs, ML training, fault-tolerant workloads — can be interrupted</td></tr>
+            <tr><td><strong>Savings Plans</strong></td><td>~40-60% off</td><td>Flexible commitment; applies across instance types/regions</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> EC2 Cheat Sheet</h2>
+        <div class="cheatsheet-grid">
+          <div class="cs-item"><div class="cs-cmd">ssh -i key.pem ec2-user@IP</div><div class="cs-desc">Connect to Amazon Linux</div></div>
+          <div class="cs-item"><div class="cs-cmd">ssh -i key.pem ubuntu@IP</div><div class="cs-desc">Connect to Ubuntu</div></div>
+          <div class="cs-item"><div class="cs-cmd">chmod 400 key.pem</div><div class="cs-desc">Fix SSH key permissions</div></div>
+          <div class="cs-item"><div class="cs-cmd">curl http://169.254.169.254/latest/meta-data/</div><div class="cs-desc">Instance metadata endpoint</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws ec2 describe-instances</div><div class="cs-desc">List instances via CLI</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws ec2 stop-instances --ids i-xxx</div><div class="cs-desc">Stop an instance</div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-ec2"><div class="quiz-header"><h3>⚡ Quick Check — Module 4</h3><span class="quiz-counter" id="qcounter-ec2">Q 1 / 4</span></div><div class="quiz-body" id="qbody-ec2"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-ec2">Score: —</span><button class="btn btn-outline" id="qnext-ec2" onclick="nextQuestion('ec2')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 4 Complete!</div><div class="complete-desc">EC2 mastered. You can now launch, configure and secure virtual servers. Next up: Load Balancing.</div><button class="btn btn-primary" onclick="nextModule()">Continue to ALB →</button></div>
+    </div>
+
+    <!-- ======== MODULE 5: ALB ======== -->
+    <div id="mod-alb" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 5 of 15</div>
+        <h1 class="module-title">ALB & <span class="highlight">Load Balancing</span></h1>
+        <p class="module-desc">Application Load Balancers distribute incoming traffic across multiple targets — EC2 instances, containers, or Lambda functions. They're the front door of every production architecture.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~25 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚖️</span> Why You Need a Load Balancer</h2>
+        <p>Without a load balancer, users connect directly to a single EC2 instance. If that instance dies, your app is down. If traffic spikes, that single instance gets overwhelmed.</p>
+        <p>A load balancer sits in front of your instances and distributes traffic. If one instance is unhealthy, the ALB stops sending traffic to it. You can add or remove instances without users noticing.</p>
+        <div class="arch-diagram">  Users
+    │
+    ▼
+  ┌─────────────────────────┐
+  │   Application Load      │
+  │     Balancer (ALB)      │
+  │   (public subnet)       │
+  └──────┬──────────┬───────┘
+         │          │
+    ┌────▼───┐ ┌───▼────┐
+    │ EC2-a  │ │ EC2-b  │  ← Target Group
+    │(AZ-a)  │ │(AZ-b)  │
+    └────────┘ └────────┘</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔀</span> ALB vs NLB vs CLB</h2>
+        <table class="styled-table">
+          <thead><tr><th>Type</th><th>Layer</th><th>Best For</th><th>Key Feature</th></tr></thead>
+          <tbody>
+            <tr><td><strong>ALB</strong></td><td>Layer 7 (HTTP/HTTPS)</td><td>Web apps, APIs, microservices</td><td>Path-based & host-based routing, WebSocket support</td></tr>
+            <tr><td><strong>NLB</strong></td><td>Layer 4 (TCP/UDP)</td><td>Ultra-low latency, gaming, IoT, non-HTTP protocols</td><td>Static IP, millions of requests/sec</td></tr>
+            <tr><td><strong>CLB</strong></td><td>Layer 4 + 7</td><td>Legacy — do not use for new projects</td><td>Deprecated, limited features</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>Rule of thumb:</strong> If your traffic is HTTP/HTTPS, use an ALB. If you need raw TCP/UDP performance or static IPs, use an NLB. Never choose CLB for new architectures.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> Listeners, Rules & Target Groups</h2>
+        <p>An ALB has three key concepts that work together:</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">👂</div><div class="card-title">Listener</div><div class="card-desc">Checks for connection requests on a specific port (80 for HTTP, 443 for HTTPS). You can have multiple listeners per ALB.</div></div>
+          <div class="card"><div class="card-icon">📐</div><div class="card-title">Rules</div><div class="card-desc">Conditions on a listener that route traffic differently. E.g., <code>/api/*</code> goes to backend targets, <code>/images/*</code> goes to S3.</div></div>
+          <div class="card"><div class="card-icon">🎯</div><div class="card-title">Target Group</div><div class="card-desc">A group of registered targets (EC2 instances, IPs, Lambda functions). The ALB sends traffic to healthy targets in the group.</div></div>
+          <div class="card"><div class="card-icon">❤️</div><div class="card-title">Health Check</div><div class="card-desc">The ALB periodically pings each target (e.g., <code>GET /health</code>). If a target fails 2 consecutive checks, it's marked unhealthy and removed from rotation.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🛣️</span> Path-Based Routing</h2>
+        <p>This is the killer feature of ALB. You can route traffic to different target groups based on the URL path or hostname.</p>
+        <div class="arch-diagram">  User Request: https://myapp.com/api/users
+         │
+    ┌────▼────────────────────────────────┐
+    │          ALB Listener (443)         │
+    │                                     │
+    │  Rule 1: /api/*  → Backend TG       │
+    │  Rule 2: /web/*  → Frontend TG      │
+    │  Rule 3: /auth/* → Auth Service TG  │
+    │  Default:        → Frontend TG      │
+    └─────────────────────────────────────┘</div>
+        <div class="callout success"><strong>Interview point:</strong> Path-based routing lets you build microservices behind a single ALB. Each service gets its own target group, and the ALB routes by URL prefix. This is the standard pattern for service-oriented architectures on AWS.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔒</span> ALB + HTTPS with ACM</h2>
+        <p>Never serve production traffic over plain HTTP. ALB integrates directly with AWS Certificate Manager (ACM) for free SSL/TLS certificates that auto-renew.</p>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Request a certificate in ACM</div><div class="step-desc">Enter your domain name (e.g., <code>myapp.com</code>). Choose DNS validation.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Add a 443 listener to your ALB</div><div class="step-desc">Select the ACM certificate. Set the default action to forward to your target group.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Redirect HTTP → HTTPS</div><div class="step-desc">On the port 80 listener, set action to "Redirect to HTTPS". All HTTP requests automatically get a 301 redirect.</div></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> ALB Cheat Sheet</h2>
+        <div class="cheatsheet-grid">
+          <div class="cs-item"><div class="cs-cmd">aws elbv2 create-load-balancer</div><div class="cs-desc">Create an ALB via CLI</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws elbv2 create-target-group</div><div class="cs-desc">Create a target group</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws elbv2 register-targets</div><div class="cs-desc">Add instances to a target group</div></div>
+          <div class="cs-item"><div class="cs-cmd">Deletion protection</div><div class="cs-desc">Enable in production to prevent accidental deletion</div></div>
+          <div class="cs-item"><div class="cs-cmd">Cross-zone LB (enabled by default)</div><div class="cs-desc">Distributes evenly across all AZs</div></div>
+          <div class="cs-item"><div class="cs-cmd">Stickiness (cookie-based)</div><div class="cs-desc">Route same user to same target — use sparingly</div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-alb"><div class="quiz-header"><h3>⚡ Quick Check — Module 5</h3><span class="quiz-counter" id="qcounter-alb">Q 1 / 3</span></div><div class="quiz-body" id="qbody-alb"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-alb">Score: —</span><button class="btn btn-outline" id="qnext-alb" onclick="nextQuestion('alb')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 5 Complete!</div><div class="complete-desc">Load balancing is the foundation of highly available architectures. Now let's make it auto-scale.</div><button class="btn btn-primary" onclick="nextModule()">Continue to Auto Scaling →</button></div>
+    </div>
+
+    <!-- ======== MODULE 6: ASG ======== -->
+    <div id="mod-asg" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 6 of 15</div>
+        <h1 class="module-title">Auto Scaling <span class="highlight">Groups</span></h1>
+        <p class="module-desc">ASGs automatically add or remove EC2 instances based on demand. Traffic spike at 3 AM? New instances spin up. Traffic dies down? Instances terminate. You pay only for what you need.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~25 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📈</span> How Auto Scaling Works</h2>
+        <p>An ASG manages a fleet of EC2 instances. You define the minimum, desired, and maximum number of instances. AWS maintains the desired count automatically.</p>
+        <div class="arch-diagram">  Traffic spike detected
+         │
+         ▼
+  CloudWatch Alarm: CPU > 70%
+         │
+         ▼
+  ASG: scale from 2 → 4 instances
+         │
+         ▼
+  2 new EC2 instances launch (60s boot)
+         │
+         ▼
+  ALB health check passes → instances receive traffic
+         │
+         ▼
+  CPU drops below 30% → ASG scales back to 2</div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">⬇️</div><div class="card-title">Min Size</div><div class="card-desc">The minimum number of instances running at all times. Never goes below this, even during low traffic.</div></div>
+          <div class="card"><div class="card-icon">🎯</div><div class="card-title">Desired Capacity</div><div class="card-desc">The target number of instances. The ASG always tries to maintain this. Scaling policies change the desired capacity.</div></div>
+          <div class="card"><div class="card-icon">⬆️</div><div class="card-title">Max Size</div><div class="card-desc">The ceiling. The ASG will never launch more than this number, protecting you from runaway costs.</div></div>
+          <div class="card"><div class="card-icon">🏥</div><div class="card-title">Health Check Grace Period</div><div class="card-desc">How long to wait after an instance launches before checking its health. Default: 300 seconds. Gives the app time to start.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📐</span> Scaling Policies</h2>
+        <table class="styled-table">
+          <thead><tr><th>Policy</th><th>How It Works</th><th>Best For</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Target Tracking</strong></td><td>Set a target metric (e.g., CPU = 50%). ASG adjusts instances to maintain it.</td><td>Most workloads. Simple and effective. Start here.</td></tr>
+            <tr><td><strong>Step Scaling</strong></td><td>Define thresholds: CPU > 60% add 1, CPU > 80% add 3.</td><td>Complex workloads with non-linear scaling needs.</td></tr>
+            <tr><td><strong>Scheduled Scaling</strong></td><td>Scale at specific times. E.g., add instances Mon-Fri 8 AM.</td><td>Predictable traffic patterns like business hours.</td></tr>
+            <tr><td><strong>Predictive Scaling</strong></td><td>ML-based. AWS forecasts traffic and pre-scales.</td><td>Cyclical workloads with historical data.</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>Recommended starting config:</strong> Target tracking on CPU utilization at 50%, with a min of 2 and max of 10. This handles 90% of web application scenarios.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔧</span> Launch Templates</h2>
+        <p>A Launch Template defines the "recipe" for each instance the ASG creates: AMI, instance type, security group, IAM role, user data script, storage, etc.</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JSON — Launch Template (conceptual)</span></div><pre>{
+  <span class="attr">"ImageId"</span>: <span class="str">"ami-0abcdef1234567890"</span>,
+  <span class="attr">"InstanceType"</span>: <span class="str">"t3.small"</span>,
+  <span class="attr">"KeyName"</span>: <span class="str">"my-key"</span>,
+  <span class="attr">"SecurityGroupIds"</span>: [<span class="str">"sg-0123456789"</span>],
+  <span class="attr">"IamInstanceProfile"</span>: { <span class="attr">"Name"</span>: <span class="str">"MyAppRole"</span> },
+  <span class="attr">"UserData"</span>: <span class="str">"&lt;base64 encoded bootstrap script&gt;"</span>,
+  <span class="attr">"BlockDeviceMappings"</span>: [{
+    <span class="attr">"DeviceName"</span>: <span class="str">"/dev/xvda"</span>,
+    <span class="attr">"Ebs"</span>: { <span class="attr">"VolumeSize"</span>: <span class="num">30</span>, <span class="attr">"VolumeType"</span>: <span class="str">"gp3"</span> }
+  }]
+}</pre></div>
+        <div class="callout warning"><strong>Launch Templates vs Launch Configurations:</strong> Launch Configurations are legacy and cannot be modified after creation. Always use Launch Templates — they support versioning, overrides, and newer instance features.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> ALB + ASG — The Standard Production Pattern</h2>
+        <p>This is the most common production architecture on AWS. The ALB distributes traffic and reports health; the ASG maintains instance count.</p>
+        <div class="arch-diagram">  Internet
+     │
+     ▼
+  ┌──────────────┐
+  │     ALB      │  ← Public subnet, HTTPS listener
+  │ Health Check │     pings GET /health
+  └──┬───────┬───┘
+     │       │
+  ┌──▼──┐ ┌─▼───┐
+  │EC2-1│ │EC2-2│  ← ASG manages these
+  │(a)  │ │(b)  │     Launches in private subnets across AZs
+  └─────┘ └─────┘
+     ▲       ▲
+     └───────┘
+  ASG: Min=2, Max=10
+  Policy: Target tracking CPU=50%</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">💰</span> Mixed Instances & Spot in ASG</h2>
+        <p>Mixed Instances Policies let you blend On-Demand and Spot instances in a single ASG, cutting costs dramatically while maintaining availability.</p>
+        <div class="callout success"><strong>Cost optimization pattern:</strong> Set base capacity of 2 On-Demand instances, then allow up to 8 additional Spot instances from diverse instance types (t3, m5, m6i). If one Spot type gets interrupted, the ASG replaces it with another. This can cut EC2 costs by 50-70%.</div>
+      </div>
+
+      <div class="quiz-container" id="quiz-asg"><div class="quiz-header"><h3>⚡ Quick Check — Module 6</h3><span class="quiz-counter" id="qcounter-asg">Q 1 / 3</span></div><div class="quiz-body" id="qbody-asg"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-asg">Score: —</span><button class="btn btn-outline" id="qnext-asg" onclick="nextQuestion('asg')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 6 Complete!</div><div class="complete-desc">You now know how to build auto-scaling, load-balanced architectures. Time for storage.</div><button class="btn btn-primary" onclick="nextModule()">Continue to S3 →</button></div>
+    </div>
+
+    <!-- ======== MODULE 7: S3 ======== -->
+    <div id="mod-s3" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 7 of 15</div>
+        <h1 class="module-title">S3 — <span class="highlight">Object Storage</span></h1>
+        <p class="module-desc">Simple Storage Service. Unlimited storage for files, images, videos, backups, and static websites. One of AWS's oldest and most reliable services.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~30 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> Code + Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🗂️</span> Buckets & Objects</h2>
+        <p>S3 has two main concepts: <strong>buckets</strong> (containers) and <strong>objects</strong> (files). Think of a bucket as a folder and objects as the files inside.</p>
+        <div class="callout info"><strong>S3 is NOT a filesystem.</strong> It's object storage. There are no true directories — "folders" in S3 are just a naming convention using slashes in the key name, e.g. <code>photos/2024/jan/img1.jpg</code>.</div>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🪣</div><div class="card-title">Bucket</div><div class="card-desc">Top-level container. Name must be globally unique across ALL of AWS. Lives in one Region.</div></div>
+          <div class="card"><div class="card-icon">📄</div><div class="card-title">Object</div><div class="card-desc">A file stored in a bucket. Has a key (path), value (data), metadata, and optional version ID.</div></div>
+          <div class="card"><div class="card-icon">🔑</div><div class="card-title">Object Key</div><div class="card-desc">The "path" to the object: <code>images/profile/user123.jpg</code>. The key is unique within a bucket.</div></div>
+          <div class="card"><div class="card-icon">📏</div><div class="card-title">Size Limits</div><div class="card-desc">Max object size: 5TB. Use multipart upload for anything over 5GB.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">💾</span> Storage Classes</h2>
+        <table class="styled-table">
+          <thead><tr><th>Class</th><th>Access Pattern</th><th>Retrieval Time</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td><strong>S3 Standard</strong></td><td>Frequent access</td><td>Milliseconds</td><td>Highest storage cost</td></tr>
+            <tr><td><strong>S3 Standard-IA</strong></td><td>Infrequent access</td><td>Milliseconds</td><td>Lower storage, retrieval fee</td></tr>
+            <tr><td><strong>S3 Intelligent-Tiering</strong></td><td>Unknown pattern</td><td>Milliseconds</td><td>Auto-moves between tiers</td></tr>
+            <tr><td><strong>S3 Glacier Instant</strong></td><td>Archive, rare access</td><td>Milliseconds</td><td>Very cheap storage</td></tr>
+            <tr><td><strong>S3 Glacier Flexible</strong></td><td>Archive, restore in hrs</td><td>Minutes to hours</td><td>Cheapest long-term</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🌐</span> Static Website Hosting</h2>
+        <p>S3 can serve static HTML/CSS/JS files as a website. This is perfect for React/Vue/Next.js static exports, and costs pennies per month.</p>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Create a bucket with your domain name</div><div class="step-desc">Name the bucket exactly your domain: <code>www.myapp.com</code></div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Enable static website hosting</div><div class="step-desc">Bucket Properties → Static website hosting → Enable. Set index document: <code>index.html</code></div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Disable Block Public Access & add bucket policy</div><div class="step-desc">Allow <code>s3:GetObject</code> to <code>Principal: "*"</code> for your bucket ARN.</div></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-content"><div class="step-title">Upload your build files</div><div class="step-desc">Upload your <code>dist/</code> or <code>build/</code> folder. Your site is now live at the S3 endpoint.</div></div></div>
+        </div>
+        <div class="callout success"><strong>Production upgrade:</strong> Put CloudFront (AWS CDN) in front of your S3 bucket for HTTPS, custom domain support, and global caching.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚙️</span> Working with S3 via CLI & SDK</h2>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — AWS CLI S3 Commands</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="cmt"># Create a bucket</span>
+aws s3 mb s3://my-unique-bucket-name --region us-east-1
+
+<span class="cmt"># Upload a file</span>
+aws s3 cp ./image.png s3://my-bucket/images/image.png
+
+<span class="cmt"># Sync a local folder to S3 (great for deployments)</span>
+aws s3 sync ./dist s3://my-bucket/ --delete
+
+<span class="cmt"># List bucket contents</span>
+aws s3 ls s3://my-bucket/
+
+<span class="cmt"># Generate a pre-signed URL (valid 1 hour)</span>
+aws s3 presign s3://my-bucket/private-doc.pdf --expires-in 3600</pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔄</span> Versioning & Lifecycle Rules</h2>
+        <p><strong>Versioning:</strong> Enable on a bucket to keep all versions of objects. Accidentally delete or overwrite a file? Restore the previous version.</p>
+        <p><strong>Lifecycle Rules:</strong> Automatically move objects to cheaper storage classes or delete them after a set time. Example: move to Standard-IA after 30 days, archive to Glacier after 90 days, delete after 365 days.</p>
+      </div>
+
+      <div class="quiz-container" id="quiz-s3"><div class="quiz-header"><h3>⚡ Quick Check — Module 7</h3><span class="quiz-counter" id="qcounter-s3">Q 1 / 4</span></div><div class="quiz-body" id="qbody-s3"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-s3">Score: —</span><button class="btn btn-outline" id="qnext-s3" onclick="nextQuestion('s3')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 7 Complete!</div><div class="complete-desc">S3 is one of the most-used AWS services in the world. On to databases.</div><button class="btn btn-primary" onclick="nextModule()">Continue to RDS →</button></div>
+    </div>
+
+    <!-- ======== MODULE 8: RDS ======== -->
+    <div id="mod-rds" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 8 of 15</div>
+        <h1 class="module-title">RDS — <span class="highlight">Managed Databases</span></h1>
+        <p class="module-desc">Relational Database Service. AWS handles patching, backups, replication. You just write SQL and connect.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~30 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> Code + Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🗄️</span> What RDS Does For You</h2>
+        <p>Running your own database on EC2 means you're responsible for everything: OS patches, database engine updates, backups, hardware failures, replication setup, monitoring. That's a second job.</p>
+        <p>RDS is a <strong>managed service</strong> — AWS handles all of that. You get a database endpoint and connect to it.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔧</div><div class="card-title">Automated Patching</div><div class="card-desc">AWS patches the OS and database engine automatically during your maintenance window.</div></div>
+          <div class="card"><div class="card-icon">📸</div><div class="card-title">Automated Backups</div><div class="card-desc">Daily backups + transaction logs. Restore to any point in time within your retention period.</div></div>
+          <div class="card"><div class="card-icon">🔄</div><div class="card-title">Multi-AZ Failover</div><div class="card-desc">Standby replica in another AZ. If primary fails, automatic failover in ~60 seconds.</div></div>
+          <div class="card"><div class="card-icon">📊</div><div class="card-title">Read Replicas</div><div class="card-desc">Read-only copies to distribute SELECT queries. Scale reads independently from writes.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🗃️</span> Supported Database Engines</h2>
+        <table class="styled-table">
+          <thead><tr><th>Engine</th><th>Best For</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>PostgreSQL</strong></td><td>General purpose, JSON, complex queries</td><td>Most popular choice for new SaaS apps</td></tr>
+            <tr><td><strong>MySQL</strong></td><td>Web apps, WordPress, legacy systems</td><td>Huge community, well-understood</td></tr>
+            <tr><td><strong>Aurora (PostgreSQL)</strong></td><td>High-performance, scalable</td><td>AWS-proprietary, 3x faster than standard PostgreSQL</td></tr>
+            <tr><td><strong>Aurora (MySQL)</strong></td><td>High-performance, scalable</td><td>5x faster than standard MySQL</td></tr>
+            <tr><td><strong>SQL Server</strong></td><td>.NET apps, Microsoft ecosystem</td><td>Expensive licensing</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>For new projects:</strong> Choose RDS PostgreSQL or Aurora PostgreSQL. PostgreSQL has excellent JSON support, full-text search, and extensions like PostGIS.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> Multi-AZ vs Read Replicas</h2>
+        <div class="arch-diagram">  MULTI-AZ (for availability/failover)          READ REPLICA (for performance)
+  ─────────────────────────────────          ────────────────────────────────
+  App → Primary DB (AZ-a) ──sync──→ Standby  App (writes) → Primary DB
+          ↓ failover if primary fails                    ↓ replication
+        Standby becomes new Primary        App (reads) → Read Replica 1
+                                           App (reads) → Read Replica 2
+  • Standby is NOT readable              • Replicas ARE readable
+  • Automatic failover ~60s              • You route read traffic manually
+  • Same region, different AZ            • Can be in different regions</div>
+        <div class="callout warning"><strong>Interview trap:</strong> "Can you read from the Multi-AZ standby?" Answer: NO. The standby is purely for failover. Only Read Replicas accept read traffic.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔒</span> RDS Security — The Right Pattern</h2>
+        <div class="arch-diagram">  Internet
+     │
+     ▼
+  [Load Balancer]  ← Public Subnet
+     │
+     ▼
+  [EC2 / App Server]  ← Private Subnet
+     │
+     ▼
+  [RDS Instance]  ← Private Subnet (no public IP)
+     │
+  Security Group: only accept connections from App Server SG on port 5432</div>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Put RDS in a private subnet</div><div class="step-desc">Select private subnets via a DB Subnet Group. Disable "Publicly accessible".</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Create an RDS Security Group</div><div class="step-desc">Inbound: allow port 5432 (Postgres) or 3306 (MySQL) ONLY from the app server's Security Group.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Use Secrets Manager for credentials</div><div class="step-desc">Never hard-code DB passwords. Store them in AWS Secrets Manager. RDS can rotate them automatically.</div></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-content"><div class="step-title">Enable encryption at rest</div><div class="step-desc">Enabled by default on new RDS instances. Uses AWS KMS. No performance penalty.</div></div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚙️</span> Connecting to RDS from Code</h2>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — Connect to RDS PostgreSQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="kw">import</span> { Pool } <span class="kw">from</span> <span class="str">"pg"</span>;
+
+<span class="kw">const</span> pool = <span class="kw">new</span> <span class="fn">Pool</span>({
+  host: process.env.<span class="attr">DB_HOST</span>,       <span class="cmt">// RDS endpoint</span>
+  port: <span class="num">5432</span>,
+  database: process.env.<span class="attr">DB_NAME</span>,
+  user: process.env.<span class="attr">DB_USER</span>,
+  password: process.env.<span class="attr">DB_PASS</span>,   <span class="cmt">// from Secrets Manager</span>
+  ssl: { rejectUnauthorized: <span class="kw">false</span> },
+  max: <span class="num">20</span>,
+  idleTimeoutMillis: <span class="num">30000</span>,
+});
+
+<span class="kw">export async function</span> <span class="fn">query</span>(sql, params) {
+  <span class="kw">const</span> client = <span class="kw">await</span> pool.<span class="fn">connect</span>();
+  <span class="kw">try</span> {
+    <span class="kw">return</span> <span class="kw">await</span> client.<span class="fn">query</span>(sql, params);
+  } <span class="kw">finally</span> {
+    client.<span class="fn">release</span>();
+  }
+}</pre></div>
+      </div>
+
+      <div class="quiz-container" id="quiz-rds"><div class="quiz-header"><h3>⚡ Quick Check — Module 8</h3><span class="quiz-counter" id="qcounter-rds">Q 1 / 4</span></div><div class="quiz-body" id="qbody-rds"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-rds">Score: —</span><button class="btn btn-outline" id="qnext-rds" onclick="nextQuestion('rds')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 8 Complete!</div><div class="complete-desc">RDS mastered. Next: caching to make your database blazing fast.</div><button class="btn btn-primary" onclick="nextModule()">Continue to ElastiCache →</button></div>
+    </div>
+
+    <!-- ======== MODULE 9: ELASTICACHE ======== -->
+    <div id="mod-elasticache" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 9 of 15</div>
+        <h1 class="module-title">Elasti<span class="highlight">Cache</span></h1>
+        <p class="module-desc">In-memory caching that makes your database 10-100x faster for reads. ElastiCache sits between your app and RDS, serving frequently accessed data from memory instead of disk.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~20 min read</div><div class="meta-chip"><div class="dot"></div> Performance</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚡</span> Why Caching Matters</h2>
+        <p>Every database query takes time — even optimized ones. If 10,000 users request the same product page, querying the database 10,000 times is wasteful. Caching stores the result in memory and serves it in under 1ms.</p>
+        <div class="arch-diagram">  Without Cache:                      With Cache:
+  App → RDS (5-20ms per query)      App → ElastiCache (0.5ms) → hit? return
+                                      │
+                                      ▼ miss
+                                    RDS (5-20ms) → store in cache → return</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔄</span> Redis vs Memcached</h2>
+        <table class="styled-table">
+          <thead><tr><th>Feature</th><th>Redis</th><th>Memcached</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Data Structures</strong></td><td>Strings, Lists, Sets, Sorted Sets, Hashes</td><td>Strings only</td></tr>
+            <tr><td><strong>Persistence</strong></td><td>Yes (snapshots + AOF)</td><td>No — data lost on restart</td></tr>
+            <tr><td><strong>Clustering</strong></td><td>Yes — multi-node with sharding</td><td>Yes — multi-threaded, sharding</td></tr>
+            <tr><td><strong>Pub/Sub</strong></td><td>Yes</td><td>No</td></tr>
+            <tr><td><strong>Sorted data</strong></td><td>Yes (sorted sets for leaderboards, queues)</td><td>No</td></tr>
+            <tr><td><strong>Best For</strong></td><td>Session storage, leaderboards, queues, caching</td><td>Simple key-value caching, multi-threaded performance</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>Default choice:</strong> Pick Redis unless you have a specific reason for Memcached. Redis is more feature-rich, supports persistence, and has better tooling. Most AWS architectures use Redis.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> Caching Strategies</h2>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">💤</div><div class="card-title">Lazy Loading (Cache-Aside)</div><div class="card-desc">App checks cache first. On miss, query DB, store result in cache with TTL. Most common pattern. Simple and effective.</div></div>
+          <div class="card"><div class="card-icon">✏️</div><div class="card-title">Write-Through</div><div class="card-desc">App writes to cache AND database simultaneously. Data is always fresh in cache, but writes are slower.</div></div>
+          <div class="card"><div class="card-icon">⏰</div><div class="card-title">TTL (Time to Live)</div><div class="card-desc">Every cached entry has an expiration. After TTL, the entry is deleted and the next request hits the DB. Prevents stale data.</div></div>
+          <div class="card"><div class="card-icon">🗑️</div><div class="card-title">Cache Invalidation</div><div class="card-desc">When data changes, delete the cached entry. Next read repopulates it. The hardest problem in caching is knowing when to invalidate.</div></div>
+        </div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — Lazy Loading with Redis</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="kw">import</span> Redis <span class="kw">from</span> <span class="str">"ioredis"</span>;
+
+<span class="kw">const</span> redis = <span class="kw">new</span> <span class="fn">Redis</span>(process.env.<span class="attr">REDIS_URL</span>);
+
+<span class="kw">async function</span> <span class="fn">getProduct</span>(productId) {
+  <span class="cmt">// 1. Check cache</span>
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">`product:</span>${productId}<span class="str">`</span>);
+  <span class="kw">if</span> (cached) <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached);
+
+  <span class="cmt">// 2. Cache miss — query database</span>
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">query</span>(<span class="str">"SELECT * FROM products WHERE id = $1"</span>, [productId]);
+
+  <span class="cmt">// 3. Store in cache with 5-minute TTL</span>
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(<span class="str">`product:</span>${productId}<span class="str">`</span>, <span class="num">300</span>, JSON.<span class="fn">stringify</span>(result.rows[<span class="num">0</span>]));
+
+  <span class="kw">return</span> result.rows[<span class="num">0</span>];
+}</pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> ElastiCache Architecture</h2>
+        <p>ElastiCache Redis nodes live in private subnets. Your app connects to the Redis primary endpoint for writes and the reader endpoint for reads (if using replicas).</p>
+        <div class="arch-diagram">  ┌──────────────────────────────────────────┐
+  │  App Servers (Private Subnet)            │
+  │     │                                    │
+  │     ├──→ ElastiCache Redis (primary +    │
+  │     │     replica in different AZ)       │
+  │     │         │                          │
+  │     │    cache miss                      │
+  │     │         ▼                          │
+  │     └──→ RDS PostgreSQL (Multi-AZ)       │
+  └──────────────────────────────────────────┘</div>
+        <div class="callout warning"><strong>Security:</strong> ElastiCache nodes should be in private subnets. Use Security Groups to allow access only from your app server's SG. Enable in-transit encryption (TLS) and at-rest encryption. Use AUTH tokens for Redis.</div>
+      </div>
+
+      <div class="quiz-container" id="quiz-elasticache"><div class="quiz-header"><h3>⚡ Quick Check — Module 9</h3><span class="quiz-counter" id="qcounter-elasticache">Q 1 / 3</span></div><div class="quiz-body" id="qbody-elasticache"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-elasticache">Score: —</span><button class="btn btn-outline" id="qnext-elasticache" onclick="nextQuestion('elasticache')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 9 Complete!</div><div class="complete-desc">You can now make any database-backed app dramatically faster. Time for containers.</div><button class="btn btn-primary" onclick="nextModule()">Continue to ECS →</button></div>
+    </div>
+
+    <!-- ======== MODULE 10: ECS ======== -->
+    <div id="mod-ecs" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 10 of 15</div>
+        <h1 class="module-title">ECS & <span class="highlight">Containers</span></h1>
+        <p class="module-desc">Elastic Container Service. Run Docker containers on AWS without managing servers (Fargate) or on EC2 you control. ECS is the backbone of modern microservice architectures.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~35 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> Hands-on + Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🐳</span> What Are Containers?</h2>
+        <p>A container packages your application code along with all its dependencies (libraries, runtime, system tools) into a single image. It runs identically on your laptop, in staging, and in production. No more "works on my machine."</p>
+        <p>Containers are lighter than VMs. An EC2 instance runs an entire OS. A container shares the host OS kernel and runs only your app. You can pack many containers onto one instance.</p>
+        <div class="callout info"><strong>Key difference:</strong> A VM virtualizes hardware. A container virtualizes the operating system. VMs take minutes to start; containers start in seconds.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📦</span> ECS Core Concepts</h2>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🏢</div><div class="card-title">Cluster</div><div class="card-desc">A logical grouping of compute resources (EC2 instances or Fargate). Your services and tasks run inside a cluster.</div></div>
+          <div class="card"><div class="card-icon">📋</div><div class="card-title">Task Definition</div><div class="card-desc">The blueprint for your container: image, CPU, memory, ports, environment variables, IAM role, volumes. Think of it as a Docker Compose file for AWS.</div></div>
+          <div class="card"><div class="card-icon">🚀</div><div class="card-title">Task</div><div class="card-desc">A running instance of a Task Definition. One container (or group of containers) actually executing. A Task is to a Task Definition what an EC2 instance is to an AMI.</div></div>
+          <div class="card"><div class="card-icon">🔄</div><div class="card-title">Service</div><div class="card-desc">Maintains a desired number of running Tasks. If a task crashes, the Service replaces it. Integrates with ALB for load balancing. This is what you deploy to production.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚡</span> Fargate vs EC2 Launch Type</h2>
+        <table class="styled-table">
+          <thead><tr><th>Feature</th><th>Fargate</th><th>EC2</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Server management</strong></td><td>Zero — no instances to manage</td><td>You manage the EC2 instances in the cluster</td></tr>
+            <tr><td><strong>Pricing</strong></td><td>Pay per vCPU and GB of memory per second</td><td>Pay for EC2 instances (can use Reserved/Spot)</td></tr>
+            <tr><td><strong>Startup time</strong></td><td>~30-60 seconds</td><td>~5-10 seconds (instance already running)</td></tr>
+            <tr><td><strong>Bin packing</strong></td><td>Not needed — each task gets its own resources</td><td>You decide how many tasks fit per instance</td></tr>
+            <tr><td><strong>GPU support</strong></td><td>Limited</td><td>Full (g4dn, p3 instances)</td></tr>
+            <tr><td><strong>Best for</strong></td><td>Most workloads. Start here.</td><td>High-throughput, GPU, or cost-optimized (Spot) workloads</td></tr>
+          </tbody>
+        </table>
+        <div class="callout success"><strong>Rule of thumb:</strong> Start with Fargate. Move to EC2 only when you need GPU, extremely high throughput, or want to optimize costs with Spot instances for batch processing.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🖼️</span> ECR — Elastic Container Registry</h2>
+        <p>ECR is AWS's Docker image registry. You push your built images to ECR, and ECS pulls them when launching tasks.</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — Build, Push, and Deploy</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="cmt"># 1. Authenticate Docker to ECR</span>
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin <span class="num">123456789.dkr.ecr.us-east-1.amazonaws.com</span>
+
+<span class="cmt"># 2. Build your image</span>
+docker build -t my-app .
+
+<span class="cmt"># 3. Tag it for ECR</span>
+docker tag my-app:latest <span class="num">123456789.dkr.ecr.us-east-1.amazonaws.com</span>/my-app:latest
+
+<span class="cmt"># 4. Push to ECR</span>
+docker push <span class="num">123456789.dkr.ecr.us-east-1.amazonaws.com</span>/my-app:latest
+
+<span class="cmt"># 5. Force ECS service to pull new image</span>
+aws ecs update-service --cluster my-cluster --service my-service --force-new-deployment</pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🎭</span> Task Role vs Execution Role</h2>
+        <p>This is a common confusion point. Two different IAM Roles are involved in ECS:</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🚀</div><div class="card-title">Task Execution Role</div><div class="card-desc">Used by the ECS <strong>agent</strong> to pull images from ECR, send logs to CloudWatch, and fetch secrets from Secrets Manager. You grant it: <code>ecr:GetAuthorizationToken</code>, <code>ecr:BatchGetImage</code>, <code>logs:CreateLogStream</code>, <code>secretsmanager:GetSecretValue</code>.</div></div>
+          <div class="card"><div class="card-icon">🔑</div><div class="card-title">Task Role</div><div class="card-desc">Used by your <strong>application code</strong> running inside the container. If your app needs to read from S3, write to SQS, or call DynamoDB, those permissions go here. This is where least privilege matters most.</div></div>
+        </div>
+        <div class="callout danger"><strong>Common mistake:</strong> Granting S3 or DynamoDB permissions to the Execution Role instead of the Task Role. The Execution Role is for infrastructure tasks. The Task Role is for your application.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> ECS + ALB — Production Architecture</h2>
+        <div class="arch-diagram">  Internet
+     │
+     ▼
+  ┌──────────────┐
+  │     ALB      │  ← Public subnets, HTTPS
+  └──┬───────┬───┘
+     │       │
+  ┌──▼──┐ ┌─▼───┐
+  │Task │ │Task │  ← Fargate tasks in private subnets
+  │ (a) │ │ (b) │     ECS Service maintains desired count
+  └──┬──┘ └──┬──┘
+     │       │
+  ┌──▼───────▼──┐
+  │  RDS / Redis │  ← Isolated subnets
+  └──────────────┘
+
+  VPC Flow:
+  Public Subnets:  ALB
+  Private Subnets: ECS Fargate tasks + NAT Gateway
+  Isolated Subnets: RDS + ElastiCache</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> ECS Cheat Sheet</h2>
+        <div class="cheatsheet-grid">
+          <div class="cs-item"><div class="cs-cmd">aws ecs create-cluster</div><div class="cs-desc">Create an ECS cluster</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws ecs register-task-definition</div><div class="cs-desc">Register a task definition from JSON</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws ecs create-service</div><div class="cs-desc">Create a service with desired count</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws ecs update-service --force-new-deployment</div><div class="cs-desc">Force redeploy with new image</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws ecs describe-services</div><div class="cs-desc">Check service status and task health</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws logs tail /ecs/my-app</div><div class="cs-desc">Stream container logs in real time</div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-ecs"><div class="quiz-header"><h3>⚡ Quick Check — Module 10</h3><span class="quiz-counter" id="qcounter-ecs">Q 1 / 4</span></div><div class="quiz-body" id="qbody-ecs"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-ecs">Score: —</span><button class="btn btn-outline" id="qnext-ecs" onclick="nextQuestion('ecs')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 10 Complete!</div><div class="complete-desc">You can now run containers at scale on AWS. Next: API Gateway.</div><button class="btn btn-primary" onclick="nextModule()">Continue to API Gateway →</button></div>
+    </div>
+
+    <!-- ======== MODULE 11: API GATEWAY ======== -->
+    <div id="mod-apigw" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 11 of 15</div>
+        <h1 class="module-title">API <span class="highlight">Gateway</span></h1>
+        <p class="module-desc">A fully managed service for creating, publishing, and securing APIs. It acts as the "front door" for your backend services — handling authentication, throttling, caching, and routing.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~20 min read</div><div class="meta-chip"><div class="dot"></div> Core Service</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🚪</span> What API Gateway Does</h2>
+        <p>API Gateway is a managed proxy that sits between your clients and your backend. It handles:</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔐</div><div class="card-title">Authentication</div><div class="card-desc">Validate JWT tokens, integrate with Cognito, or use Lambda authorizers. Your backend only receives authenticated requests.</div></div>
+          <div class="card"><div class="card-icon">🚦</div><div class="card-title">Throttling</div><div class="card-desc">Rate limiting per API key, per client, or globally. Prevent abuse and protect backends from traffic spikes.</div></div>
+          <div class="card"><div class="card-icon">📊</div><div class="card-title">Monitoring</div><div class="card-desc">Built-in CloudWatch metrics: request count, latency, error rates. No instrumentation needed.</div></div>
+          <div class="card"><div class="card-icon">🗺️</div><div class="card-title">Request/Response Transformation</div><div class="card-desc">Modify headers, query strings, and body before they reach your backend or return to the client.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔀</span> REST API vs HTTP API</h2>
+        <table class="styled-table">
+          <thead><tr><th>Feature</th><th>HTTP API</th><th>REST API</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Price</strong></td><td>~70% cheaper</td><td>Higher cost</td></tr>
+            <tr><td><strong>Latency</strong></td><td>Lower latency</td><td>Slightly higher</td></tr>
+            <tr><td><strong>Authorizers</strong></td><td>JWT, Lambda</td><td>JWT, Lambda, Cognito, IAM</td></tr>
+            <tr><td><strong>Caching</strong></td><td>No built-in caching</td><td>Built-in edge caching</td></tr>
+            <tr><td><strong>Request validation</strong></td><td>No</td><td>Yes — JSON Schema validation</td></tr>
+            <tr><td><strong>Usage plans / API keys</strong></td><td>No</td><td>Yes</td></tr>
+            <tr><td><strong>Best for</strong></td><td>Most new APIs. Start here.</td><td>Complex APIs needing caching, validation, or usage plans</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>Rule of thumb:</strong> Start with HTTP API. Upgrade to REST API only if you need built-in caching, request validation, or API key usage plans.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔗</span> Integration Types</h2>
+        <p>API Gateway can forward requests to different backends:</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">⚡</div><div class="card-title">Lambda Proxy</div><div class="card-desc">The most common pattern. API Gateway invokes a Lambda function. The entire request is passed to Lambda, and Lambda returns the response.</div></div>
+          <div class="card"><div class="card-icon">🌐</div><div class="card-title">HTTP Proxy</div><div class="card-desc">Forwards the request to any HTTP endpoint — your ECS service, ALB, or even an external API. No Lambda needed.</div></div>
+          <div class="card"><div class="card-icon">☁️</div><div class="card-title">AWS Service</div><div class="card-desc">Direct integration with AWS services. E.g., <code>POST /messages</code> → directly publishes to an SQS queue without any compute in between.</div></div>
+          <div class="card"><div class="card-icon">🔌</div><div class="card-title">VPC Link</div><div class="card-desc">Connects API Gateway to resources in a private VPC (like an internal ALB). Keeps your backend completely private.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> API Gateway Architecture</h2>
+        <div class="arch-diagram">  Mobile App / Browser
+         │
+         ▼
+  ┌──────────────────┐
+  │   API Gateway    │  ← Handles auth, throttling, CORS
+  │  (HTTP API)      │
+  └──┬────┬────┬─────┘
+     │    │    │
+  ┌──▼┐ ┌─▼──┐ ▼
+  │/users │/orders │ /payments
+  │Lambda │Lambda  │ → SQS Queue
+  └──────┘ └──────┘
+  
+  OR for container backends:
+  API Gateway → VPC Link → Internal ALB → ECS Tasks</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> API Gateway Cheat Sheet</h2>
+        <div class="cheatsheet-grid">
+          <div class="cs-item"><div class="cs-cmd">aws apigatewayv2 create-api</div><div class="cs-desc">Create an HTTP API</div></div>
+          <div class="cs-item"><div class="cs-cmd">aws apigatewayv2 create-stage</div><div class="cs-desc">Deploy to a stage (dev, prod)</div></div>
+          <div class="cs-item"><div class="cs-cmd">Custom domain: ACM cert + Route 53</div><div class="cs-desc">Use api.myapp.com instead of generated URL</div></div>
+          <div class="cs-item"><div class="cs-cmd">CORS: configure at API level</div><div class="cs-desc">Set allowed origins, methods, headers</div></div>
+          <div class="cs-item"><div class="cs-cmd">Stages: dev / staging / prod</div><div class="cs-desc">Each stage has its own URL and config</div></div>
+          <div class="cs-item"><div class="cs-cmd">$default stage</div><div class="cs-desc">Auto-deploy — changes go live immediately</div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-apigw"><div class="quiz-header"><h3>⚡ Quick Check — Module 11</h3><span class="quiz-counter" id="qcounter-apigw">Q 1 / 3</span></div><div class="quiz-body" id="qbody-apigw"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-apigw">Score: —</span><button class="btn btn-outline" id="qnext-apigw" onclick="nextQuestion('apigw')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 11 Complete!</div><div class="complete-desc">API Gateway gives you a managed front door for any backend. Next: messaging with SQS & SNS.</div><button class="btn btn-primary" onclick="nextModule()">Continue to SQS & SNS →</button></div>
+    </div>
+
+    <!-- ======== MODULE 12: SQS & SNS ======== -->
+    <div id="mod-messaging" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 12 of 15</div>
+        <h1 class="module-title">SQS & <span class="highlight">SNS</span></h1>
+        <p class="module-desc">Messaging services that decouple your architecture. SQS queues messages for processing. SNS broadcasts notifications to multiple subscribers. Together they enable resilient, event-driven systems.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~25 min read</div><div class="meta-chip"><div class="dot"></div> Architecture</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📨</span> Why Messaging?</h2>
+        <p>Without messaging, Service A directly calls Service B. If Service B is slow or down, Service A fails too. Messaging breaks this dependency:</p>
+        <div class="arch-diagram">  SYNCHRONOUS (tightly coupled):       ASYNCHRONOUS (decoupled):
+  Order Service → Payment Service      Order Service → SQS Queue ← Payment Service
+  
+  • Payment is slow? Orders fail.      • Payment is slow? Orders still accepted.
+  • Payment is down? Orders fail.      • Payment is down? Messages wait in queue.
+  • Traffic spike? Both crash.         • Traffic spike? Queue absorbs it.</div>
+        <div class="callout success"><strong>Interview principle:</strong> "I decouple services with queues to improve resilience. If the downstream service is slow or unavailable, the queue buffers requests and the upstream service continues operating."</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📬</span> SQS — Simple Queue Service</h2>
+        <p>SQS is a fully managed message queue. Producers send messages to a queue. Consumers poll the queue and process messages.</p>
+        <table class="styled-table">
+          <thead><tr><th>Feature</th><th>Standard Queue</th><th>FIFO Queue</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Ordering</strong></td><td>Best-effort (may arrive out of order)</td><td>Strictly ordered (First-In-First-Out)</td></tr>
+            <tr><td><strong>Delivery</strong></td><td>At-least-once (duplicates possible)</td><td>Exactly-once (no duplicates)</td></tr>
+            <tr><td><strong>Throughput</strong></td><td>Unlimited (nearly)</td><td>300 msgs/sec (or 3,000 with batching)</td></tr>
+            <tr><td><strong>Best for</strong></td><td>Most workloads. Order doesn't matter.</td><td>Financial transactions, order processing where order matters.</td></tr>
+          </tbody>
+        </table>
+
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">⏱️ Visibility Timeout <span class="acc-arrow">▼</span></div><div class="acc-body">When a consumer receives a message, it becomes "invisible" to other consumers for the visibility timeout period (default 30 seconds). The consumer must delete the message after processing. If it doesn't (e.g., the consumer crashes), the message becomes visible again and another consumer picks it up. Set this to slightly longer than your expected processing time.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">💀 Dead-Letter Queue (DLQ) <span class="acc-arrow">▼</span></div><div class="acc-body">A separate queue where messages go after failing to process a set number of times (maxReceiveCount). Without a DLQ, poison messages (messages that always cause errors) would be processed forever. With a DLQ, they're moved aside for investigation. Always configure a DLQ in production.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">📨 Message Retention <span class="acc-arrow">▼</span></div><div class="acc-body">Messages are kept in the queue for 1-14 days (default: 4 days). If no consumer processes them within the retention period, they're deleted. For long-term storage, configure the DLQ with a longer retention period.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📢</span> SNS — Simple Notification Service</h2>
+        <p>SNS is a pub/sub messaging service. You publish a message to a <strong>topic</strong>, and all subscribers receive it. Think of it as a broadcast system.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">📡</div><div class="card-title">Topic</div><div class="card-desc">A communication channel. You publish messages to a topic, and SNS delivers them to all subscribers.</div></div>
+          <div class="card"><div class="card-icon">📬</div><div class="card-title">Subscribers</div><div class="card-desc">SQS queues, Lambda functions, HTTP endpoints, email addresses, SMS, or mobile push notifications.</div></div>
+          <div class="card"><div class="card-icon">🌊</div><div class="card-title">Fan-Out Pattern</div><div class="card-desc">One SNS topic → multiple SQS queues. A single event (e.g., "order placed") triggers parallel processing: inventory update, payment processing, email notification.</div></div>
+          <div class="card"><div class="card-icon">🔒</div><div class="card-title">Message Filtering</div><div class="card-desc">Subscribers can set filter policies to receive only specific messages. E.g., only receive messages where <code>"type": "payment"</code>.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> SNS + SQS Fan-Out Architecture</h2>
+        <div class="arch-diagram">  S3 Event / API Gateway / App
+         │
+         ▼
+  ┌──────────┐
+  │ SNS Topic│  ← "order-placed" event published here
+  └──┬───┬───┘
+     │   │
+  ┌──▼┐ ┌▼────────┐
+  │SQS│ │SQS      │  ← Each queue gets a copy
+  │Pay│ │Inventory│     Processed independently
+  └─┬─┘ └────┬────┘
+    │         │
+  ┌─▼─┐   ┌──▼──┐
+  │Lambda/│ │Lambda/│
+  │Worker │ │Worker │
+  └─────┘   └─────┘
+
+  Benefits:
+  • Each service processes at its own pace
+  • If payment processing fails, inventory still processes
+  • Easy to add new subscribers (e.g., analytics) without changing existing services</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚙️</span> Sending Messages from Code</h2>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — SQS & SNS SDK</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="kw">import</span> { SQSClient, SendMessageCommand } <span class="kw">from</span> <span class="str">"@aws-sdk/client-sqs"</span>;
+<span class="kw">import</span> { SNSClient, PublishCommand } <span class="kw">from</span> <span class="str">"@aws-sdk/client-sns"</span>;
+
+<span class="kw">const</span> sqs = <span class="kw">new</span> <span class="fn">SQSClient</span>({ region: <span class="str">"us-east-1"</span> });
+<span class="kw">const</span> sns = <span class="kw">new</span> <span class="fn">SNSClient</span>({ region: <span class="str">"us-east-1"</span> });
+
+<span class="cmt">// Send to SQS</span>
+<span class="kw">await</span> sqs.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">SendMessageCommand</span>({
+  QueueUrl: process.env.<span class="attr">QUEUE_URL</span>,
+  MessageBody: JSON.<span class="fn">stringify</span>({ orderId: <span class="str">"12345"</span>, amount: <span class="num">99.99</span> }),
+  MessageGroupId: <span class="str">"orders"</span>,           <span class="cmt">// FIFO only</span>
+  MessageDeduplicationId: <span class="str">"order-12345"</span> <span class="cmt">// FIFO only</span>
+}));
+
+<span class="cmt">// Publish to SNS</span>
+<span class="kw">await</span> sns.<span class="fn">send</span>(<span class="kw">new</span> <span class="fn">PublishCommand</span>({
+  TopicArn: process.env.<span class="attr">TOPIC_ARN</span>,
+  Subject: <span class="str">"Order Placed"</span>,
+  Message: JSON.<span class="fn">stringify</span>({ orderId: <span class="str">"12345"</span>, status: <span class="str">"placed"</span> }),
+  MessageAttributes: {
+    <span class="attr">"eventType"</span>: { DataType: <span class="str">"String"</span>, StringValue: <span class="str">"order_placed"</span> }
+  }
+}));</pre></div>
+      </div>
+
+      <div class="quiz-container" id="quiz-messaging"><div class="quiz-header"><h3>⚡ Quick Check — Module 12</h3><span class="quiz-counter" id="qcounter-messaging">Q 1 / 3</span></div><div class="quiz-body" id="qbody-messaging"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-messaging">Score: —</span><button class="btn btn-outline" id="qnext-messaging" onclick="nextQuestion('messaging')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 12 Complete!</div><div class="complete-desc">Messaging makes architectures resilient. Next: monitoring everything with CloudWatch.</div><button class="btn btn-primary" onclick="nextModule()">Continue to CloudWatch →</button></div>
+    </div>
+
+    <!-- ======== MODULE 13: CLOUDWATCH ======== -->
+    <div id="mod-cloudwatch" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 13 of 15</div>
+        <h1 class="module-title">CloudWatch & <span class="highlight">Observability</span></h1>
+        <p class="module-desc">If you can't see it, you can't fix it. CloudWatch gives you metrics, logs, alarms, and traces for every AWS service. This module covers the full observability stack.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~30 min read</div><div class="meta-chip"><div class="dot"></div> Operations</div><div class="meta-chip"><div class="dot"></div> 1 Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📊</span> The Three Pillars of Observability</h2>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">📈</div><div class="card-title">Metrics</div><div class="card-desc">Numerical data over time: CPU utilization, request count, error rate, latency. CloudWatch collects these automatically for most AWS services.</div></div>
+          <div class="card"><div class="card-icon">📝</div><div class="card-title">Logs</div><div class="card-desc">Text records of events: application logs, access logs, error traces. CloudWatch Logs stores and indexes them for searching.</div></div>
+          <div class="card"><div class="card-icon">🔍</div><div class="card-title">Traces</div><div class="card-desc">End-to-end request tracking across services. A single user request might hit API Gateway → Lambda → DynamoDB. X-Ray traces the full path and identifies bottlenecks.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📈</span> CloudWatch Metrics</h2>
+        <p>Most AWS services publish metrics to CloudWatch automatically. You don't need to configure anything for basic metrics like EC2 CPU, ALB request count, or RDS connections.</p>
+        <table class="styled-table">
+          <thead><tr><th>Service</th><th>Key Metrics</th></tr></thead>
+          <tbody>
+            <tr><td><strong>EC2</strong></td><td>CPUUtilization, NetworkIn/Out, DiskRead/Write</td></tr>
+            <tr><td><strong>ALB</strong></td><td>RequestCount, TargetResponseTime, HTTPCode_Target_5XX</td></tr>
+            <tr><td><strong>RDS</strong></td><td>CPUUtilization, FreeableMemory, DatabaseConnections, ReadLatency</td></tr>
+            <tr><td><strong>SQS</strong></td><td>ApproximateNumberOfMessagesVisible, ApproximateAgeOfOldestMessage</td></tr>
+            <tr><td><strong>ECS</strong></td><td>CPUUtilization, MemoryUtilization, RunningTaskCount</td></tr>
+            <tr><td><strong>ElastiCache</strong></td><td>CacheHitRate, CacheMisses, CurrConnections, Evictions</td></tr>
+          </tbody>
+        </table>
+        <div class="callout info"><strong>Custom metrics:</strong> For application-level metrics (e.g., "orders per minute," "queue depth"), use the CloudWatch Embedded Metric Format (EMF) or the PutMetricData API. Install the CloudWatch Agent for OS-level metrics like memory and disk usage — EC2 only sends CPU by default.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🚨</span> CloudWatch Alarms</h2>
+        <p>Alarms watch a metric and trigger actions when a threshold is breached. This is how you get notified before users notice problems.</p>
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><div class="step-content"><div class="step-title">Choose a metric</div><div class="step-desc">e.g., ALB <code>HTTPCode_Target_5XX</code> (server errors)</div></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-content"><div class="step-title">Set threshold</div><div class="step-desc">e.g., "Greater than 10 errors in 5 minutes"</div></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-content"><div class="step-title">Define action</div><div class="step-desc">Send SNS notification (email, Slack via Lambda), trigger Auto Scaling, or invoke a Lambda function for auto-remediation.</div></div></div>
+        </div>
+        <div class="callout warning"><strong>Production must-haves:</strong> At minimum, create alarms for: 5XX error rate > threshold, CPU > 80% for 10 minutes, RDS free storage < 20%, SQS oldest message age > 5 minutes, and ElastiCache cache hit rate < 80%.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📝</span> CloudWatch Logs</h2>
+        <p>CloudWatch Logs stores, searches, and analyzes log data. It's organized into <strong>Log Groups</strong> (e.g., <code>/ecs/my-app</code>) containing <strong>Log Streams</strong> (individual log sequences from each container/instance).</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — Structured Logging for CloudWatch</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="cmt">// Structured JSON logs are searchable in CloudWatch Insights</span>
+<span class="kw">function</span> <span class="fn">log</span>(level, message, extra = {}) {
+  console.<span class="fn">log</span>(JSON.<span class="fn">stringify</span>({
+    level,
+    message,
+    timestamp: <span class="kw">new</span> <span class="fn">Date</span>().<span class="fn">toISOString</span>(),
+    service: <span class="str">"order-service"</span>,
+    ...extra
+  }));
+}
+
+<span class="fn">log</span>(<span class="str">"INFO"</span>, <span class="str">"Order processed"</span>, { orderId: <span class="str">"12345"</span>, duration: <span class="num">142</span> });
+<span class="fn">log</span>(<span class="str">"ERROR"</span>, <span class="str">"Payment failed"</span>, { orderId: <span class="str">"12345"</span>, error: <span class="str">"timeout"</span> });</pre></div>
+        <div class="callout success"><strong>CloudWatch Insights:</strong> Query logs with a SQL-like syntax. E.g., <code>fields @timestamp, @message | filter level = "ERROR" | sort @timestamp desc | limit 50</code>. This is invaluable for debugging production issues.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🔍</span> X-Ray — Distributed Tracing</h2>
+        <p>When a request flows through API Gateway → ECS → RDS → ElastiCache, which service is slow? X-Ray traces the full journey and shows you a service map with latency at each step.</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">JavaScript — X-Ray SDK</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="kw">import</span> AWSXRay <span class="kw">from</span> <span class="str">"aws-xray-sdk-core"</span>;
+
+<span class="cmt">// Wrap your AWS SDK calls to auto-trace them</span>
+<span class="kw">const</span> s3 = AWSXRay.<span class="fn">captureAWSv3Client</span>(
+  <span class="kw">new</span> <span class="fn">S3Client</span>({ region: <span class="str">"us-east-1"</span> })
+);
+
+<span class="cmt">// Create custom subsegments for application code</span>
+<span class="kw">const</span> segment = AWSXRay.<span class="fn">getSegment</span>();
+<span class="kw">const</span> subsegment = segment.<span class="fn">addNewSubsegment</span>(<span class="str">"processOrder"</span>);
+<span class="kw">try</span> {
+  <span class="cmt">// ... business logic</span>
+  subsegment.<span class="fn">addAnnotation</span>(<span class="str">"orderId"</span>, <span class="str">"12345"</span>);
+} <span class="kw">finally</span> {
+  subsegment.<span class="fn">close</span>();
+}</pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🛡️</span> CloudTrail — API Audit Logging</h2>
+        <p>CloudTrail records <strong>every API call</strong> made in your AWS account. Who created that S3 bucket? Who modified that security group? When was that RDS instance deleted?</p>
+        <div class="callout info"><strong>CloudTrail vs CloudWatch Logs:</strong> CloudTrail tracks <em>who did what</em> in AWS (audit/security). CloudWatch Logs tracks <em>what your application says</em> (operational). Both are essential. Enable CloudTrail from day one — it's enabled by default for management events.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🖥️</span> CloudWatch Dashboards</h2>
+        <p>Build custom dashboards that show your system's health at a glance. Combine metrics from multiple services on a single screen. Share dashboards with your team via URL.</p>
+        <div class="callout success"><strong>Interview tip:</strong> Mention that you build operational dashboards during on-call. Showing a dashboard with ALB error rate, ECS CPU/memory, RDS connections, and SQS queue depth demonstrates that you think about production readiness.</div>
+      </div>
+
+      <div class="quiz-container" id="quiz-cloudwatch"><div class="quiz-header"><h3>⚡ Quick Check — Module 13</h3><span class="quiz-counter" id="qcounter-cloudwatch">Q 1 / 3</span></div><div class="quiz-body" id="qbody-cloudwatch"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-cloudwatch">Score: —</span><button class="btn btn-outline" id="qnext-cloudwatch" onclick="nextQuestion('cloudwatch')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 13 Complete!</div><div class="complete-desc">You now understand the full observability stack. Last technical module: Terraform for Infrastructure as Code.</div><button class="btn btn-primary" onclick="nextModule()">Continue to Terraform →</button></div>
+    </div>
+
+    <!-- ======== MODULE 14: TERRAFORM ======== -->
+    <div id="mod-terraform" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 14 of 15</div>
+        <h1 class="module-title"><span class="highlight">Terraform</span> — Infrastructure as Code</h1>
+        <p class="module-desc">Everything you've learned so far was done via the console (clicks). In production, you define infrastructure in code with Terraform — version-controlled, repeatable, and auditable.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~30 min read</div><div class="meta-chip"><div class="dot"></div> Critical Skill</div><div class="meta-chip"><div class="dot"></div> Code + Quiz</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> Why Infrastructure as Code?</h2>
+        <p>Imagine you built your entire infrastructure by clicking through the AWS console. Now you need to recreate it in a second region for disaster recovery. Do you click through everything again? What if you miss a setting?</p>
+        <p>With IaC, your infrastructure is defined in files. You apply those files to create identical environments every time.</p>
+        <div class="card-grid">
+          <div class="card"><div class="card-icon">🔁</div><div class="card-title">Repeatable</div><div class="card-desc">Deploy identical dev, staging, and production environments from the same code.</div></div>
+          <div class="card"><div class="card-icon">📝</div><div class="card-title">Version Controlled</div><div class="card-desc">Store in Git. Review infrastructure changes in pull requests. Roll back to previous versions.</div></div>
+          <div class="card"><div class="card-icon">👁️</div><div class="card-title">Auditable</div><div class="card-desc">Git history shows who changed what and when. Compliance teams love this.</div></div>
+          <div class="card"><div class="card-icon">🤝</div><div class="card-title">Collaborative</div><div class="card-desc">Teams work on infrastructure together using the same workflow as application code.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">⚙️</span> Terraform Basics</h2>
+        <p>Terraform uses HCL (HashiCorp Configuration Language). The core workflow is: write code → plan changes → apply changes.</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HCL — main.tf (EC2 Instance)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="kw">terraform</span> {
+  <span class="attr">required_providers</span> {
+    <span class="fn">aws</span> = {
+      source  = <span class="str">"hashicorp/aws"</span>
+      version = <span class="str">"~&gt; 5.0"</span>
+    }
+  }
+}
+
+<span class="kw">provider</span> <span class="str">"aws"</span> {
+  region = <span class="str">"us-east-1"</span>
+}
+
+<span class="kw">resource</span> <span class="str">"aws_instance"</span> <span class="str">"web"</span> {
+  ami           = <span class="str">"ami-0abcdef1234567890"</span>
+  instance_type = <span class="str">"t3.micro"</span>
+
+  <span class="attr">tags</span> = {
+    Name = <span class="str">"web-server-1"</span>
+  }
+}
+
+<span class="kw">output</span> <span class="str">"instance_ip"</span> {
+  value = aws_instance.web.public_ip
+}</pre></div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">Bash — Terraform Workflow</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="cmt"># 1. Initialize — download providers</span>
+terraform init
+
+<span class="cmt"># 2. Plan — preview changes (dry run)</span>
+terraform plan
+
+<span class="cmt"># 3. Apply — create/update infrastructure</span>
+terraform apply
+
+<span class="cmt"># 4. Destroy — tear down everything</span>
+terraform destroy</pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📦</span> Variables & Outputs</h2>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HCL — variables.tf</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div><pre><span class="kw">variable</span> <span class="str">"environment"</span> {
+  type        = string
+  description = <span class="str">"Deployment environment"</span>
+  default     = <span class="str">"dev"</span>
+}
+
+<span class="kw">variable</span> <span class="str">"instance_type"</span> {
+  type    = string
+  default = <span class="str">"t3.micro"</span>
+}
+
+<span class="cmt"># Usage in main.tf:</span>
+<span class="cmt"># instance_type = var.instance_type</span>
+<span class="cmt"># Name = "web-${var.environment}"</span>
+
+<span class="cmt"># Apply with overrides:</span>
+<span class="cmt"># terraform apply -var="environment=prod" -var="instance_type=t3.large"</span></pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🗺️</span> State Management</h2>
+        <p>Terraform tracks what it created in a <strong>state file</strong> (<code>terraform.tfstate</code>). This file maps your code to real AWS resources.</p>
+        <div class="callout danger"><strong>Never commit state files to Git.</strong> They contain sensitive data (passwords, keys). Use a <strong>remote backend</strong> — store state in S3 with DynamoDB for locking:</div>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HCL — Remote State Backend</span></div><pre><span class="kw">terraform</span> {
+  <span class="attr">backend</span> <span class="str">"s3"</span> {
+    bucket         = <span class="str">"my-terraform-state"</span>
+    key            = <span class="str">"prod/terraform.tfstate"</span>
+    region         = <span class="str">"us-east-1"</span>
+    dynamodb_table = <span class="str">"terraform-locks"</span>  <span class="cmt"># Prevents concurrent applies</span>
+    encrypt        = <span class="kw">true</span>
+  }
+}</pre></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🧩</span> Modules — Reusable Infrastructure</h2>
+        <p>Modules are reusable packages of Terraform config. Instead of copy-pasting the same VPC setup across 10 projects, you create a VPC module and reference it:</p>
+        <div class="code-block"><div class="code-header"><span class="code-lang">HCL — Using a Module</span></div><pre><span class="kw">module</span> <span class="str">"vpc"</span> {
+  source = <span class="str">"./modules/vpc"</span>
+
+  cidr_block       = <span class="str">"10.0.0.0/16"</span>
+  environment      = var.environment
+  availability_zones = [<span class="str">"us-east-1a"</span>, <span class="str">"us-east-1b"</span>]
+}
+
+<span class="cmt"># Reference module outputs:</span>
+<span class="cmt"># module.vpc.private_subnet_ids</span></pre></div>
+        <div class="callout info"><strong>Community modules:</strong> Use the official AWS modules from the Terraform Registry. E.g., <code>terraform-aws-modules/vpc/aws</code> creates a production-ready VPC with subnets, NAT gateways, and route tables in ~20 lines of code.</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📋</span> Terraform Cheat Sheet</h2>
+        <div class="cheatsheet-grid">
+          <div class="cs-item"><div class="cs-cmd">terraform init</div><div class="cs-desc">Initialize working directory, download providers</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform plan</div><div class="cs-desc">Preview changes before applying</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform apply</div><div class="cs-desc">Create or update infrastructure</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform destroy</div><div class="cs-desc">Delete all managed resources</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform state list</div><div class="cs-desc">List all resources in state</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform import aws_instance.web i-xxx</div><div class="cs-desc">Import existing resource into state</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform fmt</div><div class="cs-desc">Auto-format all .tf files</div></div>
+          <div class="cs-item"><div class="cs-cmd">terraform validate</div><div class="cs-desc">Check syntax and configuration</div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-terraform"><div class="quiz-header"><h3>⚡ Quick Check — Module 14</h3><span class="quiz-counter" id="qcounter-terraform">Q 1 / 3</span></div><div class="quiz-body" id="qbody-terraform"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-terraform">Score: —</span><button class="btn btn-outline" id="qnext-terraform" onclick="nextQuestion('terraform')" style="display:none;">Next Question →</button></div></div>
+      <div class="module-complete"><div class="complete-icon">🎉</div><div class="complete-title">Module 14 Complete!</div><div class="complete-desc">You can now codify any AWS architecture. Final module: Interview Preparation.</div><button class="btn btn-primary" onclick="nextModule()">Continue to Interview Prep →</button></div>
+    </div>
+
+    <!-- ======== MODULE 15: INTERVIEW ======== -->
+    <div id="mod-interview" class="module">
+      <div class="module-hero">
+        <div class="module-badge">📍 Module 15 of 15</div>
+        <h1 class="module-title">Interview <span class="highlight">Mastery</span></h1>
+        <p class="module-desc">The exact questions you'll be asked, model answers, architecture design challenges, and key phrases that signal competence. This module covers all 14 prior topics.</p>
+        <div class="module-meta"><div class="meta-chip"><div class="dot"></div> ~40 min</div><div class="meta-chip"><div class="dot"></div> High Value</div><div class="meta-chip"><div class="dot"></div> Practice Scenarios</div></div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">❓</span> EC2 & ALB Questions</h2>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What is the difference between stopping and terminating an EC2 instance?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>Stop:</strong> Instance shuts down but EBS root volume is preserved. Not charged for compute, still pay for EBS storage. Can restart with data intact.<br><br><strong>Terminate:</strong> Instance AND root EBS volume are deleted (unless Delete on Termination is false). Permanent.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What's the difference between ALB and NLB?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>ALB (Layer 7):</strong> Routes based on HTTP content — URL path, hostname, headers. Supports WebSocket, path-based routing, host-based routing. Best for web apps and APIs.<br><br><strong>NLB (Layer 4):</strong> Routes TCP/UDP traffic. Ultra-low latency (~100ms vs ALB's ~400ms). Static IP addresses. Best for non-HTTP protocols, gaming, IoT, and extreme throughput.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"How would you ensure your EC2 app is highly available?" <span class="acc-arrow">▼</span></div><div class="acc-body">Deploy EC2 instances across <strong>multiple Availability Zones</strong> in an <strong>Auto Scaling Group</strong>. Put an <strong>ALB</strong> in front to distribute traffic and perform health checks. Use <strong>Launch Templates</strong> for consistent configuration. If one AZ fails, ASG maintains desired count in remaining AZs and ALB routes around the failure.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">❓</span> Auto Scaling & Compute Questions</h2>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What scaling policy would you use for a web application?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>Target tracking on CPU at 50%.</strong> This is the simplest and most effective policy for most web apps. The ASG automatically adds instances when CPU exceeds 50% and removes them when it drops below. For more nuanced control, add scheduled scaling for known traffic patterns (e.g., business hours) and step scaling for traffic spikes that need faster response.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What is the difference between Fargate and EC2 for ECS?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>Fargate:</strong> Serverless — you don't manage instances. Pay per vCPU/memory per second. Start here for most workloads.<br><br><strong>EC2:</strong> You manage the instances. Can use Spot for 70%+ savings. Better for GPU workloads or very high throughput where you need bin packing control. Choose EC2 when cost optimization with Spot is critical or you need GPU/ARM instances.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">❓</span> S3 & Storage Questions</h2>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"How would you allow users to upload files directly to S3 from the browser?" <span class="acc-arrow">▼</span></div><div class="acc-body">Use <strong>pre-signed PUT URLs</strong>. Backend generates a pre-signed URL with a time limit (e.g., 10 minutes). Client uploads directly to S3 via PUT — no traffic through your server. After upload, S3 can trigger a Lambda via Event Notifications for post-processing (thumbnail generation, virus scan, etc.).</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What is S3's consistency model?" <span class="acc-arrow">▼</span></div><div class="acc-body">Since December 2020, S3 offers <strong>strong read-after-write consistency</strong> for all operations. Immediately after a successful PUT or DELETE, any subsequent GET or LIST reflects that change. No eventual consistency concerns.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">❓</span> RDS & Caching Questions</h2>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What is the difference between Multi-AZ and Read Replicas?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>Multi-AZ</strong> = availability. Synchronous standby in another AZ. Automatic failover in ~60s. Standby is NOT readable. Same connection string.<br><br><strong>Read Replicas</strong> = performance. Asynchronous replicas for read traffic. Up to 15 replicas. Can be cross-region. CAN be promoted to standalone if needed.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"When would you use ElastiCache?" <span class="acc-arrow">▼</span></div><div class="acc-body">When database reads are a bottleneck. Common scenarios: <strong>session storage</strong> (replace sticky sessions), <strong>query result caching</strong> (product pages, user profiles), <strong>rate limiting</strong> (count requests in Redis), <strong>leaderboards</strong> (sorted sets). Always use lazy loading (cache-aside) as the default pattern, with TTL to prevent stale data.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">❓</span> Messaging & Event-Driven Questions</h2>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"When would you use SQS vs SNS?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>SQS</strong> for point-to-point: one producer, one consumer. Messages are pulled by the consumer. Use when you need reliable processing with retry (DLQ) and want to decouple producer from consumer speed.<br><br><strong>SNS</strong> for pub/sub: one producer, many subscribers. Messages are pushed to subscribers. Use when multiple services need to react to the same event. Often combined: SNS → fan-out → multiple SQS queues.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"What is a Dead-Letter Queue and why do you need one?" <span class="acc-arrow">▼</span></div><div class="acc-body">A DLQ is a separate SQS queue where messages go after failing to process a configured number of times (maxReceiveCount). Without a DLQ, "poison messages" that always cause errors would be retried forever, blocking the queue. With a DLQ, they're moved aside for investigation while the main queue continues processing healthy messages. Always configure one in production.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">❓</span> Terraform & IaC Questions</h2>
+        <div class="accordion">
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"Why Terraform over CloudFormation?" <span class="acc-arrow">▼</span></div><div class="acc-body"><strong>Terraform</strong> is cloud-agnostic (works with AWS, GCP, Azure, 100+ providers). HCL is more readable than CloudFormation's verbose JSON/YAML. Terraform plan shows changes before applying. State management is explicit. Community modules are extensive.<br><br><strong>CloudFormation</strong> is AWS-native, free, and deeply integrated (Drift Detection, StackSets). Better choice if you're 100% AWS and want zero external tooling. Most teams choose Terraform for its flexibility and ecosystem.</div></div>
+          <div class="acc-item"><div class="acc-header" onclick="toggleAcc(this)">"How do you handle secrets in Terraform?" <span class="acc-arrow">▼</span></div><div class="acc-body">Never hard-code secrets in .tf files. Use <strong>AWS Secrets Manager</strong> or <strong>SSM Parameter Store</strong> to store secrets, and reference them in Terraform with data sources. For sensitive Terraform variables, use <code>TF_VAR_</code> environment variables or <code>.tfvars</code> files excluded from Git via <code>.gitignore</code>. Enable state encryption and use a remote backend with restricted access.</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🏗️</span> Architecture Design Challenges</h2>
+        <div class="callout warning"><strong>Challenge 1:</strong> Design a containerized SaaS platform with user auth, file uploads, PostgreSQL, Redis caching, and async processing. Handle 10,000 DAU.</div>
+        <div class="arch-diagram">  ┌──────────────────────────────────────────────────────────────────┐
+  │                     Complete SaaS Architecture                    │
+  │                                                                   │
+  │  Users → Route 53 → CloudFront (CDN + HTTPS)                    │
+  │                          │                                        │
+  │              ┌───────────┼───────────────┐                       │
+  │              ↓           ↓               ↓                        │
+  │         [S3 Static   [API Gateway]   [S3 Uploads]               │
+  │          Website]      │                (pre-signed URLs)         │
+  │                   [VPC Link]                                     │
+  │                        │                                         │
+  │                   [Internal ALB]                                  │
+  │                   ┌────┴────┐                                    │
+  │                   ↓         ↓                                     │
+  │             [ECS Fargate  [ECS Fargate                           │
+  │              Service A]   Service B]   ← Auto Scaling            │
+  │                   │         │                                     │
+  │          ┌────────┴─────────┤                                    │
+  │          ↓                  ↓                                     │
+  │   [ElastiCache        [SQS Queue]                               │
+  │    Redis]              ← Async jobs                              │
+  │          │                  │                                     │
+  │          ↓             [ECS Worker]                              │
+  │   [RDS PostgreSQL]                                                 │
+  │    Multi-AZ]                                                      │
+  │                                                                   │
+  │  Monitoring: CloudWatch Metrics + Alarms + X-Ray                  │
+  │  Secrets: AWS Secrets Manager                                     │
+  │  IaC: Terraform (VPC, ECS, RDS, Redis, SQS modules)             │
+  └──────────────────────────────────────────────────────────────────┘</div>
+        <p>When presenting, walk through layer by layer and explain the <em>why</em> behind each choice — not just the what.</p>
+
+        <div class="callout warning"><strong>Challenge 2:</strong> Design a real-time order processing system where orders come in via API, get queued, processed by workers, cached in Redis, and stored in PostgreSQL. Include observability.</div>
+        <div class="arch-diagram">  API Gateway → ECS Service (validation) → SNS Topic
+                                                    │
+                                   ┌────────────────┼────────────────┐
+                                   ↓                ↓                ↓
+                              SQS Orders      SQS Analytics    SQS Notifications
+                                   │                │                │
+                              ECS Worker       ECS Worker       Lambda
+                                   │                │             (email/SMS)
+                                   ↓                ↓
+                              ElastiCache ←→ RDS PostgreSQL
+                              (Redis)        (orders table)
+                                   │
+                              CloudWatch ← X-Ray traces
+                              (metrics,    (end-to-end latency)
+                               logs,
+                               alarms)</div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">🎯</span> Key Phrases to Use in Interviews</h2>
+        <div class="tag-row">
+          <span class="tag-chip orange">Least Privilege</span>
+          <span class="tag-chip orange">High Availability</span>
+          <span class="tag-chip orange">Fault Tolerant</span>
+          <span class="tag-chip blue">Multi-AZ deployment</span>
+          <span class="tag-chip blue">Auto Scaling Group</span>
+          <span class="tag-chip blue">Application Load Balancer</span>
+          <span class="tag-chip green">No hardcoded credentials</span>
+          <span class="tag-chip green">IAM Roles for services</span>
+          <span class="tag-chip green">Pre-signed URLs</span>
+          <span class="tag-chip purple">Encryption at rest and in transit</span>
+          <span class="tag-chip purple">Defense in depth</span>
+          <span class="tag-chip cyan">Infrastructure as Code</span>
+          <span class="tag-chip cyan">Decoupled architecture</span>
+          <span class="tag-chip cyan">Event-driven processing</span>
+          <span class="tag-chip cyan">Observability</span>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title"><span class="icon">📚</span> AWS Certifications Roadmap</h2>
+        <div class="steps">
+          <div class="step"><div class="step-num">→</div><div class="step-content"><div class="step-title">AWS Cloud Practitioner (CLF-C02)</div><div class="step-desc">Foundational cert. ~2 weeks prep. Boosts your resume immediately.</div></div></div>
+          <div class="step"><div class="step-num">→</div><div class="step-content"><div class="step-title">AWS Solutions Architect Associate (SAA-C03)</div><div class="step-desc">The most respected AWS cert for engineers. Covers EC2, S3, RDS, VPC, ECS, and more. ~6-8 weeks prep.</div></div></div>
+          <div class="step"><div class="step-num">→</div><div class="step-content"><div class="step-title">AWS Developer Associate (DVA-C02)</div><div class="step-desc">Focused on building and deploying apps: Lambda, API Gateway, DynamoDB, SQS/SNS, CodeDeploy. Best cert for software engineers.</div></div></div>
+        </div>
+      </div>
+
+      <div class="quiz-container" id="quiz-interview"><div class="quiz-header"><h3>🏆 Final Challenge — Mixed Topics</h3><span class="quiz-counter" id="qcounter-interview">Q 1 / 5</span></div><div class="quiz-body" id="qbody-interview"></div><div class="quiz-nav"><span class="quiz-score" id="qscore-interview">Score: —</span><button class="btn btn-outline" id="qnext-interview" onclick="nextQuestion('interview')" style="display:none;">Next Question →</button></div></div>
+
+      <div class="module-complete" style="background:linear-gradient(135deg, rgba(255,153,0,0.1), rgba(255,153,0,0.02)); border-color:rgba(255,153,0,0.3);">
+        <div class="complete-icon">🏆</div>
+        <div class="complete-title" style="color:var(--accent)">Course Complete!</div>
+        <div class="complete-desc">You've covered AWS fundamentals, IAM, EC2, ALB, Auto Scaling, S3, RDS, ElastiCache, ECS, API Gateway, SQS/SNS, CloudWatch, Terraform, and interview preparation. You're ready to build production architectures on AWS.</div>
+        <div class="tag-row" style="justify-content:center;margin-top:12px;">
+          <span class="tag-chip orange">EC2 ✓</span>
+          <span class="tag-chip blue">ALB ✓</span>
+          <span class="tag-chip green">ASG ✓</span>
+          <span class="tag-chip purple">S3 ✓</span>
+          <span class="tag-chip cyan">RDS ✓</span>
+          <span class="tag-chip orange">ElastiCache ✓</span>
+          <span class="tag-chip blue">ECS ✓</span>
+          <span class="tag-chip green">API GW ✓</span>
+          <span class="tag-chip purple">SQS/SNS ✓</span>
+          <span class="tag-chip cyan">CloudWatch ✓</span>
+          <span class="tag-chip orange">Terraform ✓</span>
+          <span class="tag-chip blue">IAM ✓</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content-area -->
+</main>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+const MODULES = ['intro','core','iam','ec2','alb','asg','s3','rds','elasticache','ecs','apigw','messaging','cloudwatch','terraform','interview'];
+
+const BREADCRUMBS = {
+  intro:'What is AWS?', core:'Core Concepts', iam:'IAM & Security',
+  ec2:'EC2 — Compute', alb:'ALB & Load Balancing', asg:'Auto Scaling Groups',
+  s3:'S3 — Storage', rds:'RDS — Databases', elasticache:'ElastiCache',
+  ecs:'ECS & Containers', apigw:'API Gateway', messaging:'SQS & SNS',
+  cloudwatch:'CloudWatch & Observability', terraform:'Terraform',
+  interview:'Interview Prep'
+};
+
+let currentModuleIdx = 0;
+let completedModules = new Set();
+
+const QUIZZES = {
+  intro: [
+    { q: "What is the main benefit of cloud computing over owning physical servers?",
+      opts: ["Faster internet connection","Pay-as-you-go with no upfront hardware costs","Free electricity","Better security by default"],
+      correct: 1, explain: "Cloud computing's core value proposition is eliminating upfront capital costs. You pay only for what you use." },
+    { q: "Which company operates Amazon Web Services?",
+      opts: ["Google","Microsoft","Amazon","IBM"],
+      correct: 2, explain: "AWS is Amazon's cloud division. Launched in 2006, it's the world's largest cloud platform." },
+    { q: "What is the Free Tier?",
+      opts: ["A permanently free AWS plan","12 months of limited free usage for new accounts","A discount for students","A special plan for non-profits"],
+      correct: 1, explain: "The AWS Free Tier gives new accounts 12 months of limited free usage including EC2 (750 hrs/month) and S3 (5GB)." }
+  ],
+  core: [
+    { q: "What is an Availability Zone (AZ)?",
+      opts: ["A country where AWS operates","One or more data centers within a Region","A VPN tunnel","A billing category"],
+      correct: 1, explain: "An AZ is one or more physically separated data centers within a Region, connected with low-latency links." },
+    { q: "A single EC2 instance is in AZ us-east-1a. The AZ has a power outage. What happens?",
+      opts: ["AWS automatically moves it to another AZ","The instance is inaccessible until the AZ recovers","Nothing — EC2 is regional","AWS replaces it with a new instance"],
+      correct: 1, explain: "A single EC2 instance is AZ-specific. If that AZ fails, the instance is down. This is why production apps run in multiple AZs." },
+    { q: "Which of these AWS services is GLOBAL (not tied to a specific region)?",
+      opts: ["EC2","S3","RDS","IAM"],
+      correct: 3, explain: "IAM is a global service. Users, groups, roles, and policies apply across all regions." }
+  ],
+  iam: [
+    { q: "What is the IAM default behavior when no policy is attached?",
+      opts: ["Allow all actions","Deny all actions","Allow read-only actions","Allow actions in the current region only"],
+      correct: 1, explain: "IAM follows 'default deny.' Every action is denied unless there is an explicit Allow statement." },
+    { q: "Your EC2 app needs to read from S3. What is the CORRECT approach?",
+      opts: ["Hard-code AWS access keys in the code","Create an IAM User and put its keys in .env","Assign an IAM Role to the EC2 instance","Make the S3 bucket fully public"],
+      correct: 2, explain: "IAM Roles for EC2 is the correct pattern. The SDK automatically fetches temporary credentials. Never hard-code keys." },
+    { q: "What is the Principle of Least Privilege?",
+      opts: ["Give all permissions to admins only","Give only the permissions actually needed — nothing more","Deny all access by default","Use the root account for everything"],
+      correct: 1, explain: "Least Privilege means every IAM entity gets only the minimum permissions needed for their specific task." }
+  ],
+  ec2: [
+    { q: "What does the 't3' in t3.micro tell you?",
+      opts: ["It's the 3rd type of server AWS made","It's a burstable family, 3rd generation","It has 3 CPUs","It costs $3/hour"],
+      correct: 1, explain: "t = burstable family, 3 = 3rd generation. Naming convention: family + generation + size." },
+    { q: "What is a Security Group?",
+      opts: ["A group of EC2 instances","A virtual firewall for your instance","An IAM policy group","A monitoring tool"],
+      correct: 1, explain: "A Security Group is a stateful virtual firewall that controls inbound and outbound traffic at the instance level." },
+    { q: "Why should you NEVER open SSH (port 22) to 0.0.0.0/0?",
+      opts: ["It's slower","It wastes bandwidth","Bots will attempt brute-force attacks within minutes","AWS will shut down your account"],
+      correct: 2, explain: "Opening SSH to the entire internet invites automated brute-force attacks. Restrict to your specific IP address." },
+    { q: "What's the difference between stopping and terminating an instance?",
+      opts: ["No difference","Stop preserves EBS volume; terminate deletes everything","Stop charges more","Terminate is reversible"],
+      correct: 1, explain: "Stop preserves the EBS root volume (you can restart). Terminate deletes the instance and its root volume." }
+  ],
+  alb: [
+    { q: "What layer does an ALB operate at?",
+      opts: ["Layer 3 (Network)","Layer 4 (Transport)","Layer 7 (Application)","Layer 2 (Data Link)"],
+      correct: 2, explain: "ALB operates at Layer 7 (HTTP/HTTPS). It can route based on URL path, hostname, headers, and query strings." },
+    { q: "What is path-based routing?",
+      opts: ["Routing traffic to different servers based on the URL path","Routing traffic based on IP address","Routing traffic based on the time of day","Routing traffic through a VPN"],
+      correct: 0, explain: "Path-based routing sends /api/* to one target group and /web/* to another, all behind a single ALB." },
+    { q: "What happens when a target fails the ALB health check?",
+      opts: ["The ALB reboots the target","The ALB stops sending traffic to it","The ALB terminates the target","Nothing — health checks are informational only"],
+      correct: 1, explain: "The ALB marks the target as unhealthy and stops routing traffic to it. Healthy targets continue receiving traffic." }
+  ],
+  asg: [
+    { q: "What does the 'desired capacity' in an ASG represent?",
+      opts: ["The maximum number of instances","The minimum number of instances","The target number of instances the ASG maintains","The number of instances in the Free Tier"],
+      correct: 2, explain: "The desired capacity is the target count. The ASG launches or terminates instances to match this number." },
+    { q: "Which scaling policy should you start with for most web applications?",
+      opts: ["Step Scaling","Scheduled Scaling","Target Tracking on CPU at 50%","Manual Scaling"],
+      correct: 2, explain: "Target tracking is the simplest and most effective. Set CPU target at 50% and the ASG handles the rest automatically." },
+    { q: "What is the purpose of the health check grace period?",
+      opts: ["To save money during low traffic","To give a new instance time to start before health checks begin","To delay scaling actions","To test new AMIs"],
+      correct: 1, explain: "The grace period (default 300s) prevents the ASG from terminating a new instance before it has finished booting and passing health checks." }
+  ],
+  s3: [
+    { q: "S3 bucket names must be:",
+      opts: ["Unique within your AWS account","Unique within your region","Globally unique across ALL of AWS","Only unique within your VPC"],
+      correct: 2, explain: "S3 bucket names must be globally unique across all AWS accounts worldwide. They're part of the URL endpoint." },
+    { q: "What is a pre-signed URL?",
+      opts: ["A permanent public link to an S3 object","A temporary URL that grants time-limited access to a private object","A URL that requires a password","A URL for S3 console access"],
+      correct: 1, explain: "Pre-signed URLs provide temporary access to private objects. You set an expiration time. Perfect for secure file downloads/uploads." },
+    { q: "Which storage class is best for data you access rarely but need to retrieve in milliseconds?",
+      opts: ["S3 Standard","S3 Standard-IA","S3 Glacier Instant","S3 Glacier Flexible"],
+      correct: 2, explain: "Glacier Instant offers very cheap storage with millisecond retrieval. Standard-IA also works but Glacier Instant is cheaper for archival data." },
+    { q: "Since December 2020, what consistency model does S3 use?",
+      opts: ["Eventual consistency","Strong read-after-write consistency","Causal consistency","Session consistency"],
+      correct: 1, explain: "S3 now provides strong read-after-write consistency for all operations. A successful PUT is immediately visible to GETs." }
+  ],
+  rds: [
+    { q: "Can you read from the Multi-AZ standby replica?",
+      opts: ["Yes, for read-heavy workloads","No, the standby is only for failover","Only during maintenance windows","Only with Read Replicas enabled"],
+      correct: 1, explain: "The Multi-AZ standby is NOT readable. It exists purely for automatic failover. Use Read Replicas for read scaling." },
+    { q: "Which database engine is recommended for new SaaS applications?",
+      opts: ["Oracle","SQL Server","PostgreSQL or Aurora PostgreSQL","MySQL only"],
+      correct: 2, explain: "PostgreSQL (or Aurora PostgreSQL) is the most popular choice for new SaaS apps due to JSON support, extensions, and open-source ecosystem." },
+    { q: "How should you store RDS credentials in production?",
+      opts: ["Hard-code in the application","Environment variables in a .env file committed to Git","AWS Secrets Manager","A text file on the EC2 instance"],
+      correct: 2, explain: "AWS Secrets Manager stores credentials securely and can auto-rotate them. Your app fetches credentials via API at runtime." },
+    { q: "Should production RDS instances be publicly accessible?",
+      opts: ["Yes, for easier debugging","No — put them in private subnets","Only during business hours","It doesn't matter"],
+      correct: 1, explain: "Production RDS should always be in private subnets with no public access. Access only from app server security groups." }
+  ],
+  elasticache: [
+    { q: "What is the default choice for ElastiCache in most architectures?",
+      opts: ["Memcached","Redis","Either is fine — they're identical","DynamoDB DAX"],
+      correct: 1, explain: "Redis is the default choice for most architectures. It offers more data structures, persistence, pub/sub, and clustering." },
+    { q: "What is lazy loading (cache-aside)?",
+      opts: ["Writing data to cache and database simultaneously","Checking cache first; on miss, query DB and store result in cache","Loading all data into cache at startup","Never invalidating cache entries"],
+      correct: 1, explain: "Lazy loading checks cache first. On miss, it queries the database, stores the result in cache with a TTL, and returns it." },
+    { q: "Where should ElastiCache nodes be deployed?",
+      opts: ["Public subnets with an Elastic IP","Private subnets with security group restrictions","On-premises via Direct Connect","In a separate AWS account"],
+      correct: 1, explain: "ElastiCache should be in private subnets, accessible only from your application server's security group. Enable in-transit encryption." }
+  ],
+  ecs: [
+    { q: "What is the difference between an ECS Task Definition and a Task?",
+      opts: ["They're the same thing","Task Definition is the blueprint; Task is a running instance of it","Task Definition is for Fargate; Task is for EC2","Task Definition stores secrets; Task runs code"],
+      correct: 1, explain: "A Task Definition is the configuration/blueprint. A Task is a running instance of that blueprint. Same relationship as AMI to EC2 instance." },
+    { q: "What is the ECS Task Execution Role used for?",
+      opts: ["Running your application code","Pulling images from ECR, sending logs to CloudWatch, and fetching secrets","Managing EC2 instances in the cluster","Authenticating users"],
+      correct: 1, explain: "The Task Execution Role is used by the ECS agent for infrastructure tasks: pulling images, writing logs, fetching secrets. Your app's AWS permissions go in the Task Role." },
+    { q: "When should you choose Fargate over EC2 for ECS?",
+      opts: ["Never — EC2 is always better","For most workloads — Fargate is simpler with no server management","Only for testing environments","Only when you need Spot instances"],
+      correct: 1, explain: "Fargate is the default choice for most workloads. No servers to manage, pay per task. Choose EC2 only for GPU, Spot optimization, or extreme throughput." },
+    { q: "What is ECR?",
+      opts: ["A container orchestration service","A Docker image registry on AWS","An event-driven compute service","A load balancer for containers"],
+      correct: 1, explain: "ECR (Elastic Container Registry) is AWS's managed Docker image registry. You push images to ECR and ECS pulls them to run." }
+  ],
+  apigw: [
+    { q: "What is the key advantage of HTTP API over REST API?",
+      opts: ["More features","70% cheaper with lower latency","Better documentation","More integration types"],
+      correct: 1, explain: "HTTP API is ~70% cheaper and has lower latency than REST API. Start with HTTP API; upgrade to REST only if you need caching, validation, or usage plans." },
+    { q: "What is a VPC Link in API Gateway?",
+      opts: ["A VPN connection between VPCs","A way to connect API Gateway to resources in a private VPC","A link between API Gateway and CloudFront","A security group rule"],
+      correct: 1, explain: "VPC Link connects API Gateway to private resources like an internal ALB. Traffic flows through the AWS network, never touching the public internet." },
+    { q: "What can API Gateway directly integrate with (without Lambda)?",
+      opts: ["Only Lambda","Only HTTP endpoints","AWS services like SQS, Lambda, and any HTTP endpoint","Only EC2 instances"],
+      correct: 2, explain: "API Gateway can integrate with Lambda, HTTP endpoints, AWS services (SQS, SNS, Step Functions), and VPC-backed resources via VPC Link." }
+  ],
+  messaging: [
+    { q: "What is the SNS + SQS fan-out pattern?",
+      opts: ["Sending one message to one queue","One SNS topic broadcasts to multiple SQS queues","One SQS queue distributes to multiple consumers","Sending messages from S3 to Lambda"],
+      correct: 1, explain: "Fan-out: one SNS topic publishes to multiple SQS queues. Each queue is processed independently by different services." },
+    { q: "What is a Dead-Letter Queue (DLQ)?",
+      opts: ["A queue for expired messages","A queue where messages go after failing to process multiple times","A backup queue in another region","A queue that deletes messages automatically"],
+      correct: 1, explain: "A DLQ receives messages that fail processing maxReceiveCount times. It prevents poison messages from blocking the main queue." },
+    { q: "When would you choose SQS FIFO over Standard?",
+      opts: ["For all workloads — FIFO is always better","When message order and exactly-once processing matter","When you need higher throughput","When you're using Lambda consumers"],
+      correct: 1, explain: "FIFO guarantees order and exactly-once delivery but is limited to 300 msgs/sec. Use Standard for most workloads; FIFO for financial transactions, order processing." }
+  ],
+  cloudwatch: [
+    { q: "What are the three pillars of observability?",
+      opts: ["CPU, Memory, Disk","Metrics, Logs, Traces","Monitoring, Alerting, Logging","CloudWatch, X-Ray, CloudTrail"],
+      correct: 1, explain: "Metrics (numerical data over time), Logs (text event records), and Traces (end-to-end request tracking across services)." },
+    { q: "What is the difference between CloudTrail and CloudWatch Logs?",
+      opts: ["They're the same service","CloudTrail tracks who did what in AWS (audit); CloudWatch Logs tracks app logs (operational)","CloudTrail is for EC2; CloudWatch is for Lambda","CloudTrail is deprecated"],
+      correct: 1, explain: "CloudTrail records API calls for security/audit. CloudWatch Logs stores application and system logs for operational debugging." },
+    { q: "EC2 instances automatically publish which metric to CloudWatch?",
+      opts: ["Memory utilization and CPU","Only CPU utilization","Disk, memory, and CPU","All system metrics"],
+      correct: 1, explain: "EC2 only publishes CPU (and network/disk I/O) by default. For memory and disk utilization, you must install the CloudWatch Agent." }
+  ],
+  terraform: [
+    { q: "What does 'terraform plan' do?",
+      opts: ["Creates infrastructure","Destroys infrastructure","Shows a preview of changes without applying them","Validates syntax only"],
+      correct: 2, explain: "terraform plan is a dry run. It compares your code to the current state and shows exactly what will be created, modified, or deleted." },
+    { q: "Why should you never commit terraform.tfstate to Git?",
+      opts: ["It's too large","It contains sensitive data like passwords and keys","It changes too frequently","It's not a code file"],
+      correct: 1, explain: "State files contain sensitive data (resource IDs, passwords, keys). Use a remote backend (S3 + DynamoDB) instead." },
+    { q: "What is a Terraform module?",
+      opts: ["A provider plugin","A reusable package of Terraform configuration","A state management tool","A plan output format"],
+      correct: 1, explain: "Modules are reusable packages of .tf files. They promote DRY (Don't Repeat Yourself) infrastructure. E.g., a VPC module used across all environments." }
+  ],
+  interview: [
+    { q: "How would you design a highly available web application on AWS?",
+      opts: ["Single EC2 instance with manual backups","ALB + ASG across multiple AZs + RDS Multi-AZ","One large EC2 instance in one AZ","Lambda functions only with no database"],
+      correct: 1, explain: "ALB distributes traffic, ASG maintains instances across AZs, RDS Multi-AZ provides database failover. This is the standard production pattern." },
+    { q: "Your app's API response time spiked. How do you investigate?",
+      opts: ["Restart everything","Check CloudWatch metrics, X-Ray traces, and application logs","Delete and redeploy","Check S3 bucket policies"],
+      correct: 1, explain: "Start with CloudWatch dashboards (which service is slow?), use X-Ray traces (which step in the request path is the bottleneck?), and check application logs in CloudWatch Insights for errors." },
+    { q: "When should you use SQS in an architecture?",
+      opts: ["For all API requests","When you need to decouple services and handle async processing","For database queries","For static file storage"],
+      correct: 1, explain: "SQS decouples services. Instead of Service A calling Service B synchronously, Service A queues a message. Service B processes it at its own pace. Improves resilience and handles traffic spikes." },
+    { q: "What's the correct way to manage AWS infrastructure for a production team?",
+      opts: ["ClickOps through the AWS Console","Terraform with remote state in S3, code in Git, reviewed via pull requests","CloudFormation templates stored on a shared drive","Manual documentation of all resources"],
+      correct: 1, explain: "Infrastructure as Code (Terraform) stored in Git with remote state. Changes reviewed in pull requests. This provides version control, auditability, and repeatability." },
+    { q: "How would you secure an ECS containerized application?",
+      opts: ["Make everything public and use strong passwords","Private subnets, Security Groups, Task Roles with least privilege, Secrets Manager, encryption in transit and at rest","Only use Fargate — it's automatically secure","Put all services in one security group"],
+      correct: 1, explain: "Defense in depth: private subnets (no public access to containers), SGs for network isolation, Task Roles for least privilege, Secrets Manager for credentials, TLS for encryption." }
+  ]
+};
+
+// Quiz state
+const quizState = {};
+for (let k in QUIZZES) { quizState[k] = { idx: 0, score: 0, answered: false }; }
+
+function showModule(id, el) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.getElementById('mod-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  currentModuleIdx = MODULES.indexOf(id);
+  document.getElementById('breadcrumb').innerHTML = 'AWS Mastery / <span>' + BREADCRUMBS[id] + '</span>';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (QUIZZES[id]) renderQuiz(id);
+  // close sidebar on mobile
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+function nextModule() {
+  markDone(MODULES[currentModuleIdx]);
+  if (currentModuleIdx < MODULES.length - 1) {
+    const next = MODULES[currentModuleIdx + 1];
+    const el = document.querySelector(`[data-module="${next}"]`);
+    showModule(next, el);
+  }
+}
+
+function prevModule() {
+  if (currentModuleIdx > 0) {
+    const prev = MODULES[currentModuleIdx - 1];
+    const el = document.querySelector(`[data-module="${prev}"]`);
+    showModule(prev, el);
+  }
+}
+
+function markDone(id) {
+  completedModules.add(id);
+  const el = document.querySelector(`[data-module="${id}"]`);
+  if (el) el.classList.add('done');
+  const pct = Math.round((completedModules.size / MODULES.length) * 100);
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function renderQuiz(mod) {
+  const qs = QUIZZES[mod];
+  if (!qs) return;
+  const s = quizState[mod];
+  const container = document.getElementById('qbody-' + mod);
+  const counter = document.getElementById('qcounter-' + mod);
+  const scoreEl = document.getElementById('qscore-' + mod);
+  const nextBtn = document.getElementById('qnext-' + mod);
+  container.innerHTML = '';
+  nextBtn.style.display = 'none';
+  counter.textContent = `Q ${s.idx + 1} / ${qs.length}`;
+  scoreEl.innerHTML = `Score: ${s.score} / ${qs.length}`;
+
+  const q = qs[s.idx];
+  const div = document.createElement('div');
+  div.innerHTML = `<div class="quiz-question">${q.q}</div><div class="quiz-options"></div><div class="quiz-feedback" id="qf-${mod}"></div>`;
+  container.appendChild(div);
+  const optsDiv = div.querySelector('.quiz-options');
+
+  q.opts.forEach((opt, i) => {
+    const letter = String.fromCharCode(65 + i);
+    const optDiv = document.createElement('div');
+    optDiv.className = 'quiz-option';
+    optDiv.innerHTML = `<span class="option-letter">${letter}</span><span>${opt}</span>`;
+    optDiv.onclick = () => {
+      if (quizState[mod].answered) return;
+      quizState[mod].answered = true;
+      const feedback = document.getElementById('qf-' + mod);
+      if (i === q.correct) {
+        optDiv.classList.add('correct');
+        quizState[mod].score++;
+        feedback.className = 'quiz-feedback show correct';
+        feedback.textContent = '✓ Correct! ' + q.explain;
+      } else {
+        optDiv.classList.add('wrong');
+        optsDiv.children[q.correct].classList.add('correct');
+        feedback.className = 'quiz-feedback show wrong';
+        feedback.textContent = '✗ Incorrect. ' + q.explain;
+      }
+      document.querySelectorAll('#qbody-' + mod + ' .quiz-option').forEach(o => o.classList.add('disabled'));
+      scoreEl.innerHTML = `Score: ${quizState[mod].score} / ${qs.length}`;
+
+      if (s.idx < qs.length - 1) {
+        nextBtn.style.display = 'inline-block';
+      } else {
+        if (quizState[mod].score === qs.length) {
+          markDone(mod);
+        }
+        scoreEl.innerHTML += quizState[mod].score >= Math.ceil(qs.length * 0.7)
+          ? ' <span class="good">— Passed!</span>'
+          : ' <span class="bad">— Try again</span>';
+      }
+    };
+    optsDiv.appendChild(optDiv);
+  });
+}
+
+function nextQuestion(mod) {
+  quizState[mod].idx++;
+  quizState[mod].answered = false;
+  renderQuiz(mod);
+}
+
+function toggleAcc(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Init first quiz
+renderQuiz('intro');
+</script>
+</body>
+</html>

@@ -1,0 +1,2775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Design Mastery</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+:root {
+  --bg: #080c12;
+  --bg2: #0d1420;
+  --bg3: #111827;
+  --border: #1e2d45;
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --accent3: #10b981;
+  --warn: #f59e0b;
+  --danger: #ef4444;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #64748b;
+  --card: #0f1929;
+  --card2: #131e30;
+  --glow: 0 0 20px rgba(0,212,255,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* GRID NOISE TEXTURE */
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image: 
+    linear-gradient(rgba(0,212,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* SPLASH */
+#splash {
+  position:fixed;
+  inset:0;
+  background: var(--bg);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:1000;
+  transition: opacity .6s, visibility .6s;
+}
+#splash.hidden { opacity:0; visibility:hidden; }
+
+.splash-badge {
+  font-family: 'Space Mono', monospace;
+  font-size:.75rem;
+  color: var(--accent);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  margin-bottom:1.5rem;
+  opacity:.7;
+}
+
+.splash-title {
+  font-size:clamp(2.5rem,6vw,5rem);
+  font-weight:800;
+  line-height:1;
+  text-align:center;
+  background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:1rem;
+}
+
+.splash-sub {
+  font-family: 'Space Mono', monospace;
+  color: var(--text2);
+  font-size:.9rem;
+  text-align:center;
+  margin-bottom:3rem;
+  max-width:500px;
+  line-height:1.8;
+}
+
+.splash-btn {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color:#fff;
+  border:none;
+  padding:1rem 3rem;
+  border-radius:4px;
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:1rem;
+  cursor:pointer;
+  letter-spacing:.05em;
+  position:relative;
+  overflow:hidden;
+  transition:transform .2s, box-shadow .2s;
+}
+.splash-btn:hover { transform:translateY(-2px); box-shadow:0 0 40px rgba(0,212,255,0.4); }
+.splash-btn::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,.1),transparent);
+  transform:translateX(-100%);
+  transition: transform .4s;
+}
+.splash-btn:hover::after { transform:translateX(100%); }
+
+.splash-stats {
+  display:flex;
+  gap:3rem;
+  margin-top:3rem;
+  font-family:'Space Mono',monospace;
+}
+.splash-stat { text-align:center; }
+.splash-stat-num { font-size:1.8rem; font-weight:700; color:var(--accent); display:block; }
+.splash-stat-label { font-size:.7rem; color:var(--text3); letter-spacing:.1em; text-transform:uppercase; }
+
+/* LAYOUT */
+#app { display:none; height:100vh; overflow:hidden; position:relative; z-index:1; }
+#app.visible { display:flex; }
+
+/* SIDEBAR */
+#sidebar {
+  width:280px;
+  min-width:280px;
+  background: var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
+
+.sidebar-header {
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+}
+
+.sidebar-logo {
+  font-weight:800;
+  font-size:1.1rem;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  display:block;
+  margin-bottom:.5rem;
+}
+
+.progress-bar-wrap {
+  height:3px;
+  background: var(--border);
+  border-radius:99px;
+  overflow:hidden;
+  margin-top:.75rem;
+}
+.progress-bar-fill {
+  height:100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius:99px;
+  transition: width .5s ease;
+}
+.progress-text {
+  font-family:'Space Mono',monospace;
+  font-size:.7rem;
+  color:var(--text3);
+  margin-top:.4rem;
+}
+
+.sidebar-search {
+  padding:.75rem 1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.sidebar-search input {
+  width:100%;
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:.5rem .75rem;
+  color:var(--text);
+  font-family:'Space Mono',monospace;
+  font-size:.8rem;
+  outline:none;
+}
+.sidebar-search input:focus { border-color: var(--accent); }
+.sidebar-search input::placeholder { color:var(--text3); }
+
+.sidebar-nav {
+  flex:1;
+  overflow-y:auto;
+  padding:.5rem 0;
+  scrollbar-width:thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.nav-module {
+  padding:.4rem 1.5rem;
+  cursor:pointer;
+  border-left:3px solid transparent;
+  transition:all .2s;
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+.nav-module:hover { background: var(--bg3); }
+.nav-module.active { border-left-color: var(--accent); background: rgba(0,212,255,.05); }
+.nav-module.completed .nav-check { color: var(--accent3); }
+
+.nav-module-num {
+  font-family:'Space Mono',monospace;
+  font-size:.65rem;
+  color:var(--text3);
+  min-width:24px;
+}
+.nav-module-title {
+  font-size:.85rem;
+  font-weight:600;
+  flex:1;
+  line-height:1.3;
+}
+.nav-module.active .nav-module-title { color:var(--accent); }
+.nav-check { font-size:.9rem; }
+
+.nav-section-label {
+  font-family:'Space Mono',monospace;
+  font-size:.65rem;
+  color:var(--text3);
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  padding:.75rem 1.5rem .25rem;
+}
+
+/* MAIN CONTENT */
+#main {
+  flex:1;
+  overflow-y:auto;
+  padding:0;
+  scrollbar-width:thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.module-content {
+  max-width:860px;
+  margin:0 auto;
+  padding:3rem 2.5rem 6rem;
+}
+
+.module-header {
+  margin-bottom:3rem;
+  padding-bottom:2rem;
+  border-bottom:1px solid var(--border);
+}
+
+.module-tag {
+  font-family:'Space Mono',monospace;
+  font-size:.7rem;
+  color:var(--accent);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  margin-bottom:.75rem;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.module-tag::before {
+  content:'';
+  display:inline-block;
+  width:20px;
+  height:1px;
+  background:var(--accent);
+}
+
+.module-title {
+  font-size:clamp(1.8rem,3vw,2.8rem);
+  font-weight:800;
+  line-height:1.1;
+  margin-bottom:1rem;
+}
+
+.module-desc {
+  font-family:'Space Mono',monospace;
+  font-size:.85rem;
+  color:var(--text2);
+  line-height:1.8;
+}
+
+/* CONTENT ELEMENTS */
+h2 {
+  font-size:1.5rem;
+  font-weight:700;
+  margin:2.5rem 0 1rem;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+h2::before {
+  content:'';
+  display:inline-block;
+  width:4px;
+  height:1.5rem;
+  background: linear-gradient(var(--accent), var(--accent2));
+  border-radius:2px;
+}
+
+h3 {
+  font-size:1.15rem;
+  font-weight:700;
+  margin:2rem 0 .75rem;
+  color: var(--accent);
+}
+
+p {
+  font-family:'Space Mono',monospace;
+  font-size:.85rem;
+  line-height:1.9;
+  color: var(--text2);
+  margin-bottom:1rem;
+}
+
+ul, ol {
+  margin:.5rem 0 1rem 1.5rem;
+}
+li {
+  font-family:'Space Mono',monospace;
+  font-size:.85rem;
+  color:var(--text2);
+  line-height:1.9;
+  margin-bottom:.25rem;
+}
+li strong { color:var(--text); }
+
+strong { color:var(--text); font-weight:700; }
+
+/* CODE BLOCKS */
+.code-block {
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:6px;
+  margin:1.5rem 0;
+  overflow:hidden;
+}
+.code-label {
+  font-family:'Space Mono',monospace;
+  font-size:.7rem;
+  color:var(--text3);
+  padding:.5rem 1rem;
+  border-bottom:1px solid var(--border);
+  background: var(--bg2);
+  letter-spacing:.1em;
+}
+pre {
+  padding:1.25rem;
+  overflow-x:auto;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.8rem;
+  line-height:1.7;
+  color: #e2e8f0;
+}
+.kw { color:#7c3aed; }
+.str { color:#10b981; }
+.cm { color:#475569; font-style:italic; }
+.num { color:#f59e0b; }
+.fn { color:#00d4ff; }
+.type { color:#f472b6; }
+
+/* CALLOUT BOXES */
+.callout {
+  border-radius:6px;
+  padding:1.25rem 1.5rem;
+  margin:1.5rem 0;
+  border-left:4px solid;
+  font-family:'Space Mono',monospace;
+  font-size:.82rem;
+  line-height:1.8;
+}
+.callout-title {
+  font-weight:700;
+  font-size:.8rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:.5rem;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.callout.info { background:rgba(0,212,255,.06); border-color:var(--accent); color:var(--text2); }
+.callout.info .callout-title { color:var(--accent); }
+.callout.warn { background:rgba(245,158,11,.06); border-color:var(--warn); color:var(--text2); }
+.callout.warn .callout-title { color:var(--warn); }
+.callout.success { background:rgba(16,185,129,.06); border-color:var(--accent3); color:var(--text2); }
+.callout.success .callout-title { color:var(--accent3); }
+.callout.danger { background:rgba(239,68,68,.06); border-color:var(--danger); color:var(--text2); }
+.callout.danger .callout-title { color:var(--danger); }
+.callout.interview { background:rgba(124,58,237,.08); border-color:var(--accent2); color:var(--text2); }
+.callout.interview .callout-title { color:var(--accent2); }
+
+/* DIAGRAMS */
+.diagram {
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:1.5rem;
+  margin:1.5rem 0;
+  overflow-x:auto;
+}
+.diagram pre {
+  padding:0;
+  color:var(--accent);
+  font-size:.78rem;
+  line-height:1.6;
+}
+.diagram-title {
+  font-family:'Space Mono',monospace;
+  font-size:.7rem;
+  color:var(--text3);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:.75rem;
+}
+
+/* COMPARISON TABLE */
+.compare-table {
+  width:100%;
+  border-collapse:collapse;
+  margin:1.5rem 0;
+  font-family:'Space Mono',monospace;
+  font-size:.78rem;
+}
+.compare-table th {
+  background: var(--bg3);
+  padding:.75rem 1rem;
+  text-align:left;
+  color:var(--accent);
+  font-size:.72rem;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  border:1px solid var(--border);
+}
+.compare-table td {
+  padding:.7rem 1rem;
+  border:1px solid var(--border);
+  color:var(--text2);
+  vertical-align:top;
+  line-height:1.6;
+}
+.compare-table tr:nth-child(even) td { background:rgba(255,255,255,.02); }
+.tag { display:inline-block; padding:.15rem .5rem; border-radius:3px; font-size:.7rem; font-weight:700; }
+.tag-green { background:rgba(16,185,129,.15); color:var(--accent3); }
+.tag-red { background:rgba(239,68,68,.15); color:var(--danger); }
+.tag-blue { background:rgba(0,212,255,.15); color:var(--accent); }
+.tag-purple { background:rgba(124,58,237,.15); color:#a78bfa; }
+
+/* QUIZ */
+.quiz-section {
+  background: var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:2rem;
+  margin:2.5rem 0;
+}
+.quiz-title {
+  font-size:1rem;
+  font-weight:700;
+  color: var(--accent);
+  margin-bottom:.25rem;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.quiz-subtitle {
+  font-family:'Space Mono',monospace;
+  font-size:.75rem;
+  color:var(--text3);
+  margin-bottom:1.5rem;
+}
+.quiz-q {
+  margin-bottom:1.5rem;
+  padding-bottom:1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.quiz-q:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.quiz-question {
+  font-family:'Space Mono',monospace;
+  font-size:.85rem;
+  color:var(--text);
+  margin-bottom:1rem;
+  line-height:1.7;
+}
+.quiz-options { display:flex; flex-direction:column; gap:.5rem; }
+.quiz-opt {
+  background: var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:.7rem 1rem;
+  cursor:pointer;
+  font-family:'Space Mono',monospace;
+  font-size:.8rem;
+  color:var(--text2);
+  transition:all .2s;
+  display:flex;
+  gap:.75rem;
+  align-items:flex-start;
+}
+.quiz-opt:hover { border-color:var(--accent); color:var(--text); }
+.quiz-opt.correct { background:rgba(16,185,129,.1); border-color:var(--accent3); color:var(--accent3); }
+.quiz-opt.wrong { background:rgba(239,68,68,.1); border-color:var(--danger); color:var(--danger); }
+.quiz-opt.disabled { cursor:not-allowed; pointer-events:none; }
+.quiz-opt-letter {
+  min-width:22px;
+  height:22px;
+  border-radius:3px;
+  background: var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.7rem;
+  font-weight:700;
+}
+.quiz-explanation {
+  margin-top:.75rem;
+  padding:.75rem 1rem;
+  background:rgba(0,212,255,.05);
+  border-left:3px solid var(--accent);
+  border-radius:0 4px 4px 0;
+  font-family:'Space Mono',monospace;
+  font-size:.78rem;
+  color:var(--text2);
+  line-height:1.7;
+  display:none;
+}
+.quiz-explanation.show { display:block; }
+
+/* SCENARIO CARDS */
+.scenario-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+  margin:1.5rem 0;
+}
+.scenario-card {
+  background: var(--card2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:1.25rem;
+  transition:border-color .2s;
+}
+.scenario-card:hover { border-color:var(--accent); }
+.scenario-card h4 {
+  font-size:.9rem;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:.5rem;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.scenario-card p { font-size:.78rem; margin:0; }
+
+/* METRIC CARDS */
+.metric-row {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:1rem;
+  margin:1.5rem 0;
+}
+.metric-card {
+  background: var(--card2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:1rem;
+  text-align:center;
+}
+.metric-val {
+  font-family:'Space Mono',monospace;
+  font-size:1.4rem;
+  font-weight:700;
+  color:var(--accent);
+  display:block;
+}
+.metric-label {
+  font-family:'Space Mono',monospace;
+  font-size:.7rem;
+  color:var(--text3);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  margin-top:.25rem;
+}
+
+/* TABS */
+.tabs { margin:1.5rem 0; }
+.tab-headers { display:flex; border-bottom:1px solid var(--border); gap:0; }
+.tab-btn {
+  font-family:'Space Mono',monospace;
+  font-size:.78rem;
+  padding:.6rem 1.2rem;
+  background:none;
+  border:none;
+  border-bottom:2px solid transparent;
+  color:var(--text3);
+  cursor:pointer;
+  transition:all .2s;
+  margin-bottom:-1px;
+}
+.tab-btn:hover { color:var(--text2); }
+.tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); }
+.tab-pane { display:none; padding-top:1rem; }
+.tab-pane.active { display:block; }
+
+/* NAV BUTTONS */
+.module-nav {
+  display:flex;
+  justify-content:space-between;
+  margin-top:3rem;
+  padding-top:2rem;
+  border-top:1px solid var(--border);
+  gap:1rem;
+}
+.nav-btn {
+  background: var(--card2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:.75rem 1.5rem;
+  color:var(--text2);
+  font-family:'Syne',sans-serif;
+  font-weight:600;
+  font-size:.85rem;
+  cursor:pointer;
+  transition:all .2s;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+.nav-btn:hover { border-color:var(--accent); color:var(--accent); }
+.nav-btn.primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color:#fff;
+  border-color:transparent;
+}
+.nav-btn.primary:hover { box-shadow: var(--glow); }
+.nav-btn:disabled { opacity:.3; cursor:not-allowed; }
+
+.complete-btn {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.complete-btn button {
+  background: linear-gradient(135deg, var(--accent3), #059669);
+  color:#fff;
+  border:none;
+  border-radius:4px;
+  padding:.75rem 2rem;
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:.9rem;
+  cursor:pointer;
+  transition:all .2s;
+}
+.complete-btn button:hover { box-shadow:0 0 20px rgba(16,185,129,.3); transform:translateY(-1px); }
+
+/* INTERVIEW FRAMEWORK */
+.framework-step {
+  display:flex;
+  gap:1.25rem;
+  padding:1.25rem;
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  margin:.75rem 0;
+  transition: border-color .2s;
+}
+.framework-step:hover { border-color: var(--accent); }
+.step-num {
+  min-width:36px;
+  height:36px;
+  border-radius:50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  font-size:.85rem;
+  color:#fff;
+  flex-shrink:0;
+}
+.step-body h4 {
+  font-size:.95rem;
+  font-weight:700;
+  color:var(--text);
+  margin-bottom:.35rem;
+}
+.step-body p { font-size:.8rem; margin:0; }
+
+/* REAL DESIGN SECTION */
+.design-case {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  margin:2rem 0;
+}
+.design-case-header {
+  background: linear-gradient(135deg, rgba(0,212,255,.1), rgba(124,58,237,.1));
+  padding:1.25rem 1.5rem;
+  border-bottom:1px solid var(--border);
+}
+.design-case-header h3 { margin:0; color:var(--text); }
+.design-case-header p { margin:.25rem 0 0; font-size:.78rem; }
+.design-case-body { padding:1.5rem; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:99px; }
+::-webkit-scrollbar-thumb:hover { background:var(--text3); }
+
+/* RESPONSIVE */
+@media(max-width:768px) {
+  #sidebar { display:none; }
+  .scenario-grid { grid-template-columns:1fr; }
+  .module-content { padding:2rem 1.25rem 4rem; }
+}
+
+.hidden { display:none !important; }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.module-content { animation: fadeIn .4s ease; }
+
+/* CHECKPOINT badge */
+.checkpoint {
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  background: linear-gradient(135deg, var(--accent2), #6d28d9);
+  color:#fff;
+  padding:.3rem .8rem;
+  border-radius:99px;
+  font-family:'Space Mono',monospace;
+  font-size:.72rem;
+  font-weight:700;
+  margin:.5rem 0;
+}
+
+.tip-box {
+  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(0,212,255,.08));
+  border:1px solid rgba(124,58,237,.3);
+  border-radius:6px;
+  padding:1rem 1.25rem;
+  margin:1rem 0;
+  font-family:'Space Mono',monospace;
+  font-size:.8rem;
+  color:var(--text2);
+  line-height:1.8;
+}
+.tip-box strong { color:var(--accent2); }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-badge">⚡ Founder Series</div>
+  <div class="splash-title">System Design<br>Mastery</div>
+  <div class="splash-sub">From zero to interview-ready.<br>Learn how to architect systems that scale to millions.</div>
+  <button class="splash-btn" onclick="startCourse()">Begin Course →</button>
+  <div class="splash-stats">
+    <div class="splash-stat"><span class="splash-stat-num">12</span><span class="splash-stat-label">Modules</span></div>
+    <div class="splash-stat"><span class="splash-stat-num">60+</span><span class="splash-stat-label">Concepts</span></div>
+    <div class="splash-stat"><span class="splash-stat-num">8</span><span class="splash-stat-label">Real Designs</span></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">System Design Mastery</span>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text" id="progressText">0 / 12 modules complete</div>
+    </div>
+    <div class="sidebar-search">
+      <input type="text" id="searchInput" placeholder="Search modules..." oninput="filterModules(this.value)">
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav"></nav>
+  </div>
+  <div id="main">
+    <div id="moduleContainer"></div>
+  </div>
+</div>
+
+<script>
+const modules = [
+  // ===================== MODULE 0 =====================
+  {
+    id:0,
+    tag:'Orientation',
+    title:'What Is System Design?',
+    desc:'Understand the scope, purpose, and mindset shift required to think in systems.',
+    content:`
+<h2>Why System Design Matters</h2>
+<p>System design is the process of defining the <strong>architecture, components, modules, interfaces, and data flow</strong> of a system to satisfy specified requirements. It bridges the gap between a problem statement and a working, scalable product.</p>
+<p>As a software engineer, you'll encounter system design in two contexts: <strong>on the job</strong> (designing real infrastructure) and <strong>in interviews</strong> (proving you can think at scale). Both require the same mental model.</p>
+
+<div class="callout info">
+<div class="callout-title">🎯 The Core Question</div>
+System design asks: "Given these requirements and constraints, how would you build this to serve X users reliably?" It's not about memorizing patterns — it's about making <strong>informed trade-offs</strong>.
+</div>
+
+<h2>The Engineer's Mindset Shift</h2>
+<p>Junior engineers think about making code work. System designers think about making systems <strong>work at scale, reliably, cheaply, and maintainably</strong> — often all at once, with conflicting constraints.</p>
+
+<div class="scenario-grid">
+  <div class="scenario-card">
+    <h4>🧑‍💻 Junior Thinking</h4>
+    <p>"This function returns the right data."</p>
+    <p style="margin-top:.5rem">"The API works."</p>
+    <p style="margin-top:.5rem">"The tests pass."</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🏗️ Systems Thinking</h4>
+    <p>"How does this behave under 100k concurrent users?"</p>
+    <p style="margin-top:.5rem">"What happens when the DB goes down?"</p>
+    <p style="margin-top:.5rem">"How much does this cost at 10M records?"</p>
+  </div>
+</div>
+
+<h2>The Four Pillars of System Design</h2>
+
+<div class="framework-step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>Scalability</h4>
+    <p>Can the system handle growth in users, data, and traffic without fundamental rewrites? Horizontal vs. vertical. Stateless services. Partitioning strategies.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>Reliability & Availability</h4>
+    <p>Does the system work correctly and stay online? Fault tolerance, redundancy, failover, health checks, SLAs (99.9% vs 99.99% uptime — that's the difference between 8.7 hours and 52 minutes of downtime per year).</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>Performance</h4>
+    <p>How fast does it respond? Latency vs. throughput. P50/P95/P99 latency. Caching. Indexing. Async processing. Real-time vs. batch.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>Maintainability</h4>
+    <p>Can the team operate and evolve the system? Observability (logs, metrics, traces). Deployability. Clear boundaries and APIs between components.</p>
+  </div>
+</div>
+
+<h2>Key Vocabulary You Must Know</h2>
+
+<table class="compare-table">
+  <tr><th>Term</th><th>Definition</th><th>Example</th></tr>
+  <tr><td><strong>Latency</strong></td><td>Time for one operation to complete</td><td>API responds in 50ms</td></tr>
+  <tr><td><strong>Throughput</strong></td><td>Operations per unit time</td><td>10,000 requests/second</td></tr>
+  <tr><td><strong>Availability</strong></td><td>% of time system is operational</td><td>99.9% = ~8.7 hrs downtime/year</td></tr>
+  <tr><td><strong>Consistency</strong></td><td>All nodes see the same data at same time</td><td>Bank balance matches everywhere</td></tr>
+  <tr><td><strong>Partition Tolerance</strong></td><td>System works despite network splits</td><td>Two DCs still serve traffic independently</td></tr>
+  <tr><td><strong>Durability</strong></td><td>Data survives crashes</td><td>DB persists writes to disk</td></tr>
+  <tr><td><strong>Idempotency</strong></td><td>Same operation = same result, no matter how many times called</td><td>POST /payment is safe to retry</td></tr>
+</table>
+
+<div class="metric-row">
+  <div class="metric-card"><span class="metric-val">99.9%</span><span class="metric-label">3 Nines = 8.7h/yr down</span></div>
+  <div class="metric-card"><span class="metric-val">99.99%</span><span class="metric-label">4 Nines = 52min/yr down</span></div>
+  <div class="metric-card"><span class="metric-val">99.999%</span><span class="metric-label">5 Nines = 5.3min/yr down</span></div>
+  <div class="metric-card"><span class="metric-val">&lt;100ms</span><span class="metric-label">Human "instant" threshold</span></div>
+</div>
+
+<h2>How to Use This Course</h2>
+<p>Each module builds on the last. We go: <strong>Building Blocks → Storage → Scalability → Real Designs → Interview Mastery</strong>. Every module has concepts, code examples, visual diagrams, and quizzes. Don't skip — the concepts stack.</p>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Tip</div>
+Interviewers don't want a perfect answer. They want to see how you <strong>think and communicate</strong> under constraints. Narrate your decisions. Say "I'm choosing X over Y because..." This is more valuable than memorizing architectures.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Test your understanding before moving on.</div>
+  <div class="quiz-q" data-answer="1">
+    <div class="quiz-question">A system has 99.9% availability. How many hours of downtime is that per year?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>About 1 hour</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>About 8.7 hours</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>About 24 hours</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>About 52 minutes</div>
+    </div>
+    <div class="quiz-explanation">8760 hours/year × 0.001 = 8.76 hours. 99.99% (4 nines) gives ~52 minutes. Interviewers test whether you know this difference — it changes what infrastructure you design.</div>
+  </div>
+  <div class="quiz-q" data-answer="2">
+    <div class="quiz-question">Which describes idempotency correctly?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>An operation that is extremely fast</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>An operation that runs in parallel</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>An operation that produces the same result whether called once or many times</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>An operation that never fails</div>
+    </div>
+    <div class="quiz-explanation">Idempotency is critical for retry safety. If a payment API times out and you retry, an idempotent endpoint won't charge the user twice. This is a common interview question about distributed systems reliability.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 1 =====================
+  {
+    id:1,
+    tag:'Building Blocks',
+    title:'Core Components: DNS, LB, CDN & Proxies',
+    desc:'The infrastructure layer — what happens before your code even runs.',
+    content:`
+<h2>The Request Journey</h2>
+<p>Before a single line of your application code executes, a user's request travels through several critical infrastructure components. Understanding these is foundational to every system design conversation.</p>
+
+<div class="diagram">
+  <div class="diagram-title">Request Flow: Browser → Your App</div>
+<pre>
+Browser
+   │
+   ▼ DNS Lookup
+DNS Resolver ──────────► Returns IP address of your service
+   │
+   ▼ TCP connection to IP
+Load Balancer (Reverse Proxy)
+   │
+   ├──► App Server 1
+   ├──► App Server 2
+   └──► App Server 3
+             │
+             ▼
+        Database / Cache
+</pre>
+</div>
+
+<h2>DNS — Domain Name System</h2>
+<p>DNS translates human-readable domain names (<code>api.yourapp.com</code>) into IP addresses. It's a distributed, hierarchical system — think of it as the internet's phone book.</p>
+
+<h3>Key DNS Concepts</h3>
+<ul>
+  <li><strong>TTL (Time-to-Live)</strong>: How long a DNS record is cached. Short TTL = faster failover, more DNS queries. Long TTL = faster resolution, slower recovery from IP changes.</li>
+  <li><strong>A Record</strong>: Domain → IPv4 address</li>
+  <li><strong>CNAME</strong>: Domain → another domain (aliasing)</li>
+  <li><strong>DNS Failover</strong>: Route53, Cloudflare DNS can automatically switch to a backup IP if health checks fail.</li>
+</ul>
+
+<div class="callout warn">
+<div class="callout-title">⚠️ DNS is NOT a Load Balancer</div>
+DNS round-robin distributes across IPs but has no health awareness. If one server dies, DNS still routes traffic to it until TTL expires. Use a proper load balancer for health-aware routing.
+</div>
+
+<h2>Load Balancers</h2>
+<p>A load balancer distributes incoming traffic across multiple backend servers. This achieves <strong>horizontal scalability</strong> and <strong>high availability</strong>.</p>
+
+<h3>Load Balancing Algorithms</h3>
+<table class="compare-table">
+  <tr><th>Algorithm</th><th>How It Works</th><th>Best For</th></tr>
+  <tr><td>Round Robin</td><td>Requests cycle through servers 1→2→3→1...</td><td>Uniform requests, similar server capacity</td></tr>
+  <tr><td>Least Connections</td><td>Route to server with fewest active connections</td><td>Long-lived connections (WebSockets)</td></tr>
+  <tr><td>Weighted Round Robin</td><td>Servers get traffic proportional to their weight</td><td>Heterogeneous server capacity</td></tr>
+  <tr><td>IP Hash</td><td>Hash client IP → always same server</td><td>Session affinity (sticky sessions)</td></tr>
+  <tr><td>Least Response Time</td><td>Route to fastest server</td><td>Latency-sensitive services</td></tr>
+</table>
+
+<h3>Layer 4 vs Layer 7 Load Balancers</h3>
+<div class="tabs">
+  <div class="tab-headers">
+    <button class="tab-btn active" onclick="switchTab(this,'l4')">Layer 4 (Transport)</button>
+    <button class="tab-btn" onclick="switchTab(this,'l7')">Layer 7 (Application)</button>
+  </div>
+  <div class="tab-pane active" id="l4">
+    <p>Routes based on <strong>IP + TCP/UDP port</strong>. Doesn't inspect payload. Very fast, low overhead. Can't route based on URL path or HTTP headers. Think: AWS NLB, HAProxy in TCP mode.</p>
+    <div class="callout info"><div class="callout-title">Use When</div>Raw performance matters. Non-HTTP traffic (databases, gaming). Ultra-low latency requirements.</div>
+  </div>
+  <div class="tab-pane" id="l7">
+    <p>Routes based on <strong>HTTP headers, URL paths, cookies</strong>. Can do SSL termination, A/B testing, request rewriting. Slight overhead vs L4. Think: AWS ALB, Nginx, Traefik, Envoy.</p>
+    <div class="callout info"><div class="callout-title">Use When</div>Microservices routing (/api/users → user-service, /api/orders → order-service). HTTP-based apps. Content-based routing.</div>
+  </div>
+</div>
+
+<h2>CDN — Content Delivery Network</h2>
+<p>A CDN is a globally distributed network of servers that cache static content (images, CSS, JS, videos) close to users. Instead of hitting your origin server in <em>us-east-1</em> from Nairobi, the user gets content from a Nairobi PoP (Point of Presence).</p>
+
+<div class="diagram">
+  <div class="diagram-title">CDN Architecture</div>
+<pre>
+             Origin Server (us-east-1)
+                    │
+         ┌──────────┼──────────┐
+         ▼          ▼          ▼
+    PoP London  PoP Nairobi  PoP Tokyo
+    [Cache]     [Cache]      [Cache]
+         │          │          │
+    EU Users   EA Users    APAC Users
+    ~15ms      ~8ms        ~12ms
+</pre>
+</div>
+
+<h3>CDN Cache Behavior</h3>
+<ul>
+  <li><strong>Cache Hit</strong>: File exists in PoP → served instantly. No origin load.</li>
+  <li><strong>Cache Miss</strong>: File not in PoP → fetched from origin, cached, returned to user.</li>
+  <li><strong>Cache-Control headers</strong>: Your origin controls TTL. <code>Cache-Control: max-age=86400</code> = cache for 1 day.</li>
+  <li><strong>Cache Invalidation</strong>: Force-purge stale assets after deployments (or use content-addressed URLs: <code>bundle.a3f2b1.js</code>).</li>
+</ul>
+
+<div class="callout success">
+<div class="callout-title">✅ CDN Best Practice</div>
+For versioned static assets, set <code>Cache-Control: max-age=31536000, immutable</code>. The hash in the filename guarantees uniqueness, so you never need to invalidate — just deploy a new URL. This is how Vite/Next.js builds work.
+</div>
+
+<h2>Reverse Proxies</h2>
+<p>A reverse proxy sits between clients and your servers. It handles <strong>SSL termination, compression, authentication, rate limiting, and caching</strong> — offloading work from your app servers.</p>
+
+<div class="code-block">
+  <div class="code-label">NGINX — Reverse Proxy Config</div>
+  <pre><span class="cm"># Upstream pool of app servers</span>
+<span class="kw">upstream</span> app_servers {
+    least_conn;
+    <span class="fn">server</span> 10.0.0.1:<span class="num">3000</span>;
+    <span class="fn">server</span> 10.0.0.2:<span class="num">3000</span>;
+    <span class="fn">server</span> 10.0.0.3:<span class="num">3000</span> backup;
+}
+
+<span class="kw">server</span> {
+    listen <span class="num">443</span> ssl;
+    server_name api.yourapp.com;
+
+    <span class="cm"># SSL termination here — app servers get plain HTTP</span>
+    ssl_certificate /etc/ssl/cert.pem;
+
+    location / {
+        <span class="fn">proxy_pass</span> http://app_servers;
+        <span class="fn">proxy_set_header</span> X-Real-IP $remote_addr;
+        <span class="fn">proxy_set_header</span> X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    location /static/ {
+        <span class="fn">expires</span> 1y;
+        add_header Cache-Control <span class="str">"public, immutable"</span>;
+    }
+}</pre>
+</div>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Framing</div>
+When asked to design a system, always mention the load balancer and CDN early. Interviewers look for you to identify that static content should be cached globally and that app servers need distribution. It signals you understand real infrastructure, not just application code.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Solidify your understanding.</div>
+  <div class="quiz-q" data-answer="1">
+    <div class="quiz-question">A chat application with long-lived WebSocket connections would be best served by which load balancing algorithm?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Round Robin</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Least Connections</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>IP Hash</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Weighted Round Robin</div>
+    </div>
+    <div class="quiz-explanation">Least Connections routes new connections to the least-loaded server. For long-lived WebSockets, one server can accumulate many connections while others are idle. Least Connections balances this properly. Round Robin ignores connection count entirely.</div>
+  </div>
+  <div class="quiz-q" data-answer="3">
+    <div class="quiz-question">You deploy a React app via CDN. After a production bug fix, users still see the old JS bundle. What's the most robust solution?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Set TTL to 1 second</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Manually purge CDN cache on every deploy</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>Ask users to clear their browser cache</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Use content-hashed filenames so each deploy gets a unique URL</div>
+    </div>
+    <div class="quiz-explanation">Content-hashed filenames (bundle.abc123.js) are the gold standard. Since the URL changes with content, you never need cache invalidation. The old URL keeps its long TTL. The new URL gets its own cache entry. This is exactly how Vite and Next.js work.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 2 =====================
+  {
+    id:2,
+    tag:'Building Blocks',
+    title:'Databases: SQL, NoSQL & How to Choose',
+    desc:'The most critical architectural decision in any system. Get this wrong and no amount of scaling helps.',
+    content:`
+<h2>The Database Decision</h2>
+<p>The database choice is the most consequential architectural decision you make. It's expensive to reverse. Understand the trade-offs before you commit.</p>
+
+<h2>Relational Databases (SQL)</h2>
+<p>SQL databases (PostgreSQL, MySQL, SQLite) store data in tables with strict schemas. Relationships between tables are expressed via foreign keys. They enforce <strong>ACID</strong> guarantees.</p>
+
+<h3>ACID Properties</h3>
+<div class="scenario-grid">
+  <div class="scenario-card">
+    <h4>⚛️ Atomicity</h4>
+    <p>A transaction either fully succeeds or fully rolls back. No partial state. Transfer $100: debit AND credit happen together or neither does.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🔒 Consistency</h4>
+    <p>Data always moves from one valid state to another. Constraints (foreign keys, NOT NULL) are always enforced.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🏝️ Isolation</h4>
+    <p>Concurrent transactions don't interfere. You can set isolation levels (READ COMMITTED, SERIALIZABLE) based on your needs.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>💾 Durability</h4>
+    <p>Committed data survives crashes. Written to disk (WAL — Write-Ahead Log) before confirming success.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-label">PostgreSQL — ACID Transaction Example</div>
+  <pre><span class="cm">-- This entire block is atomic</span>
+<span class="kw">BEGIN</span>;
+
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance - <span class="num">100</span>
+<span class="kw">WHERE</span> id = <span class="num">1</span>;
+
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance + <span class="num">100</span>
+<span class="kw">WHERE</span> id = <span class="num">2</span>;
+
+<span class="cm">-- If anything fails, ROLLBACK is automatic</span>
+<span class="kw">COMMIT</span>;</pre>
+</div>
+
+<h2>NoSQL Databases</h2>
+<p>NoSQL is a broad category. The key difference: they trade strict consistency for <strong>scale, flexibility, or speed</strong>. There are four main types:</p>
+
+<table class="compare-table">
+  <tr><th>Type</th><th>Example</th><th>Data Model</th><th>Best For</th></tr>
+  <tr><td>Document</td><td>MongoDB, Firestore</td><td>JSON-like documents</td><td>Flexible schemas, content management, user profiles</td></tr>
+  <tr><td>Key-Value</td><td>Redis, DynamoDB</td><td>Hash map</td><td>Caching, sessions, leaderboards, rate limiting</td></tr>
+  <tr><td>Wide-Column</td><td>Cassandra, BigTable</td><td>Rows + dynamic columns</td><td>Time-series, IoT, write-heavy at massive scale</td></tr>
+  <tr><td>Graph</td><td>Neo4j, Neptune</td><td>Nodes + Edges</td><td>Social networks, fraud detection, recommendations</td></tr>
+</table>
+
+<h2>CAP Theorem — The Fundamental Trade-off</h2>
+<p>In a distributed system, during a <strong>network partition</strong> (nodes can't communicate), you can choose at most two of three guarantees:</p>
+
+<div class="diagram">
+  <div class="diagram-title">CAP Theorem Triangle</div>
+<pre>
+              Consistency
+             (C)
+              /\
+             /  \
+            /    \
+           /  CA  \
+          /--------\
+         / CP   AP  \
+        /____________\
+  Availability    Partition
+      (A)         Tolerance (P)
+
+ CP → Strong consistency, sacrifice availability (Zookeeper, HBase)
+ AP → Always available, eventual consistency (Cassandra, DynamoDB)
+ CA → Not realistic in distributed systems (single-node PostgreSQL)
+</pre>
+</div>
+
+<div class="callout info">
+<div class="callout-title">💡 Real-world Nuance</div>
+Network partitions always happen eventually. So CA (Consistency + Availability without Partition Tolerance) is not realistic for distributed systems. The real choice is: when a partition occurs, do you want CP (stop serving rather than serve stale data) or AP (keep serving, reconcile later)?
+</div>
+
+<h3>BASE vs ACID</h3>
+<table class="compare-table">
+  <tr><th>ACID (SQL)</th><th>BASE (NoSQL)</th></tr>
+  <tr><td>Strong Consistency</td><td><strong>B</strong>asically Available</td></tr>
+  <tr><td>Isolation</td><td><strong>S</strong>oft state (data may change)</td></tr>
+  <tr><td>Durability</td><td><strong>E</strong>ventual consistency</td></tr>
+</table>
+
+<h2>How to Choose</h2>
+
+<div class="callout success">
+<div class="callout-title">✅ Use SQL When</div>
+You need ACID (payments, orders, inventory). Data is relational with complex joins. Schema is stable. Compliance requires audit trails. PostgreSQL handles 100k+ QPS with proper indexing — don't reach for NoSQL prematurely.
+</div>
+
+<div class="callout warn">
+<div class="callout-title">⚡ Use NoSQL When</div>
+Schema is dynamic or unknown upfront. You need horizontal sharding from day one (Cassandra, DynamoDB). You're storing massive unstructured data. Key-value access patterns dominate. You need sub-millisecond latency (Redis).
+</div>
+
+<h2>Indexing — The Most Impactful Optimization</h2>
+<p>An index is a data structure (B-tree by default in PostgreSQL) that speeds up reads at the cost of write overhead and storage. <strong>Missing indexes on commonly-queried columns is the #1 cause of slow databases.</strong></p>
+
+<div class="code-block">
+  <div class="code-label">PostgreSQL — Indexing Strategies</div>
+  <pre><span class="cm">-- Single column index — fast WHERE email = ?</span>
+<span class="kw">CREATE INDEX</span> idx_users_email <span class="kw">ON</span> users(email);
+
+<span class="cm">-- Composite index — fast WHERE tenant_id = ? AND created_at > ?</span>
+<span class="kw">CREATE INDEX</span> idx_orders_tenant_created
+  <span class="kw">ON</span> orders(tenant_id, created_at <span class="kw">DESC</span>);
+
+<span class="cm">-- Partial index — only index active users (smaller, faster)</span>
+<span class="kw">CREATE INDEX</span> idx_active_users
+  <span class="kw">ON</span> users(email) <span class="kw">WHERE</span> status = <span class="str">'active'</span>;
+
+<span class="cm">-- Explain analyze — see if index is being used</span>
+<span class="kw">EXPLAIN ANALYZE</span>
+  <span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> email = <span class="str">'sam@pylaxis.io'</span>;</pre>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">🚫 Index Anti-patterns</div>
+<strong>Over-indexing</strong>: Every write must update all indexes. Tables with 20+ indexes become write-bottlenecks. Index what you query. <strong>Low-cardinality indexes</strong>: Indexing a boolean column (true/false) is useless — the DB reads half the table anyway.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Database fundamentals.</div>
+  <div class="quiz-q" data-answer="2">
+    <div class="quiz-question">You're building a financial ledger for Pylaxis that tracks EU compliance events. Which database paradigm is most appropriate?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Cassandra (AP) — high write throughput</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>MongoDB — flexible JSON schema</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>PostgreSQL (ACID) — strong consistency for financial data</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Redis — fast key-value lookups</div>
+    </div>
+    <div class="quiz-explanation">Financial ledgers require ACID guarantees. A compliance event must either be fully recorded or not at all. Eventual consistency is unacceptable — you can't have an audit trail that says "maybe this happened." PostgreSQL with proper indexing handles the scale you need.</div>
+  </div>
+  <div class="quiz-q" data-answer="0">
+    <div class="quiz-question">Cassandra is a CP or AP database?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>AP — it sacrifices consistency for availability and partition tolerance</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>CP — it sacrifices availability for consistency</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>CA — consistency and availability, no partitions</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>It implements full ACID like PostgreSQL</div>
+    </div>
+    <div class="quiz-explanation">Cassandra is AP. It's designed to always be available and never refuse a write. It achieves this via tunable consistency — you can request QUORUM reads to get stronger guarantees, but by default you trade consistency for availability. It's great for IoT time-series, logs, and analytics at massive scale.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 3 =====================
+  {
+    id:3,
+    tag:'Scalability',
+    title:'Scaling Strategies: From 1 to 1 Billion Users',
+    desc:'The exact decisions that separate a toy app from a production system used by millions.',
+    content:`
+<h2>Scaling Is a Journey, Not a Decision</h2>
+<p>No system is built for a billion users on day one. Scaling happens in stages. The art is knowing <strong>when to scale what</strong> — over-engineering kills startups, under-engineering kills products at growth inflection points.</p>
+
+<h2>Vertical vs. Horizontal Scaling</h2>
+<table class="compare-table">
+  <tr><th></th><th>Vertical Scaling (Scale Up)</th><th>Horizontal Scaling (Scale Out)</th></tr>
+  <tr><td><strong>What</strong></td><td>Bigger machine (more CPU, RAM)</td><td>More machines (add servers)</td></tr>
+  <tr><td><strong>Limit</strong></td><td>Hardware ceiling exists. Single point of failure.</td><td>Theoretically unlimited. No SPOF.</td></tr>
+  <tr><td><strong>Cost</strong></td><td>Exponential cost at high specs</td><td>Linear cost scaling</td></tr>
+  <tr><td><strong>Complexity</strong></td><td>Low — no code changes needed</td><td>High — must handle distributed state</td></tr>
+  <tr><td><strong>Use</strong></td><td>Databases (often easier to scale up first)</td><td>Stateless app servers, APIs</td></tr>
+</table>
+
+<div class="callout info">
+<div class="callout-title">💡 The Pragmatic Rule</div>
+Scale vertically first — it's simpler. Migrate to horizontal when you hit the limit or SPOF becomes unacceptable. Most startups don't need horizontal scaling until they're past 10k users/day.
+</div>
+
+<h2>The Scaling Stages (Real Architecture Evolution)</h2>
+
+<div class="framework-step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>Stage 1: Single Server (0–1k users)</h4>
+    <p>App + DB on one machine. Simple, fast to ship. Acceptable for MVP. Zero fault tolerance.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>Stage 2: Separate DB (1k–10k users)</h4>
+    <p>Move DB to its own server. Scale app and DB independently. Can now have read replicas.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>Stage 3: Load Balancer + Multiple App Servers (10k–100k users)</h4>
+    <p>App servers are stateless. Add a load balancer. Session state moves to Redis. Now you're horizontal.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>Stage 4: Database Read Replicas + Cache (100k–1M users)</h4>
+    <p>Primary DB for writes. Read replicas for read traffic. Add caching layer (Redis/Memcached) for hot data.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">5</div>
+  <div class="step-body">
+    <h4>Stage 5: CDN + Global Distribution (1M+ users)</h4>
+    <p>Static assets via CDN. Multiple regions. Database sharding or federation. Microservices for independent scaling.</p>
+  </div>
+</div>
+
+<h2>Stateless vs. Stateful Services</h2>
+<p><strong>The golden rule of horizontal scaling: make services stateless.</strong> A stateless service holds no session data — any server can handle any request. State lives in Redis, the DB, or cookies (JWTs).</p>
+
+<div class="code-block">
+  <div class="code-label">Stateless Auth — JWT Pattern (Node.js)</div>
+  <pre><span class="cm">// Server doesn't store sessions — token IS the state</span>
+<span class="kw">const</span> <span class="fn">generateToken</span> = (userId) => {
+  <span class="kw">return</span> jwt.<span class="fn">sign</span>(
+    { userId, iat: Date.<span class="fn">now</span>() },
+    process.env.JWT_SECRET,
+    { expiresIn: <span class="str">'15m'</span> }
+  );
+};
+
+<span class="cm">// Any server can verify this — no session store needed</span>
+<span class="kw">const</span> <span class="fn">verifyToken</span> = (token) => {
+  <span class="kw">return</span> jwt.<span class="fn">verify</span>(token, process.env.JWT_SECRET);
+};</pre>
+</div>
+
+<h2>Database Replication</h2>
+<p>Replication copies data from a <strong>primary</strong> (write) to one or more <strong>replicas</strong> (read). This scales read traffic and adds redundancy.</p>
+
+<div class="diagram">
+  <div class="diagram-title">Primary-Replica Replication</div>
+<pre>
+              ┌──────────────┐
+Writes ──────►│   PRIMARY DB  │──── WAL (Write-Ahead Log)
+              └──────────────┘          │
+                                   ┌────┴────┐
+                              ┌────▼──┐  ┌───▼───┐
+Reads ─────────────────────► │Replica│  │Replica│
+                              └───────┘  └───────┘
+
+Replication Lag: There's always a delay between primary write
+and replica sync. Don't read your own writes from a replica!
+</pre>
+</div>
+
+<h2>Database Sharding</h2>
+<p>Sharding partitions a database horizontally — each shard holds a subset of rows. This is for <strong>write scaling</strong>, which replication alone cannot solve.</p>
+
+<h3>Sharding Strategies</h3>
+<table class="compare-table">
+  <tr><th>Strategy</th><th>How</th><th>Pro</th><th>Con</th></tr>
+  <tr><td>Range-based</td><td>Shard by date range or ID range</td><td>Range queries efficient</td><td>Hot shards (all new data goes to latest shard)</td></tr>
+  <tr><td>Hash-based</td><td>hash(user_id) % num_shards</td><td>Even distribution</td><td>Range queries require all shards; resharding is painful</td></tr>
+  <tr><td>Directory-based</td><td>Lookup table: user → shard</td><td>Flexible routing</td><td>Lookup table is a SPOF; overhead on every query</td></tr>
+  <tr><td>Geographic</td><td>EU users → EU shard</td><td>Data locality; GDPR compliance</td><td>Uneven growth across regions</td></tr>
+</table>
+
+<div class="callout danger">
+<div class="callout-title">🚫 Sharding is a Last Resort</div>
+Sharding adds enormous operational complexity: cross-shard joins are impossible, transactions span shards poorly, and resharding is painful. Exhaust vertical scaling, read replicas, and caching first. Many large products (Shopify, GitHub) run single-shard PostgreSQL for years.
+</div>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Framing</div>
+When asked "how would you scale X to 100M users?", walk through the stages. Don't jump to "microservices and sharding" immediately. Interviewers are impressed when you say "I'd start with vertical scaling, add read replicas, add a cache layer, and only shard if absolutely necessary." This shows pragmatic judgment.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Scaling concepts.</div>
+  <div class="quiz-q" data-answer="2">
+    <div class="quiz-question">Your app servers crash during a deploy and lose all user session data. What architectural change prevents this?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Add more app servers</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Use sticky sessions in the load balancer</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>Move sessions to Redis so servers are stateless</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Increase deploy timeout</div>
+    </div>
+    <div class="quiz-explanation">Stateless app servers store no local session state. Sessions in Redis (or as JWTs) survive server restarts. Sticky sessions are a workaround that creates uneven load and still breaks when the target server restarts. This is a critical concept for horizontal scaling.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 4 =====================
+  {
+    id:4,
+    tag:'Performance',
+    title:'Caching: The Biggest Performance Win in Systems',
+    desc:'Cache correctly and your system feels 10x faster. Cache incorrectly and you get silent data corruption.',
+    content:`
+<h2>Why Cache?</h2>
+<p>Cache exploits a fundamental truth: <strong>most data is read far more than it's written</strong>. Instead of hitting the database on every request, you serve frequently-accessed data from memory — orders of magnitude faster.</p>
+
+<div class="metric-row">
+  <div class="metric-card"><span class="metric-val">~1ns</span><span class="metric-label">L1 Cache (CPU)</span></div>
+  <div class="metric-card"><span class="metric-val">~100µs</span><span class="metric-label">Redis (in-memory)</span></div>
+  <div class="metric-card"><span class="metric-val">~1ms</span><span class="metric-label">SSD (local disk)</span></div>
+  <div class="metric-card"><span class="metric-val">~10ms</span><span class="metric-label">PostgreSQL (indexed)</span></div>
+  <div class="metric-card"><span class="metric-val">~150ms</span><span class="metric-label">Cross-continent network</span></div>
+</div>
+
+<h2>Cache Placement Strategies</h2>
+
+<div class="tabs">
+  <div class="tab-headers">
+    <button class="tab-btn active" onclick="switchTab(this,'cache-aside')">Cache-Aside</button>
+    <button class="tab-btn" onclick="switchTab(this,'write-through')">Write-Through</button>
+    <button class="tab-btn" onclick="switchTab(this,'write-back')">Write-Back</button>
+    <button class="tab-btn" onclick="switchTab(this,'read-through')">Read-Through</button>
+  </div>
+  <div class="tab-pane active" id="cache-aside">
+    <p><strong>Application manages cache explicitly.</strong> On read: check cache → miss → query DB → populate cache → return. On write: update DB, invalidate cache. Also called "lazy loading."</p>
+    <div class="code-block"><div class="code-label">Cache-Aside Pattern (TypeScript)</div><pre><span class="kw">async function</span> <span class="fn">getUser</span>(id: <span class="type">string</span>) {
+  <span class="cm">// 1. Check cache first</span>
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">&#96;user:&#36;{id}&#96;</span>);
+  <span class="kw">if</span> (cached) <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached);
+
+  <span class="cm">// 2. Cache miss — query DB</span>
+  <span class="kw">const</span> user = <span class="kw">await</span> db.<span class="fn">findById</span>(id);
+
+  <span class="cm">// 3. Populate cache (TTL = 5 minutes)</span>
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(<span class="str">&#96;user:&#36;{id}&#96;</span>, <span class="num">300</span>, JSON.<span class="fn">stringify</span>(user));
+
+  <span class="kw">return</span> user;
+}</pre></div>
+    <div class="callout success"><div class="callout-title">Best For</div>Read-heavy workloads. Works well when cache goes down — app falls back to DB. Cache only what's requested (no cold data wasted).</div>
+  </div>
+  <div class="tab-pane" id="write-through">
+    <p><strong>Every write goes to DB AND cache simultaneously.</strong> Cache is always fresh. Write latency doubles. Perfect for read-heavy data that must be consistent (user profiles, product info).</p>
+    <div class="callout warn"><div class="callout-title">Trade-off</div>Cache may hold data that's never read (written but not queried again). Wastes cache memory. Write latency is higher than cache-aside.</div>
+  </div>
+  <div class="tab-pane" id="write-back">
+    <p><strong>Writes go to cache ONLY, then async flushed to DB.</strong> Extremely fast writes. Risk: if cache crashes before flush, data is lost. Use only for non-critical writes (click counts, view counts).</p>
+    <div class="callout danger"><div class="callout-title">Risk</div>Data loss on cache failure. Never use for financial or compliance data. Only acceptable for ephemeral or reconstructible data.</div>
+  </div>
+  <div class="tab-pane" id="read-through">
+    <p><strong>Cache sits in front of DB and handles DB reads itself.</strong> App only talks to cache. Cache fetches from DB on miss. Simpler app code — caching is infrastructure, not app concern.</p>
+    <div class="callout info"><div class="callout-title">Examples</div>AWS ElastiCache with DAX (DynamoDB Accelerator). The cache library handles miss logic transparently.</div>
+  </div>
+</div>
+
+<h2>Cache Eviction Policies</h2>
+<p>When the cache is full, which items get removed? The policy determines this:</p>
+
+<table class="compare-table">
+  <tr><th>Policy</th><th>Behavior</th><th>Best For</th></tr>
+  <tr><td>LRU (Least Recently Used)</td><td>Evict item not accessed longest</td><td>General purpose — most common</td></tr>
+  <tr><td>LFU (Least Frequently Used)</td><td>Evict item accessed fewest times</td><td>Frequency-based hot data (trending)</td></tr>
+  <tr><td>TTL (Time-to-Live)</td><td>Evict after fixed duration</td><td>Time-sensitive data (sessions, rates)</td></tr>
+  <tr><td>FIFO</td><td>Evict oldest inserted item</td><td>Simple queues — rarely optimal</td></tr>
+</table>
+
+<h2>Cache Invalidation — The Hard Problem</h2>
+<p>Phil Karlton famously said: <em>"There are only two hard things in CS: cache invalidation and naming things."</em> When do you invalidate?</p>
+
+<h3>The Three Strategies</h3>
+<ul>
+  <li><strong>TTL-based</strong>: Cache expires automatically. Stale window = TTL duration. Simplest. Good for data that can be slightly stale (product catalog, user profiles).</li>
+  <li><strong>Event-driven invalidation</strong>: On write → emit event → cache listener deletes keys. Zero stale window. Requires event bus (Kafka, Redis pub/sub).</li>
+  <li><strong>Versioned keys</strong>: <code>user:v3:42</code>. On write, increment version. Old versions expire naturally. No explicit invalidation needed.</li>
+</ul>
+
+<h2>Cache Failure Modes</h2>
+
+<div class="scenario-grid">
+  <div class="scenario-card">
+    <h4>❄️ Cache Stampede</h4>
+    <p>A popular cache key expires. Thousands of concurrent requests all hit the DB simultaneously. Solution: use mutex locks, probabilistic early expiry, or <strong>staggered TTLs</strong>.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>👻 Cache Penetration</h4>
+    <p>Requests for keys that don't exist in DB OR cache (e.g., probing attack with fake IDs). Cache never helps — every request hits DB. Solution: <strong>bloom filter</strong> or cache null results.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🌊 Cache Avalanche</h4>
+    <p>Many cache keys expire at the same time. Mass DB requests. Solution: randomize TTL (300 ± random(60)) so expirations are spread out.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🔥 Thundering Herd</h4>
+    <p>Cache server restarts cold. All requests miss simultaneously. Solution: gradual warm-up, request coalescing, or circuit breaker patterns.</p>
+  </div>
+</div>
+
+<div class="code-block">
+  <div class="code-label">Redis — Production Patterns</div>
+  <pre><span class="cm">// Preventing cache stampede with distributed lock</span>
+<span class="kw">async function</span> <span class="fn">getWithLock</span>(key: <span class="type">string</span>) {
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(key);
+  <span class="kw">if</span> (cached) <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached);
+
+  <span class="cm">// Only one process recomputes — others wait</span>
+  <span class="kw">const</span> lock = <span class="kw">await</span> redis.<span class="fn">set</span>(<span class="str">&#96;lock:&#36;{key}&#96;</span>, <span class="num">1</span>, <span class="str">'NX'</span>, <span class="str">'EX'</span>, <span class="num">5</span>);
+  <span class="kw">if</span> (!lock) {
+    <span class="kw">await</span> <span class="fn">sleep</span>(<span class="num">100</span>); <span class="cm">// Wait and retry</span>
+    <span class="kw">return</span> <span class="fn">getWithLock</span>(key);
+  }
+
+  <span class="kw">const</span> data = <span class="kw">await</span> db.<span class="fn">expensiveQuery</span>();
+  <span class="cm">// Randomized TTL prevents avalanche</span>
+  <span class="kw">const</span> ttl = <span class="num">300</span> + Math.<span class="fn">floor</span>(Math.<span class="fn">random</span>() * <span class="num">60</span>);
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(key, ttl, JSON.<span class="fn">stringify</span>(data));
+  <span class="kw">await</span> redis.<span class="fn">del</span>(<span class="str">&#96;lock:&#36;{key}&#96;</span>);
+  <span class="kw">return</span> data;
+}</pre>
+</div>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Tip</div>
+When asked about caching in a design, always mention: (1) what you're caching and why, (2) which strategy (cache-aside vs write-through), (3) TTL duration and why, (4) how you handle invalidation, and (5) failure modes like stampede. Covering all five signals senior-level thinking.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Caching mastery.</div>
+  <div class="quiz-q" data-answer="1">
+    <div class="quiz-question">A competitor bot queries your system with millions of random fake user IDs. Every request hits your database. Which pattern prevents this?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Increase cache TTL to 1 hour</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Use a Bloom Filter to check existence before querying</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>Switch to write-through caching</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Add more DB read replicas</div>
+    </div>
+    <div class="quiz-explanation">This is a Cache Penetration attack. A Bloom Filter is a probabilistic data structure that tells you with certainty "this ID definitely doesn't exist" (with a tiny false positive rate). If the filter says no → return 404 immediately, no DB query. Used at massive scale by Redis, Cassandra, and Chrome's Safe Browsing.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 5 =====================
+  {
+    id:5,
+    tag:'Async Systems',
+    title:'Message Queues & Event-Driven Architecture',
+    desc:'Decouple services, absorb traffic spikes, and build resilient async pipelines.',
+    content:`
+<h2>Why Async?</h2>
+<p>Synchronous architectures create tight coupling: Service A calls Service B and <strong>waits</strong>. If B is slow or down, A is blocked. Message queues break this coupling — A publishes a message and moves on. B processes it when ready.</p>
+
+<div class="diagram">
+  <div class="diagram-title">Sync vs. Async Architecture</div>
+<pre>
+SYNCHRONOUS (tight coupling):
+  User Request → API → Email Service → Payment Service → SMS Service
+  If SMS is down → request fails → user sees error
+
+ASYNCHRONOUS (loose coupling):
+  User Request → API → Queue ──► Email Worker
+                              └──► Payment Worker
+                              └──► SMS Worker (can retry independently)
+  API returns 202 Accepted immediately — user doesn't wait
+</pre>
+</div>
+
+<h2>Core Concepts</h2>
+
+<h3>Message Queue vs. Message Broker vs. Event Bus</h3>
+<table class="compare-table">
+  <tr><th>Concept</th><th>Model</th><th>Example</th><th>Best For</th></tr>
+  <tr><td>Queue</td><td>1 producer → 1 consumer (point-to-point)</td><td>SQS, RabbitMQ queue</td><td>Task distribution, work queues</td></tr>
+  <tr><td>Pub/Sub</td><td>1 producer → N consumers (broadcast)</td><td>Redis pub/sub, SNS</td><td>Notifications, fanout events</td></tr>
+  <tr><td>Event Stream</td><td>Durable log, multiple consumer groups, replay</td><td>Kafka, Kinesis</td><td>Event sourcing, audit logs, analytics</td></tr>
+</table>
+
+<h2>Apache Kafka — Deep Dive</h2>
+<p>Kafka is a <strong>distributed, durable, ordered event log</strong>. Events are written to partitions. Consumer groups read from partitions independently. Events are retained for a configurable period — consumers can replay history.</p>
+
+<div class="diagram">
+  <div class="diagram-title">Kafka Architecture</div>
+<pre>
+Producers                   Kafka Cluster               Consumers
+                         ┌─ Topic: orders ──────────────────────┐
+Order Service ──────────►│  Partition 0: [e1][e2][e3][e4]...   │──► Billing Service
+                         │  Partition 1: [e1][e2][e3]...       │──► Inventory Service
+Payment Service ────────►│  Partition 2: [e1][e2]...           │──► Analytics Service
+                         └──────────────────────────────────────┘
+                              Offset: consumers track their
+                              own position — no coupling
+</pre>
+</div>
+
+<h3>Key Kafka Properties</h3>
+<ul>
+  <li><strong>Durability</strong>: Messages written to disk, replicated across brokers. Survives node failures.</li>
+  <li><strong>Ordering</strong>: Guaranteed within a partition (not across). Use consistent partition keys for related events.</li>
+  <li><strong>Consumer Groups</strong>: Multiple instances share work within a group. Adding consumers scales throughput linearly up to partition count.</li>
+  <li><strong>Retention</strong>: Default 7 days. New consumers can replay. Enables event sourcing.</li>
+</ul>
+
+<div class="code-block">
+  <div class="code-label">Kafka Producer + Consumer (Node.js / kafkajs)</div>
+  <pre><span class="kw">import</span> { Kafka } <span class="kw">from</span> <span class="str">'kafkajs'</span>;
+
+<span class="kw">const</span> kafka = <span class="kw">new</span> <span class="type">Kafka</span>({ brokers: [<span class="str">'kafka:9092'</span>] });
+
+<span class="cm">// PRODUCER — Order Service</span>
+<span class="kw">const</span> producer = kafka.<span class="fn">producer</span>();
+<span class="kw">await</span> producer.<span class="fn">send</span>({
+  topic: <span class="str">'orders'</span>,
+  messages: [{
+    key: orderId,        <span class="cm">// Same key → same partition (ordering)</span>
+    value: JSON.<span class="fn">stringify</span>({ orderId, userId, amount, status: <span class="str">'created'</span> })
+  }]
+});
+
+<span class="cm">// CONSUMER — Billing Service (scales horizontally)</span>
+<span class="kw">const</span> consumer = kafka.<span class="fn">consumer</span>({ groupId: <span class="str">'billing-service'</span> });
+<span class="kw">await</span> consumer.<span class="fn">subscribe</span>({ topic: <span class="str">'orders'</span> });
+<span class="kw">await</span> consumer.<span class="fn">run</span>({
+  <span class="fn">eachMessage</span>: <span class="kw">async</span> ({ message }) => {
+    <span class="kw">const</span> order = JSON.<span class="fn">parse</span>(message.value.<span class="fn">toString</span>());
+    <span class="kw">await</span> billingService.<span class="fn">processOrder</span>(order);
+    <span class="cm">// Offset committed automatically on success</span>
+  }
+});</pre>
+</div>
+
+<h2>Key Patterns</h2>
+
+<h3>Dead Letter Queue (DLQ)</h3>
+<p>When a message fails processing (retried N times), it moves to a DLQ instead of blocking the queue or being lost. Engineers can inspect DLQ messages, fix the bug, and reprocess. Critical for production reliability.</p>
+
+<h3>Saga Pattern — Distributed Transactions</h3>
+<p>In microservices, you can't use a single DB transaction across services. Sagas coordinate multi-step business processes via messages, with compensating transactions for rollbacks.</p>
+
+<div class="diagram">
+  <div class="diagram-title">Saga Pattern — Order Fulfillment</div>
+<pre>
+Place Order → Reserve Inventory → Process Payment → Ship Order
+                                         │
+                              Payment fails?
+                              Compensate: Release Inventory
+                              → Emit OrderFailed event
+</pre>
+</div>
+
+<h3>Outbox Pattern — Reliable Event Publishing</h3>
+<p>The biggest trap in event-driven systems: you update the DB and then try to publish an event. If the event publish fails, you have inconsistent state. The outbox pattern solves this atomically.</p>
+
+<div class="code-block">
+  <div class="code-label">Outbox Pattern — Atomic DB + Event</div>
+  <pre><span class="cm">// Single transaction: write business data + event</span>
+<span class="kw">await</span> db.<span class="fn">transaction</span>(<span class="kw">async</span> (trx) => {
+  <span class="kw">await</span> trx(<span class="str">'orders'</span>).<span class="fn">insert</span>({ id, userId, total });
+
+  <span class="cm">// Outbox: event stored atomically with business data</span>
+  <span class="kw">await</span> trx(<span class="str">'outbox'</span>).<span class="fn">insert</span>({
+    event_type: <span class="str">'order.created'</span>,
+    payload: JSON.<span class="fn">stringify</span>({ id, userId, total }),
+    status: <span class="str">'pending'</span>
+  });
+});
+
+<span class="cm">// Separate relay process publishes outbox → Kafka</span>
+<span class="cm">// (CDC or polling — Debezium is great for this)</span></pre>
+</div>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Framing</div>
+When designing any e-commerce, logistics, or multi-step workflow system, mention Kafka or SQS for async processing. Explain why: "Rather than synchronously calling 5 services and blocking for 3 seconds, I'd emit an event and let each service process independently. This improves resilience and allows each service to scale independently."
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Async systems.</div>
+  <div class="quiz-q" data-answer="3">
+    <div class="quiz-question">You save a user's order to the DB, then publish an "order.created" Kafka event. The Kafka publish fails. What problem does the Outbox Pattern solve here?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>It retries the Kafka publish indefinitely</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>It prevents the DB write from happening without Kafka</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>It deletes the order if Kafka fails</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>It atomically stores the event in the DB, so a relay can publish it later even after a crash</div>
+    </div>
+    <div class="quiz-explanation">The outbox pattern saves the event to an outbox table in the same DB transaction as the business data. A separate relay process reads the outbox and publishes to Kafka. This guarantees: if the DB write succeeds, the event will eventually be published. No data loss. No dual-write problem. This is a senior-level pattern interviewers love.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 6 =====================
+  {
+    id:6,
+    tag:'Distributed Systems',
+    title:'Consistency, Consensus & Distributed Transactions',
+    desc:'The hardest problems in distributed computing — and what you actually need to know for interviews.',
+    content:`
+<h2>The Core Problem</h2>
+<p>In a distributed system, multiple nodes hold copies of data. Networks fail. Nodes crash. Clocks drift. The question is: <strong>how do we maintain a coherent view of state across all nodes?</strong></p>
+
+<h2>Consistency Models</h2>
+<p>Consistency models define the guarantees about what data a reader sees relative to writes. This is a spectrum, not a binary.</p>
+
+<div class="framework-step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>Strong Consistency (Linearizability)</h4>
+    <p>Every read reflects the most recent write. As if there's a single server. Highest correctness. Highest latency — requires coordination. Example: Zookeeper, etcd, single-region PostgreSQL.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>Sequential Consistency</h4>
+    <p>Operations appear in the same order on all nodes, but not necessarily real-time order. Weaker than linearizability. Easier to implement.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>Eventual Consistency</h4>
+    <p>Given no new writes, all replicas will <em>eventually</em> converge to the same value. No real-time guarantee. High availability. Example: Cassandra, DynamoDB, DNS propagation.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>Causal Consistency</h4>
+    <p>Causally related operations are seen in order. "If A caused B, everyone sees A before B." Stronger than eventual, weaker than strong. Example: MongoDB sessions.</p>
+  </div>
+</div>
+
+<h2>Consensus Algorithms</h2>
+<p>Consensus = getting multiple nodes to agree on a single value. This is the hard problem underlying leader election, distributed locks, and distributed transactions.</p>
+
+<h3>Raft — How Modern Systems Agree</h3>
+<p>Raft is the consensus algorithm behind etcd, CockroachDB, and TiKV. It's designed to be understandable (vs. Paxos).</p>
+
+<div class="diagram">
+  <div class="diagram-title">Raft Consensus — Key Concepts</div>
+<pre>
+Nodes: [Leader] [Follower] [Follower] [Follower] [Follower]
+                   │
+                   │  Heartbeats from Leader prevent election
+                   │
+Election:          │
+  Leader dies ─────┘
+  Followers wait random timeout
+  First timeout → becomes Candidate → asks for votes
+  Gets majority → becomes new Leader
+  All writes go through Leader → replicated to followers
+  Committed when majority (quorum) acknowledge write
+</pre>
+</div>
+
+<div class="callout info">
+<div class="callout-title">💡 Quorum</div>
+For a cluster of N nodes, you need a majority (⌊N/2⌋ + 1) to agree. For 5 nodes: quorum = 3. You can lose 2 nodes and still function. This is why 3 or 5 node clusters are common — never 2 or 4.
+</div>
+
+<h2>Distributed Locking</h2>
+<p>Sometimes only one process should do something at a time (cron job, payment processing, inventory deduction). Distributed locks coordinate this across nodes.</p>
+
+<div class="code-block">
+  <div class="code-label">Redis Distributed Lock (Redlock Pattern)</div>
+  <pre><span class="cm">// Acquire lock: SET key value NX EX ttl</span>
+<span class="cm">// NX = only set if Not eXists (atomic — no race condition)</span>
+<span class="cm">// EX = expire in case process crashes (auto-release)</span>
+
+<span class="kw">const</span> <span class="fn">acquireLock</span> = <span class="kw">async</span> (resource: <span class="type">string</span>, ttl: <span class="type">number</span>) => {
+  <span class="kw">const</span> token = crypto.<span class="fn">randomUUID</span>();
+  <span class="kw">const</span> result = <span class="kw">await</span> redis.<span class="fn">set</span>(
+    <span class="str">&#96;lock:&#36;{resource}&#96;</span>, token, <span class="str">'NX'</span>, <span class="str">'EX'</span>, ttl
+  );
+  <span class="kw">return</span> result === <span class="str">'OK'</span> ? token : <span class="kw">null</span>;
+};
+
+<span class="kw">const</span> <span class="fn">releaseLock</span> = <span class="kw">async</span> (resource: <span class="type">string</span>, token: <span class="type">string</span>) => {
+  <span class="cm">// Lua script: only delete if token matches (atomic)</span>
+  <span class="kw">const</span> lua = <span class="str">&#96;
+    if redis.call('get', KEYS[1]) == ARGV[1] then
+      return redis.call('del', KEYS[1])
+    end
+    return 0
+  &#96;</span>;
+  <span class="kw">await</span> redis.<span class="fn">eval</span>(lua, <span class="num">1</span>, <span class="str">&#96;lock:&#36;{resource}&#96;</span>, token);
+};</pre>
+</div>
+
+<h2>Two-Phase Commit (2PC)</h2>
+<p>2PC is a protocol for atomically committing a transaction across multiple databases/services. It has two phases: Prepare (all participants say "ready") and Commit (coordinator tells everyone to commit).</p>
+
+<div class="callout danger">
+<div class="callout-title">🚫 2PC Problems</div>
+<strong>Blocking protocol</strong>: If the coordinator crashes after Prepare but before Commit, participants are locked forever. Slow — requires 2 round trips. This is why modern distributed systems prefer Sagas (compensating transactions) over 2PC.
+</div>
+
+<h2>Idempotency at Scale</h2>
+<p>In distributed systems, retries are essential (networks fail). Every operation that modifies state must be idempotent — safe to retry without side effects.</p>
+
+<div class="code-block">
+  <div class="code-label">Idempotency Key Pattern (Payment API)</div>
+  <pre><span class="cm">// Client sends unique idempotency key</span>
+<span class="cm">// POST /payments  Idempotency-Key: uuid-abc-123</span>
+
+<span class="kw">async function</span> <span class="fn">processPayment</span>(req) {
+  <span class="kw">const</span> key = req.headers[<span class="str">'idempotency-key'</span>];
+
+  <span class="cm">// Check if we've seen this key before</span>
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">&#96;idem:&#36;{key}&#96;</span>);
+  <span class="kw">if</span> (cached) <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached); <span class="cm">// Return same response</span>
+
+  <span class="kw">const</span> result = <span class="kw">await</span> stripe.<span class="fn">charge</span>(req.body);
+
+  <span class="cm">// Store result for 24 hours</span>
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(<span class="str">&#96;idem:&#36;{key}&#96;</span>, <span class="num">86400</span>, JSON.<span class="fn">stringify</span>(result));
+  <span class="kw">return</span> result;
+}</pre>
+</div>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Tip</div>
+When asked about distributed transactions, say: "I'd prefer Sagas over 2PC because 2PC is blocking and fragile under coordinator failure. Sagas allow each step to have a compensating transaction, and the system can make progress even through partial failures." This answer shows deep understanding.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Distributed systems concepts.</div>
+  <div class="quiz-q" data-answer="1">
+    <div class="quiz-question">For a Raft cluster to tolerate 2 node failures, how many total nodes are needed?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>3 nodes</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>5 nodes</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>4 nodes</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>7 nodes</div>
+    </div>
+    <div class="quiz-explanation">To tolerate F failures, you need 2F+1 nodes. To tolerate 2 failures: 2(2)+1 = 5 nodes. With 5 nodes, quorum = 3. You can lose 2 and still have 3 nodes to form a majority. This formula is fundamental to understanding cluster sizing in production systems.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 7 =====================
+  {
+    id:7,
+    tag:'APIs & Communication',
+    title:'API Design: REST, GraphQL & gRPC',
+    desc:'How services talk to each other and to clients — and when to choose which protocol.',
+    content:`
+<h2>The API Layer</h2>
+<p>APIs are the contracts between systems. Choose the wrong protocol and you pay a tax on every interaction — in latency, payload size, developer experience, or flexibility. Choose correctly and communication becomes invisible.</p>
+
+<h2>REST — The Workhorse</h2>
+<p>REST (Representational State Transfer) uses HTTP methods (GET, POST, PUT, PATCH, DELETE) and resource-based URLs. It's the dominant style for public APIs and client-server communication.</p>
+
+<h3>REST Design Principles</h3>
+<ul>
+  <li><strong>Resources, not actions</strong>: <code>/users/42</code> not <code>/getUser?id=42</code></li>
+  <li><strong>HTTP verbs carry intent</strong>: GET=read, POST=create, PUT=replace, PATCH=update, DELETE=remove</li>
+  <li><strong>Stateless</strong>: Each request carries all needed context (auth token, etc.)</li>
+  <li><strong>Status codes matter</strong>: 200/201/204 success. 400 client error. 401 unauth. 403 forbidden. 404 not found. 409 conflict. 422 validation. 429 rate limited. 500 server error.</li>
+</ul>
+
+<div class="code-block">
+  <div class="code-label">REST API — Pylaxis Compliance Endpoints</div>
+  <pre><span class="cm"># Good REST design</span>
+GET    /api/v1/manufacturers              <span class="cm"># List manufacturers</span>
+POST   /api/v1/manufacturers              <span class="cm"># Create manufacturer</span>
+GET    /api/v1/manufacturers/:id          <span class="cm"># Get one</span>
+PATCH  /api/v1/manufacturers/:id          <span class="cm"># Partial update</span>
+DELETE /api/v1/manufacturers/:id          <span class="cm"># Delete</span>
+
+GET    /api/v1/manufacturers/:id/products <span class="cm"># Nested resource</span>
+
+<span class="cm"># Filtering, pagination, sorting via query params</span>
+GET /api/v1/products?status=compliant&page=2&limit=20&sort=-created_at</pre>
+</div>
+
+<h3>REST Versioning</h3>
+<p>APIs change. Versioning prevents breaking existing clients. Three common strategies:</p>
+<ul>
+  <li><strong>URL versioning</strong>: <code>/api/v1/</code> → <code>/api/v2/</code>. Most explicit, easiest to route. Most common.</li>
+  <li><strong>Header versioning</strong>: <code>Accept: application/vnd.pylaxis.v2+json</code>. Cleaner URLs, harder to test in browser.</li>
+  <li><strong>Query param</strong>: <code>?version=2</code>. Easiest to implement, considered bad practice.</li>
+</ul>
+
+<h2>GraphQL — Flexible Queries</h2>
+<p>GraphQL lets clients request exactly the fields they need in a single request. One endpoint, client-controlled queries. Solves over-fetching (too much data) and under-fetching (multiple roundtrips).</p>
+
+<div class="code-block">
+  <div class="code-label">GraphQL Query Example</div>
+  <pre><span class="cm"># Client requests exactly what it needs</span>
+query <span class="fn">GetManufacturer</span>($id: ID!) {
+  manufacturer(id: $id) {
+    name
+    complianceStatus
+    products {        <span class="cm"># Nested in one request (no N+1 with DataLoader)</span>
+      id
+      batteryRegId
+      passportStatus
+    }
+  }
+}
+
+<span class="cm"># Response only has requested fields — no over-fetching</span></pre>
+</div>
+
+<h3>GraphQL Trade-offs</h3>
+<table class="compare-table">
+  <tr><th></th><th>GraphQL</th><th>REST</th></tr>
+  <tr><td>Flexibility</td><td><span class="tag tag-green">High</span> — client controls shape</td><td><span class="tag tag-blue">Fixed</span> — server defines response</td></tr>
+  <tr><td>Caching</td><td><span class="tag tag-red">Hard</span> — POST queries aren't cacheable by default</td><td><span class="tag tag-green">Easy</span> — HTTP cache + CDN</td></tr>
+  <tr><td>N+1 Problem</td><td>Requires DataLoader (batching)</td><td>Controlled by server</td></tr>
+  <tr><td>Learning Curve</td><td>Higher — schema, resolvers</td><td>Lower — just HTTP</td></tr>
+  <tr><td>Best For</td><td>Complex UIs, mobile (save bandwidth)</td><td>Public APIs, simple services</td></tr>
+</table>
+
+<h2>gRPC — High Performance Internal APIs</h2>
+<p>gRPC uses Protocol Buffers (binary serialization) over HTTP/2. It's <strong>10x smaller payload, streaming support, and type-safe contracts</strong>. The standard for internal microservice communication at Google, Netflix, and Uber.</p>
+
+<div class="code-block">
+  <div class="code-label">Protocol Buffer Definition</div>
+  <pre><span class="cm">// compliance.proto</span>
+syntax = <span class="str">"proto3"</span>;
+
+<span class="kw">service</span> <span class="type">ComplianceService</span> {
+  rpc <span class="fn">CheckCompliance</span>(ComplianceRequest) <span class="kw">returns</span> (ComplianceResponse);
+  rpc <span class="fn">StreamUpdates</span>(StreamRequest) <span class="kw">returns</span> <span class="kw">stream</span> StatusUpdate;
+}
+
+<span class="kw">message</span> <span class="type">ComplianceRequest</span> {
+  string product_id = <span class="num">1</span>;
+  string regulation = <span class="num">2</span>;
+}
+
+<span class="kw">message</span> <span class="type">ComplianceResponse</span> {
+  bool is_compliant = <span class="num">1</span>;
+  repeated string missing_fields = <span class="num">2</span>;
+  int64 checked_at = <span class="num">3</span>;
+}</pre>
+</div>
+
+<h2>WebSockets — Real-time Bidirectional</h2>
+<p>WebSockets maintain a persistent connection between client and server, enabling real-time push updates. Use for: live dashboards, chat, collaborative editing, live notifications.</p>
+
+<div class="diagram">
+  <div class="diagram-title">HTTP vs WebSocket Communication</div>
+<pre>
+HTTP (Request-Response):
+  Client ──GET /data──► Server
+  Client ◄──200 OK────  Server
+  Client ──GET /data──► Server   (must poll for updates)
+
+WebSocket (Full-duplex):
+  Client ──Upgrade request──► Server
+  Client ◄──101 Switching──   Server
+  ═══════ Persistent connection ═══════
+  Server ──► Client  (push any time)
+  Client ──► Server  (send any time)
+  ═════════════════════════════════════
+</pre>
+</div>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ When to Use What</div>
+<strong>REST</strong>: Public APIs, CRUD operations, simple client-server. <strong>GraphQL</strong>: Complex frontends needing flexible data, mobile apps with bandwidth constraints. <strong>gRPC</strong>: Internal microservices, streaming, high-performance backends. <strong>WebSocket</strong>: Anything that needs real-time push (chat, live updates, collaborative tools).
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">API design decisions.</div>
+  <div class="quiz-q" data-answer="2">
+    <div class="quiz-question">Pylaxis has a React dashboard that fetches manufacturer data + their products + compliance status all at once. REST requires 3 API calls. What's the best alternative?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>gRPC — binary protocol is faster</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>WebSocket — persistent connection</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>GraphQL — client specifies exact data needed in one request</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Batch REST endpoint that returns everything</div>
+    </div>
+    <div class="quiz-explanation">GraphQL is designed for exactly this scenario — the "under-fetching" problem where multiple round trips are needed. The client declares the shape of data it needs. gRPC would work too but is better for internal services, not browser clients. The batch REST endpoint is valid but inflexible and custom per use-case.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 8 =====================
+  {
+    id:8,
+    tag:'Reliability',
+    title:'Fault Tolerance, Resilience & Observability',
+    desc:'Systems fail. The question is whether you built yours to fail gracefully — and whether you can see it failing.',
+    content:`
+<h2>Everything Fails</h2>
+<p>At scale, everything fails: networks partition, disks fill up, memory leaks grow, dependencies go down, deployments introduce bugs. Resilient systems expect failure and are designed to <strong>degrade gracefully</strong> rather than catastrophically.</p>
+
+<h2>Circuit Breaker Pattern</h2>
+<p>Prevent cascading failures. When a service is failing, stop calling it immediately rather than flooding it with requests that will all fail anyway. Like a physical circuit breaker — trips on overload, resets when clear.</p>
+
+<div class="diagram">
+  <div class="diagram-title">Circuit Breaker State Machine</div>
+<pre>
+         ┌──── Requests succeed ────────────────────┐
+         │                                          │
+CLOSED ──┴── [Normal operation] ──fail threshold──► OPEN
+                                                     │
+                                              timeout period
+                                                     │
+                                                     ▼
+                                               HALF-OPEN
+                                           [Allow 1 test request]
+                                                     │
+                                    ┌────────────────┴──────────────┐
+                                  fail                           success
+                                    │                               │
+                                    ▼                               ▼
+                                  OPEN                           CLOSED
+</pre>
+</div>
+
+<div class="code-block">
+  <div class="code-label">Circuit Breaker — TypeScript Implementation</div>
+  <pre><span class="kw">class</span> <span class="type">CircuitBreaker</span> {
+  <span class="kw">private</span> failures = <span class="num">0</span>;
+  <span class="kw">private</span> state: <span class="str">'CLOSED'</span> | <span class="str">'OPEN'</span> | <span class="str">'HALF_OPEN'</span> = <span class="str">'CLOSED'</span>;
+  <span class="kw">private</span> nextAttempt = <span class="num">0</span>;
+
+  <span class="kw">async</span> <span class="fn">call</span>&lt;T&gt;(fn: () => Promise&lt;T&gt;): Promise&lt;T&gt; {
+    <span class="kw">if</span> (<span class="kw">this</span>.state === <span class="str">'OPEN'</span>) {
+      <span class="kw">if</span> (Date.<span class="fn">now</span>() < <span class="kw">this</span>.nextAttempt)
+        <span class="kw">throw new</span> <span class="type">Error</span>(<span class="str">'Circuit OPEN — service unavailable'</span>);
+      <span class="kw">this</span>.state = <span class="str">'HALF_OPEN'</span>;
+    }
+
+    <span class="kw">try</span> {
+      <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">fn</span>();
+      <span class="kw">this</span>.failures = <span class="num">0</span>;
+      <span class="kw">this</span>.state = <span class="str">'CLOSED'</span>;
+      <span class="kw">return</span> result;
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">this</span>.failures++;
+      <span class="kw">if</span> (<span class="kw">this</span>.failures >= <span class="num">5</span>) {
+        <span class="kw">this</span>.state = <span class="str">'OPEN'</span>;
+        <span class="kw">this</span>.nextAttempt = Date.<span class="fn">now</span>() + <span class="num">30000</span>; <span class="cm">// 30s timeout</span>
+      }
+      <span class="kw">throw</span> err;
+    }
+  }
+}</pre>
+</div>
+
+<h2>Rate Limiting</h2>
+<p>Protect your system from abuse, runaway clients, and accidental DDoS. Rate limiting enforces usage quotas per user, IP, or API key.</p>
+
+<h3>Rate Limiting Algorithms</h3>
+<table class="compare-table">
+  <tr><th>Algorithm</th><th>How</th><th>Pro</th><th>Con</th></tr>
+  <tr><td>Fixed Window</td><td>100 req/min, counter resets every minute</td><td>Simple</td><td>Burst at window boundary (100 at :59, 100 at :01)</td></tr>
+  <tr><td>Sliding Window</td><td>Count requests in last 60s rolling window</td><td>No boundary burst</td><td>More memory (store timestamps)</td></tr>
+  <tr><td>Token Bucket</td><td>Tokens refill at constant rate. Spend 1 per request.</td><td>Allows short bursts</td><td>Slightly complex</td></tr>
+  <tr><td>Leaky Bucket</td><td>Queue requests, process at fixed rate</td><td>Smooth output rate</td><td>Introduces latency, queue fills up</td></tr>
+</table>
+
+<div class="code-block">
+  <div class="code-label">Redis Sliding Window Rate Limiter</div>
+  <pre><span class="kw">async function</span> <span class="fn">isRateLimited</span>(userId: <span class="type">string</span>, limit: <span class="type">number</span>) {
+  <span class="kw">const</span> key = <span class="str">&#96;ratelimit:&#36;{userId}&#96;</span>;
+  <span class="kw">const</span> now = Date.<span class="fn">now</span>();
+  <span class="kw">const</span> windowMs = <span class="num">60_000</span>; <span class="cm">// 1 minute</span>
+
+  <span class="kw">const</span> pipeline = redis.<span class="fn">pipeline</span>();
+  pipeline.<span class="fn">zremrangebyscore</span>(key, <span class="num">0</span>, now - windowMs); <span class="cm">// Remove old</span>
+  pipeline.<span class="fn">zadd</span>(key, now, <span class="str">&#96;&#36;{now}&#96;</span>);              <span class="cm">// Add current</span>
+  pipeline.<span class="fn">zcard</span>(key);                               <span class="cm">// Count window</span>
+  pipeline.<span class="fn">expire</span>(key, <span class="num">60</span>);
+  <span class="kw">const</span> results = <span class="kw">await</span> pipeline.<span class="fn">exec</span>();
+
+  <span class="kw">const</span> count = results[<span class="num">2</span>][<span class="num">1</span>] <span class="kw">as</span> <span class="type">number</span>;
+  <span class="kw">return</span> count > limit;
+}</pre>
+</div>
+
+<h2>Observability — The Three Pillars</h2>
+<p>You can't fix what you can't see. Observability answers: <strong>"What is my system doing right now?"</strong></p>
+
+<div class="scenario-grid">
+  <div class="scenario-card">
+    <h4>📋 Logs</h4>
+    <p>Discrete events with context. Structured JSON logs enable querying. Use log levels (DEBUG/INFO/WARN/ERROR). Tools: Datadog, Loki, CloudWatch.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>📊 Metrics</h4>
+    <p>Numeric measurements over time. RED: Rate, Errors, Duration. USE: Utilization, Saturation, Errors. Tools: Prometheus + Grafana, Datadog.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🔍 Traces</h4>
+    <p>Follow a single request across multiple services. Shows where time is spent, where errors originate. Tools: Jaeger, Tempo, Datadog APM.</p>
+  </div>
+  <div class="scenario-card">
+    <h4>🚨 Alerts</h4>
+    <p>Trigger on symptoms, not causes. Alert on SLO breach, not just "CPU > 80%". PagerDuty, Opsgenie. Avoid alert fatigue.</p>
+  </div>
+</div>
+
+<h2>Health Checks & SLOs</h2>
+<ul>
+  <li><strong>Liveness probe</strong>: "Is the process alive?" — if no, restart it. Simple HTTP 200.</li>
+  <li><strong>Readiness probe</strong>: "Is the service ready to serve traffic?" — if no, remove from load balancer. Checks DB connection, cache, dependencies.</li>
+  <li><strong>SLO (Service Level Objective)</strong>: Target you commit to internally. "99.9% of requests < 200ms"</li>
+  <li><strong>SLA (Service Level Agreement)</strong>: External contract with penalties. Never commit SLA > SLO.</li>
+  <li><strong>Error Budget</strong>: If SLO is 99.9%, you have 0.1% = 43.8 min/month to spend on downtime. Track burn rate.</li>
+</ul>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Interview Tip</div>
+When asked "how do you ensure reliability?", mention circuit breakers for dependencies, rate limiting for protection, retries with exponential backoff, and observability (logs/metrics/traces). Mention health checks and SLOs to show you think about operational excellence, not just code.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Reliability patterns.</div>
+  <div class="quiz-q" data-answer="0">
+    <div class="quiz-question">Your payment service calls an external tax calculation API. The tax API goes down. Without a circuit breaker, what happens?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>All payment requests queue up and timeout, overwhelming both services and potentially crashing your system too</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Requests fail gracefully and users are notified</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>The load balancer automatically reroutes to a healthy instance</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Nothing — your service is unaffected by external dependencies</div>
+    </div>
+    <div class="quiz-explanation">Without a circuit breaker, your service keeps hammering the downed dependency, accumulating timeout threads. Your connection pool exhausts. Your service starts failing too — a cascading failure. A circuit breaker trips after N failures, immediately returning an error (fail fast) instead of waiting for timeouts. This prevents cascading failures from propagating through your system.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 9 =====================
+  {
+    id:9,
+    tag:'Security',
+    title:'Security in System Design',
+    desc:'Threat modeling, authentication architecture, and securing distributed systems from first principles.',
+    content:`
+<h2>Security Is Architecture</h2>
+<p>Security isn't a feature you bolt on — it's a property of the system's architecture. The decisions you make about data flow, service boundaries, and authentication propagate through every component.</p>
+
+<h2>Authentication vs. Authorization</h2>
+<ul>
+  <li><strong>Authentication (AuthN)</strong>: Who are you? — Verify identity via password, OAuth, biometric</li>
+  <li><strong>Authorization (AuthZ)</strong>: What can you do? — Verify permission to access a resource</li>
+</ul>
+
+<h3>JWT — Stateless Auth Architecture</h3>
+<div class="diagram">
+  <div class="diagram-title">JWT Auth Flow</div>
+<pre>
+1. Client sends credentials (POST /auth/login)
+2. Server validates → generates JWT (signed with secret)
+3. JWT returned to client
+4. Client sends JWT in every request: Authorization: Bearer &lt;token&gt;
+5. Any server can verify JWT signature — no session store needed
+
+JWT Structure:
+  Header.Payload.Signature
+  {"alg":"HS256"}.{"userId":"42","role":"admin","exp":1735000000}.&lt;sig&gt;
+</pre>
+</div>
+
+<div class="callout warn">
+<div class="callout-title">⚠️ JWT Pitfalls</div>
+<strong>Store JWTs in HttpOnly cookies</strong>, not localStorage — XSS can steal localStorage tokens. <strong>Short expiry + refresh tokens</strong>: access token 15min, refresh token 30 days. <strong>Never put sensitive data in JWT payload</strong> — it's base64 encoded, not encrypted. Anyone can decode it.
+</div>
+
+<h2>OAuth 2.0 — Delegated Authorization</h2>
+<p>OAuth lets users grant your app access to their data on another service (Google, GitHub) without sharing their credentials. The "Sign in with Google" flow is OAuth.</p>
+
+<div class="diagram">
+  <div class="diagram-title">OAuth 2.0 Authorization Code Flow</div>
+<pre>
+User clicks "Sign in with Google"
+        │
+        ▼
+Your App redirects to Google with:
+  client_id, redirect_uri, scope, state (CSRF token)
+        │
+        ▼
+User authenticates at Google + grants permission
+        │
+        ▼
+Google redirects back to your redirect_uri with ?code=XYZ
+        │
+        ▼
+Your server exchanges code for access_token (server-to-server)
+  POST /token  client_id + client_secret + code
+        │
+        ▼
+Access token → call Google APIs on user's behalf
+</pre>
+</div>
+
+<h2>The Principle of Least Privilege</h2>
+<p>Every service, user, and process should have exactly the minimum permissions needed — nothing more. Apply this everywhere:</p>
+<ul>
+  <li><strong>Database users</strong>: Your API service gets SELECT/INSERT/UPDATE only. Never GRANT ALL on production.</li>
+  <li><strong>IAM roles</strong>: Lambda functions only get access to the specific S3 bucket they need.</li>
+  <li><strong>Service mesh</strong>: Services can only call services they're explicitly allowed to call.</li>
+  <li><strong>RBAC</strong>: Users get roles (admin, editor, viewer). Roles get permissions. Not users→permissions directly.</li>
+</ul>
+
+<div class="code-block">
+  <div class="code-label">RBAC Implementation (Pylaxis Multi-tenant)</div>
+  <pre><span class="cm">// Role-based access control with tenant isolation</span>
+<span class="kw">const</span> permissions = {
+  admin:   [<span class="str">'read'</span>, <span class="str">'write'</span>, <span class="str">'delete'</span>, <span class="str">'manage_users'</span>],
+  editor:  [<span class="str">'read'</span>, <span class="str">'write'</span>],
+  viewer:  [<span class="str">'read'</span>]
+};
+
+<span class="kw">function</span> <span class="fn">canAccess</span>(user: User, resource: string, action: string): boolean {
+  <span class="cm">// Tenant isolation — can never access other tenant's data</span>
+  <span class="kw">if</span> (resource.tenantId !== user.tenantId) <span class="kw">return false</span>;
+
+  <span class="cm">// Role check</span>
+  <span class="kw">return</span> permissions[user.role]?.<span class="fn">includes</span>(action) ?? <span class="kw">false</span>;
+}</pre>
+</div>
+
+<h2>Transport & Data Security</h2>
+<ul>
+  <li><strong>TLS everywhere</strong>: All traffic encrypted in transit. Even internal service-to-service (mTLS in service mesh).</li>
+  <li><strong>Encryption at rest</strong>: DB-level encryption (PostgreSQL TDE, AWS RDS encryption). Sensitive fields (PII, keys) encrypted at column level.</li>
+  <li><strong>Secret management</strong>: Never hardcode secrets. Use AWS Secrets Manager, Vault, or environment variables (not committed to git). Rotate regularly.</li>
+</ul>
+
+<h2>Common Attack Vectors</h2>
+<table class="compare-table">
+  <tr><th>Attack</th><th>What It Is</th><th>Defense</th></tr>
+  <tr><td>SQL Injection</td><td>User input executed as SQL</td><td>Parameterized queries. ORMs. Never string concat SQL.</td></tr>
+  <tr><td>XSS</td><td>Malicious scripts injected into your page</td><td>Sanitize output. CSP headers. HttpOnly cookies.</td></tr>
+  <tr><td>CSRF</td><td>Forged requests from other sites</td><td>CSRF tokens. SameSite cookie attribute. CORS.</td></tr>
+  <tr><td>SSRF</td><td>Server makes requests to internal services</td><td>Validate/allowlist URLs. Block internal IP ranges.</td></tr>
+  <tr><td>Broken Auth</td><td>Weak tokens, no expiry, guessable IDs</td><td>Strong token entropy. Short expiry. UUIDs not sequential IDs.</td></tr>
+</table>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Security in Interviews</div>
+When designing any system, proactively mention: "I'd use JWT with short expiry for auth, mTLS between internal services, encrypt PII at rest, and run least-privilege IAM roles." Mentioning security without being asked shows senior maturity.
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Security architecture.</div>
+  <div class="quiz-q" data-answer="3">
+    <div class="quiz-question">A developer stores the refresh token in localStorage. What's the specific risk?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>The token is not encrypted</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>LocalStorage is too slow for token retrieval</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>The token will expire immediately</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>An XSS attack can read localStorage and steal the token</div>
+    </div>
+    <div class="quiz-explanation">localStorage is accessible via JavaScript. An XSS vulnerability (injected script from user input) can execute &#96;localStorage.getItem('refresh_token')&#96; and exfiltrate the token. Refresh tokens are long-lived (30 days), making theft catastrophic. HttpOnly cookies cannot be read by JavaScript — even a successful XSS cannot steal them. This is why all auth tokens should live in HttpOnly, Secure, SameSite=Strict cookies.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 10 =====================
+  {
+    id:10,
+    tag:'Real Designs',
+    title:'Designing Real Systems: 4 Full Case Studies',
+    desc:'Walk through complete system designs for URL Shortener, Twitter Feed, Netflix Video, and Ride-sharing.',
+    content:`
+<h2>Case Study Framework</h2>
+<p>Every real system design starts with the same four questions. Apply them before touching any architecture.</p>
+<ol>
+  <li><strong>Clarify requirements</strong>: What does it do? What doesn't it do? Who uses it?</li>
+  <li><strong>Estimate scale</strong>: Users, QPS, storage, bandwidth. This drives every decision.</li>
+  <li><strong>Define the data model</strong>: What entities? What access patterns?</li>
+  <li><strong>Design the architecture</strong>: Draw the components. Justify each choice.</li>
+</ol>
+
+<div class="design-case">
+  <div class="design-case-header">
+    <h3>🔗 Design #1: URL Shortener (bit.ly)</h3>
+    <p>Classic interview starter — tests fundamentals in under 30 minutes.</p>
+  </div>
+  <div class="design-case-body">
+    <h3>Requirements</h3>
+    <ul>
+      <li>Shorten a long URL → 6-char short code</li>
+      <li>Redirect short URL to original in &lt;50ms</li>
+      <li>100M new URLs/day, 10B redirects/day (100:1 read:write)</li>
+      <li>URLs expire after 1 year</li>
+    </ul>
+    <h3>Scale Estimation</h3>
+    <ul>
+      <li>Write QPS: 100M / 86400s ≈ 1,160/s</li>
+      <li>Read QPS: 10B / 86400s ≈ 115,700/s</li>
+      <li>Storage: 100M URLs/day × 365 days × ~500 bytes ≈ 18TB/year</li>
+    </ul>
+    <h3>Key Design Decisions</h3>
+    <div class="diagram"><pre>
+Client → CDN → Load Balancer → URL Service (stateless, N nodes)
+                                      │
+                    ┌─────────────────┤
+                    ▼                 ▼
+              Redis Cache        PostgreSQL
+              (hot URLs)         (all URLs)
+
+Short code generation:
+  Option 1: hash(longURL) → take 6 chars (collision risk)
+  Option 2: Base62 encode auto-increment ID (1,000,000 = "4c92")
+  Option 3: Pre-generate codes in batch, store in Redis pool
+
+Redirect flow:
+  GET /abc123
+  1. Redis.get('abc123') → hit? → 301 redirect (cached by browser)
+  2. Miss → DB lookup → Redis.set('abc123', url, TTL) → redirect
+</pre></div>
+    <div class="callout info"><div class="callout-title">301 vs 302</div>301 Permanent = browser caches, no future requests to your server. 302 Temporary = browser always asks your server. For analytics (track clicks), use 302. For pure performance, use 301.</div>
+  </div>
+</div>
+
+<div class="design-case">
+  <div class="design-case-header">
+    <h3>🐦 Design #2: Twitter News Feed</h3>
+    <p>Tests fanout, caching, and real-time at scale.</p>
+  </div>
+  <div class="design-case-body">
+    <h3>Requirements</h3>
+    <ul>
+      <li>Post tweets (text, images)</li>
+      <li>Follow/unfollow users</li>
+      <li>See timeline of followed users' tweets, reverse-chronological</li>
+      <li>300M users, celebrities with 100M followers</li>
+    </ul>
+    <h3>The Fanout Problem</h3>
+    <p>When a celebrity tweets, do you push it to 100M followers' feeds (write-heavy) or do you pull and merge at read time (read-heavy)?</p>
+    <div class="diagram"><pre>
+FANOUT ON WRITE (Push):
+  Tweet created → queue → worker pushes to all follower timelines
+  Pro: Read is instant (pre-built)
+  Con: 100M writes on every celebrity tweet
+
+FANOUT ON READ (Pull):
+  Timeline request → fetch all followees' tweets → merge → sort
+  Pro: No write amplification
+  Con: High read latency (100 DB queries merged in real-time)
+
+HYBRID (Twitter's actual approach):
+  Normal users: fanout on write (< 1k followers)
+  Celebrities: fanout on read — fetched and merged at timeline request
+  Most timelines pre-built in Redis. Celebrity tweets injected at serve time.
+</pre></div>
+    <div class="callout success"><div class="callout-title">The Hybrid Pattern</div>Use different strategies for different user segments. This is a senior-level insight interviewers love. Don't apply one strategy globally when workload differs drastically by user type.</div>
+  </div>
+</div>
+
+<div class="design-case">
+  <div class="design-case-header">
+    <h3>🎬 Design #3: Netflix Video Streaming</h3>
+    <p>Tests CDN architecture, storage, and encoding pipelines.</p>
+  </div>
+  <div class="design-case-body">
+    <h3>Key Insight: Upload vs. Streaming Are Different Problems</h3>
+    <div class="diagram"><pre>
+UPLOAD PIPELINE:
+  Creator uploads raw video
+  → S3 (raw storage)
+  → Encoding Service (FFmpeg workers)
+      → 360p, 720p, 1080p, 4K variants
+      → Multiple codecs (H.264, H.265, AV1)
+  → Processed videos → S3
+  → CDN origin pushed to edge PoPs globally
+
+STREAMING PIPELINE:
+  User clicks play
+  → API returns manifest file (m3u8 / DASH)
+  → Client fetches video segments from NEAREST CDN PoP
+  → Adaptive Bitrate Streaming (ABR):
+      Bad connection → drops to 360p automatically
+      Good connection → upgrades to 4K
+
+Why CDN is critical:
+  Netflix uses ~15% of internet traffic globally.
+  Without CDN edge servers, all traffic would hit origin — impossible.
+  Netflix Open Connect: Netflix's own CDN embedded in ISPs.
+</pre></div>
+  </div>
+</div>
+
+<div class="design-case">
+  <div class="design-case-header">
+    <h3>🚗 Design #4: Ride-sharing (Uber)</h3>
+    <p>Tests geospatial systems, real-time updates, and matching algorithms.</p>
+  </div>
+  <div class="design-case-body">
+    <h3>Key Components</h3>
+    <div class="diagram"><pre>
+DRIVER LOCATION UPDATES:
+  Driver app → Location Service (WebSocket) → Redis Geo
+  Redis: GEOADD drivers:active lng lat driverId
+  Update every 4 seconds → Redis expiry 8s (gone if offline)
+
+RIDER MATCH REQUEST:
+  POST /rides → Ride Service
+  → GEORADIUS drivers:active lat lng 5km
+  → Rank by ETA (distance + traffic)
+  → Notify top 3 drivers (WebSocket/Push)
+  → First to accept wins
+
+SURGE PRICING:
+  Demand (riders) / Supply (available drivers) > threshold
+  → Apply surge multiplier
+  → Real-time demand calculated per geographic cell (S2/H3 library)
+
+TRIP TRACKING:
+  Driver sends location → Kafka → Location consumers
+  → Rider's app updates in real-time (WebSocket push)
+  → Route deviation detection
+  → ETA recalculation
+</pre></div>
+    <div class="callout info"><div class="callout-title">Geospatial Key: S2/H3 Cells</div>The world is divided into hexagonal cells (H3 by Uber, S2 by Google). Every location maps to a cell at different precision levels. Finding nearby drivers = finding drivers in the same or adjacent cells. Redis Geo commands implement this efficiently.</div>
+  </div>
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Knowledge Check</div>
+  <div class="quiz-subtitle">Real system design reasoning.</div>
+  <div class="quiz-q" data-answer="2">
+    <div class="quiz-question">Twitter uses a hybrid fanout strategy. For a user with 500 followers, which approach is used?</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Fanout on read — pull tweets at timeline request</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>No caching — always query the database</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>Fanout on write — push tweet to all 500 followers' pre-built timelines</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Batch fanout once per hour</div>
+    </div>
+    <div class="quiz-explanation">Regular users (< ~1k followers) use fanout on write. When they tweet, it's pushed to all followers' pre-built Redis timeline caches immediately. 500 Redis writes is trivial. For celebrities with millions of followers, this would be catastrophic — so they switch to fanout on read, injecting celebrity tweets at serve time.</div>
+  </div>
+</div>
+`
+  },
+
+  // ===================== MODULE 11 =====================
+  {
+    id:11,
+    tag:'Interview Mastery',
+    title:'The System Design Interview Playbook',
+    desc:'The exact framework, communication strategies, and common traps — used in real FAANG interviews.',
+    content:`
+<h2>What Interviewers Actually Evaluate</h2>
+<p>System design interviews are not about correct answers. They evaluate:</p>
+<ul>
+  <li><strong>Problem decomposition</strong>: Can you break ambiguity into concrete requirements?</li>
+  <li><strong>Breadth of knowledge</strong>: Do you know the landscape of solutions?</li>
+  <li><strong>Trade-off thinking</strong>: Do you understand the pros/cons of your choices?</li>
+  <li><strong>Communication</strong>: Can you explain complex ideas clearly?</li>
+  <li><strong>Prioritization</strong>: Do you focus on what matters most?</li>
+</ul>
+
+<h2>The 45-Minute Interview Framework</h2>
+
+<div class="framework-step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>Clarify Requirements (5 min)</h4>
+    <p>Never start designing immediately. Ask: Who uses this? What are the core features? What's out of scope? What scale are we targeting? What are the latency requirements? Are there regulatory constraints?</p>
+    <div class="tip-box"><strong>Say:</strong> "Before I start, I want to make sure I understand the requirements. Can I ask a few clarifying questions?"</div>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>Estimate Scale (5 min)</h4>
+    <p>Do back-of-envelope math. Users, QPS, storage, bandwidth. These numbers drive your architecture. State your assumptions explicitly.</p>
+    <div class="tip-box"><strong>Say:</strong> "Let me estimate the scale. If we have 10M daily active users, and each makes 10 requests per day, that's about 1,200 QPS average, maybe 5x peak = 6,000 QPS. Let me design for 10,000 QPS to be safe."</div>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>Define APIs (5 min)</h4>
+    <p>What are the key API endpoints? What do they accept and return? This forces clarity on what the system actually does.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>Data Model (5 min)</h4>
+    <p>What tables/collections? What are the key relationships? What indexes do you need? What access patterns drive the schema?</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">5</div>
+  <div class="step-body">
+    <h4>High-Level Architecture (10 min)</h4>
+    <p>Draw the system. Client → LB → Services → DB → Cache. Explain every box. Justify every connection. This is the core of the interview.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">6</div>
+  <div class="step-body">
+    <h4>Deep Dive on Critical Components (10 min)</h4>
+    <p>Pick 1-2 hard problems in your design. Dive deep. Show you can reason about consistency, failure modes, and scale in detail.</p>
+  </div>
+</div>
+<div class="framework-step">
+  <div class="step-num">7</div>
+  <div class="step-body">
+    <h4>Bottlenecks & Scaling (5 min)</h4>
+    <p>What's the weakest part of your design? How would you scale it? This is where senior candidates shine — proactively identifying weaknesses.</p>
+  </div>
+</div>
+
+<h2>The Numbers You Must Memorize</h2>
+<div class="code-block">
+  <div class="code-label">Back-of-Envelope Reference Card</div>
+  <pre><span class="cm">/* TIME */</span>
+L1 cache:           ~0.5 ns
+L2 cache:           ~7 ns
+RAM access:         ~100 ns
+SSD read:           ~150 µs
+HDD read:           ~10 ms
+LAN roundtrip:      ~0.5 ms
+Same DC roundtrip:  ~0.5 ms
+Cross-country:      ~30–100 ms
+Cross-continent:    ~150–300 ms
+
+<span class="cm">/* SCALE */</span>
+1 server:           ~1,000–10,000 QPS (depending on work)
+PostgreSQL:         ~10,000 QPS with good indexes
+Redis:              ~100,000 QPS
+Kafka:              ~1,000,000 msg/s per partition
+
+<span class="cm">/* STORAGE */</span>
+1 char =            1 byte
+1 int =             4 bytes
+1 UUID =            36 bytes (string) or 16 bytes (binary)
+1 tweet =           ~280 bytes
+1 photo =           ~3 MB
+1 minute HD video = ~100 MB
+
+<span class="cm">/* MATH SHORTCUTS */</span>
+1 day  = 86,400 s  (≈ 10^5)
+1 year = 31M s     (≈ 3 × 10^7)
+1M users × 10 req/day = ~100 QPS
+1B users × 10 req/day = ~100,000 QPS</pre>
+</div>
+
+<h2>Common Traps to Avoid</h2>
+<table class="compare-table">
+  <tr><th>Trap</th><th>What It Looks Like</th><th>What to Do Instead</th></tr>
+  <tr><td>Premature optimization</td><td>Jumping to sharding + microservices for a 10k user app</td><td>Start simple. Add complexity only when scale demands it.</td></tr>
+  <tr><td>Ignoring failures</td><td>No mention of what happens when DB goes down</td><td>Always discuss failure modes for critical components.</td></tr>
+  <tr><td>No trade-off discussion</td><td>"I'll use Kafka because it's scalable"</td><td>"Kafka adds operational overhead. For this scale, SQS is simpler. I'd switch to Kafka at 10M events/day."</td></tr>
+  <tr><td>Buzzword engineering</td><td>Microservices, blockchain, ML for everything</td><td>Choose the simplest solution that meets requirements.</td></tr>
+  <tr><td>Ignoring consistency</td><td>No discussion of data guarantees</td><td>Always clarify what data must be strongly consistent vs. eventually consistent.</td></tr>
+</table>
+
+<h2>Interview Phrases That Signal Seniority</h2>
+<div class="callout success">
+<div class="callout-title">✅ High-Signal Phrases</div>
+<ul>
+  <li>"Given the 100:1 read-to-write ratio, I'd prioritize read performance..."</li>
+  <li>"The trade-off here is: X gives us better consistency but higher latency. Given the requirement for [X], I'd choose..."</li>
+  <li>"This is a potential single point of failure. I'd add a replica to handle..."</li>
+  <li>"At this scale, the bottleneck would likely be the database. Here's how I'd address that..."</li>
+  <li>"I'm simplifying here — in production I'd also add rate limiting, circuit breakers, and monitoring."</li>
+</ul>
+</div>
+
+<div class="callout danger">
+<div class="callout-title">🚫 Low-Signal Phrases</div>
+<ul>
+  <li>"I'd use microservices." (without justification)</li>
+  <li>"This would scale infinitely." (nothing scales infinitely)</li>
+  <li>"I don't know — what do you think?" (lead, then ask for feedback)</li>
+  <li>Silence for long periods without explaining your reasoning</li>
+</ul>
+</div>
+
+<h2>Practice Questions — Do These Until Comfortable</h2>
+
+<table class="compare-table">
+  <tr><th>Difficulty</th><th>Problem</th><th>Core Skill Tested</th></tr>
+  <tr><td><span class="tag tag-green">Entry</span></td><td>Design a URL Shortener</td><td>Hashing, caching, DB design</td></tr>
+  <tr><td><span class="tag tag-green">Entry</span></td><td>Design a Pastebin</td><td>Storage, CDN, rate limiting</td></tr>
+  <tr><td><span class="tag tag-blue">Mid</span></td><td>Design a Chat System (WhatsApp)</td><td>WebSockets, message delivery, groups</td></tr>
+  <tr><td><span class="tag tag-blue">Mid</span></td><td>Design a Notification System</td><td>Fan-out, push vs. pull, priorities</td></tr>
+  <tr><td><span class="tag tag-blue">Mid</span></td><td>Design a Rate Limiter</td><td>Algorithms, Redis, distributed state</td></tr>
+  <tr><td><span class="tag tag-purple">Senior</span></td><td>Design Twitter/Instagram Feed</td><td>Fanout, hybrid strategies, scale</td></tr>
+  <tr><td><span class="tag tag-purple">Senior</span></td><td>Design a Distributed Cache</td><td>Consistent hashing, replication, eviction</td></tr>
+  <tr><td><span class="tag tag-purple">Senior</span></td><td>Design a Search Engine</td><td>Inverted index, crawling, ranking</td></tr>
+  <tr><td><span class="tag tag-red">Staff</span></td><td>Design Google Docs</td><td>OT/CRDT, real-time collaboration, conflict</td></tr>
+  <tr><td><span class="tag tag-red">Staff</span></td><td>Design YouTube</td><td>Video pipeline, global CDN, recommendations</td></tr>
+</table>
+
+<div class="callout interview">
+<div class="callout-title">🎙️ Final Advice</div>
+<p>You won't always have perfect answers. What matters is that you <strong>think out loud</strong>, <strong>make defensible decisions</strong>, and <strong>proactively identify trade-offs</strong>. A candidate who says "I'm choosing X, which has this trade-off, and here's how I'd mitigate it" beats one who silently delivers a "perfect" architecture.</p>
+<p style="margin-top:.5rem">Practice out loud. With a timer. Draw boxes and arrows as you talk. That's the skill.</p>
+</div>
+
+<div class="quiz-section">
+  <div class="quiz-title">⚡ Final Knowledge Check</div>
+  <div class="quiz-subtitle">Interview simulation.</div>
+  <div class="quiz-q" data-answer="3">
+    <div class="quiz-question">You're asked to design Instagram. Your first step should be:</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>Start drawing the architecture immediately to show technical knowledge</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Choose a database technology</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>Estimate how many users Instagram has</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>Ask clarifying questions: what features are in scope, what scale are we targeting, any special constraints?</div>
+    </div>
+    <div class="quiz-explanation">Always clarify before building. Is it just feed + photos? Stories? DMs? Video? What scale — 10k or 1B users? The architecture is completely different. Jumping to solutions before understanding requirements is the most common and costly interview mistake. Interviewers penalize it because real engineers who do this ship the wrong thing.</div>
+  </div>
+  <div class="quiz-q" data-answer="1">
+    <div class="quiz-question">You're designing a system and the interviewer asks "what if the database goes down?" The best response is:</div>
+    <div class="quiz-options">
+      <div class="quiz-opt" onclick="answerQuiz(this,0)"><span class="quiz-opt-letter">A</span>"That won't happen if we use a managed cloud database"</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,1)"><span class="quiz-opt-letter">B</span>Discuss replication, failover, circuit breakers, and graceful degradation strategies</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,2)"><span class="quiz-opt-letter">C</span>"The load balancer would reroute traffic"</div>
+      <div class="quiz-opt" onclick="answerQuiz(this,3)"><span class="quiz-opt-letter">D</span>"Users would see an error page"</div>
+    </div>
+    <div class="quiz-explanation">This is a signal question — they're testing whether you design for failure. The answer should cover: primary-replica replication for failover, a circuit breaker to stop cascading failures, cache serving stale data for reads, a queue absorbing writes, and a degraded mode that serves partial functionality instead of failing entirely. This level of thinking is what separates junior from senior system designers.</div>
+  </div>
+</div>
+
+<div class="callout success" style="margin-top:2rem">
+<div class="callout-title">🎓 Course Complete!</div>
+You've covered DNS, load balancers, CDNs, databases (SQL/NoSQL/CAP), scaling strategies, caching, message queues, distributed systems, API design, reliability, security, real system designs, and the interview framework. That's the full stack of system design knowledge. The next step is practice — pick one system per week and design it from scratch. Out loud. With a timer.
+</div>
+`
+  }
+];
+
+// =================== NAV STRUCTURE ===================
+const navSections = [
+  { label: 'Foundations', range: [0,0] },
+  { label: 'Building Blocks', range: [1,2] },
+  { label: 'Scalability', range: [3,4] },
+  { label: 'Async & Distribution', range: [5,6] },
+  { label: 'APIs & Reliability', range: [7,8] },
+  { label: 'Security', range: [9,9] },
+  { label: 'Advanced', range: [10,11] },
+];
+
+// ── in-memory state (no localStorage — not available in this sandbox) ──
+let currentModule = 0;
+let completedModules = new Set();
+
+// Expose every function called via inline onclick on window so dynamically
+// injected HTML can reach them even inside a sandboxed iframe.
+window.startCourse = function () {
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  buildNav();
+  renderModule(0);
+  updateProgress();
+};
+
+function buildNav() {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '';
+  navSections.forEach(function (section) {
+    const label = document.createElement('div');
+    label.className = 'nav-section-label';
+    label.textContent = section.label;
+    nav.appendChild(label);
+    for (let i = section.range[0]; i <= section.range[1]; i++) {
+      const m = modules[i];
+      const el = document.createElement('div');
+      el.className = 'nav-module' + (completedModules.has(i) ? ' completed' : '');
+      el.id = 'nav-' + i;
+      el.dataset.idx = i;
+      el.innerHTML =
+        '<span class="nav-module-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="nav-module-title">' + m.title + '</span>' +
+        '<span class="nav-check">' + (completedModules.has(i) ? '✓' : '') + '</span>';
+      el.onclick = (function (idx) { return function () { renderModule(idx); }; })(i);
+      nav.appendChild(el);
+    }
+  });
+}
+
+window.renderModule = function (idx) {
+  currentModule = idx;
+  const m = modules[idx];
+  const container = document.getElementById('moduleContainer');
+
+  const prevBtn = idx > 0
+    ? '<button class="nav-btn" onclick="renderModule(' + (idx - 1) + ')">← Previous</button>'
+    : '<button class="nav-btn" disabled>← Previous</button>';
+
+  const nextBtn = idx < modules.length - 1
+    ? '<button class="nav-btn primary" onclick="renderModule(' + (idx + 1) + ')">Next Module →</button>'
+    : '<button class="nav-btn primary" onclick="alert(\'🎉 You completed the full course!\')">Course Complete 🎓</button>';
+
+  container.innerHTML =
+    '<div class="module-content">' +
+      '<div class="module-header">' +
+        '<div class="module-tag">' + m.tag + ' · Module ' + (idx + 1) + ' of ' + modules.length + '</div>' +
+        '<h1 class="module-title">' + m.title + '</h1>' +
+        '<div class="module-desc">' + m.desc + '</div>' +
+      '</div>' +
+      m.content +
+      '<div class="complete-btn">' +
+        '<button onclick="markComplete(' + idx + ')">✓ Mark Complete & Continue</button>' +
+      '</div>' +
+      '<div class="module-nav">' + prevBtn + nextBtn + '</div>' +
+    '</div>';
+
+  document.querySelectorAll('.nav-module').forEach(function (el) {
+    el.classList.remove('active');
+  });
+  const navEl = document.getElementById('nav-' + idx);
+  if (navEl) {
+    navEl.classList.add('active');
+    navEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+  document.getElementById('main').scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.markComplete = function (idx) {
+  completedModules.add(idx);
+  updateProgress();
+  buildNav();
+  if (idx < modules.length - 1) renderModule(idx + 1);
+};
+
+function updateProgress() {
+  const pct = Math.round((completedModules.size / modules.length) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent =
+    completedModules.size + ' / ' + modules.length + ' modules complete';
+}
+
+window.answerQuiz = function (el, selected) {
+  const qBlock = el.closest('.quiz-q');
+  if (qBlock.dataset.answered) return;
+  qBlock.dataset.answered = '1';
+  const correct = parseInt(qBlock.dataset.answer, 10);
+  const opts = qBlock.querySelectorAll('.quiz-opt');
+  opts.forEach(function (opt, i) {
+    opt.classList.add('disabled');
+    if (i === correct) opt.classList.add('correct');
+    else if (i === selected && selected !== correct) opt.classList.add('wrong');
+  });
+  qBlock.querySelector('.quiz-explanation').classList.add('show');
+};
+
+window.switchTab = function (btn, paneId) {
+  const tabs = btn.closest('.tabs');
+  tabs.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+  tabs.querySelectorAll('.tab-pane').forEach(function (p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  tabs.querySelector('#' + paneId).classList.add('active');
+};
+
+window.filterModules = function (query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('.nav-module').forEach(function (el) {
+    const title = el.querySelector('.nav-module-title').textContent.toLowerCase();
+    el.style.display = title.includes(q) ? '' : 'none';
+  });
+};
+</script>
+</body>
+</html>

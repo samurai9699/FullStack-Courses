@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Technical Writing Mastery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d13;--surface:#111318;--surface2:#181c25;--border:#1f2333;
+  --accent:#e8a838;--accent-dim:rgba(232,168,56,.10);--accent-glow:rgba(232,168,56,.22);
+  --text:#e4ddd0;--muted:#6e788f;--faint:#3a4055;
+  --red:#e05252;--green:#4ecb8a;--blue:#5a9fff;
+  --code-bg:#0d0f16;--sidebar:280px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Lora',Georgia,serif;font-size:16px;line-height:1.8;display:flex;min-height:100vh;overflow-x:hidden;}
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+#sidebar{width:var(--sidebar);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.sb-header{padding:26px 22px 18px;border-bottom:1px solid var(--border);}
+.sb-logo{font-family:'Playfair Display',serif;font-size:13px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);line-height:1.3;}
+.sb-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:3px;}
+.sb-progress{padding:14px 22px 0;}
+.sb-prog-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;}
+.prog-track{height:2px;background:var(--faint);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s ease;width:0%;}
+.sb-list{padding:12px 0;flex:1;}
+.sb-item{display:flex;align-items:flex-start;gap:10px;padding:9px 22px;cursor:pointer;transition:background .15s;border-left:2px solid transparent;}
+.sb-item:hover{background:var(--surface2);}
+.sb-item.active{background:var(--accent-dim);border-left-color:var(--accent);}
+.sb-item.done .sb-dot{background:var(--green);color:#0b0d13;}
+.sb-item.active .sb-dot{background:var(--accent);color:#0b0d13;}
+.sb-dot{width:20px;height:20px;border-radius:50%;background:var(--faint);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:3px;transition:all .2s;}
+.sb-lbl{font-size:12.5px;line-height:1.4;color:var(--muted);transition:color .15s;}
+.sb-item:hover .sb-lbl,.sb-item.active .sb-lbl{color:var(--text);}
+
+/* ─── MAIN ───────────────────────────────────────────────── */
+#main{margin-left:var(--sidebar);flex:1;min-height:100vh;}
+
+/* ─── WELCOME ────────────────────────────────────────────── */
+#welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:60px 40px;text-align:center;}
+.wc-tag{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;}
+.wc-h1{font-family:'Playfair Display',serif;font-size:62px;font-weight:900;line-height:1.08;max-width:680px;margin-bottom:22px;}
+.wc-h1 em{font-style:italic;color:var(--accent);}
+.wc-p{font-size:16px;color:var(--muted);max-width:520px;line-height:1.75;margin-bottom:36px;}
+.wc-stats{display:flex;gap:48px;margin-bottom:44px;}
+.wc-stat{text-align:center;}
+.wc-stat-n{font-family:'Playfair Display',serif;font-size:38px;font-weight:900;color:var(--accent);}
+.wc-stat-l{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-top:2px;}
+.wc-start{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;padding:15px 38px;background:var(--accent);color:#0b0d13;border:none;border-radius:8px;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;transition:all .2s;}
+.wc-start:hover{background:#f0b84a;transform:translateY(-2px);box-shadow:0 10px 28px var(--accent-glow);}
+
+/* ─── MODULE LAYOUT ──────────────────────────────────────── */
+.mod-wrap{animation:fadeIn .25s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.mod-header{padding:52px 64px 38px;background:linear-gradient(135deg,var(--surface) 0%,var(--bg) 100%);border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.mod-header::after{content:attr(data-n);position:absolute;right:44px;top:10px;font-family:'Playfair Display',serif;font-size:130px;font-weight:900;color:var(--border);line-height:1;pointer-events:none;user-select:none;}
+.mh-eye{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.mh-h1{font-family:'Playfair Display',serif;font-size:40px;font-weight:900;line-height:1.15;max-width:580px;}
+.mh-desc{margin-top:14px;color:var(--muted);font-size:14.5px;max-width:520px;line-height:1.7;}
+.mh-meta{display:flex;gap:22px;margin-top:20px;}
+.mh-chip{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.mh-chip b{color:var(--accent);}
+
+/* ─── CONTENT BODY ───────────────────────────────────────── */
+.mod-body{padding:44px 64px;max-width:820px;}
+.mod-body h2{font-family:'Playfair Display',serif;font-size:25px;font-weight:700;margin-top:44px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.mod-body h3{font-family:'Lora',serif;font-size:17px;font-weight:600;margin-top:28px;margin-bottom:8px;color:#d4cecc;}
+.mod-body p{margin-bottom:15px;font-size:15.5px;}
+.mod-body ul,.mod-body ol{margin:0 0 15px 22px;font-size:15.5px;}
+.mod-body li{margin-bottom:7px;padding-left:3px;}
+.mod-body strong{color:#f0eade;font-weight:600;}
+.mod-body em{color:var(--accent);font-style:italic;}
+.mod-body a{color:var(--blue);text-decoration:none;}
+
+/* Callout */
+.co{margin:22px 0;padding:14px 18px;border-left:3px solid var(--accent);background:var(--accent-dim);border-radius:0 6px 6px 0;font-size:14.5px;}
+.co.info{border-color:var(--blue);background:rgba(90,159,255,.07);}
+.co.warn{border-color:#e8a838;background:rgba(232,168,56,.08);}
+.co.danger{border-color:var(--red);background:rgba(224,82,82,.08);}
+.co.tip{border-color:var(--green);background:rgba(78,203,138,.07);}
+.co-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:5px;color:var(--accent);}
+.co.info .co-lbl{color:var(--blue);}
+.co.warn .co-lbl{color:#e8a838;}
+.co.danger .co-lbl{color:var(--red);}
+.co.tip .co-lbl{color:var(--green);}
+
+/* Code blocks */
+.cb{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;margin:18px 0;overflow:hidden;}
+.cb-lbl{padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface);}
+.cb pre{padding:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.65;overflow-x:auto;color:#c9d1d9;white-space:pre-wrap;word-break:break-word;}
+.cb pre .c{color:var(--faint);font-style:italic;}
+.cb pre .g{color:var(--green);}
+.cb pre .r{color:var(--red);}
+.cb pre .a{color:var(--accent);}
+.cb pre .b{color:var(--blue);}
+
+/* Compare grid */
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0;}
+.cg-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;}
+.cg-card.bad{border-top:2px solid var(--red);}
+.cg-card.good{border-top:2px solid var(--green);}
+.cg-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.cg-card.bad .cg-lbl{color:var(--red);}
+.cg-card.good .cg-lbl{color:var(--green);}
+.cg-card p{font-size:13.5px;margin:0;line-height:1.6;}
+
+/* Table */
+.tw-tbl{width:100%;border-collapse:collapse;margin:18px 0;font-size:13.5px;}
+.tw-tbl th{background:var(--surface2);padding:9px 13px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.tw-tbl td{padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55;}
+.tw-tbl tr:last-child td{border-bottom:none;}
+.tw-tbl tr:hover td{background:var(--surface2);}
+
+/* ─── EXERCISES ──────────────────────────────────────────── */
+.ex-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin:32px 0;overflow:hidden;}
+.ex-head{padding:12px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.ex-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-dim);padding:3px 8px;border-radius:4px;}
+.ex-title{font-size:13.5px;font-weight:600;color:var(--text);}
+.ex-body{padding:18px;}
+.ex-prompt{font-size:14px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+.ex-orig{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:13px;font-size:14px;margin-bottom:12px;line-height:1.65;color:var(--text);}
+.ex-ta{width:100%;min-height:90px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:11px;color:var(--text);font-family:'Lora',serif;font-size:14px;line-height:1.65;resize:vertical;outline:none;transition:border-color .2s;}
+.ex-ta:focus{border-color:var(--accent);}
+.ex-ta::placeholder{color:var(--faint);}
+.ex-actions{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.btn{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:7px 16px;border-radius:6px;border:none;cursor:pointer;transition:all .15s;letter-spacing:.04em;}
+.btn-primary{background:var(--accent);color:#0b0d13;font-weight:700;}
+.btn-primary:hover{background:#f0b84a;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.ex-reveal{margin-top:11px;padding:13px;background:rgba(78,203,138,.06);border:1px solid rgba(78,203,138,.18);border-radius:6px;font-size:14px;line-height:1.65;display:none;}
+.ex-reveal.on{display:block;}
+.ex-rev-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:7px;}
+.ex-tips{margin-top:8px;padding-top:8px;border-top:1px solid rgba(78,203,138,.12);}
+.ex-tips li{font-size:13px;margin-bottom:4px;color:var(--muted);}
+
+/* ─── QUIZ ───────────────────────────────────────────────── */
+.quiz-wrap{border-top:1px solid var(--border);padding:26px 18px;}
+.quiz-hdr{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:9px;}
+.quiz-hdr::before{content:'';width:3px;height:16px;background:var(--accent);border-radius:2px;display:block;}
+.quiz-q{margin-bottom:22px;}
+.quiz-qnum{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);margin-bottom:5px;}
+.quiz-qtxt{font-size:14.5px;font-weight:600;margin-bottom:9px;line-height:1.5;}
+.quiz-opts{display:flex;flex-direction:column;gap:7px;}
+.quiz-opt{display:flex;align-items:flex-start;gap:9px;padding:9px 13px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13.5px;transition:all .15s;user-select:none;line-height:1.5;}
+.quiz-opt:hover:not(.locked){border-color:var(--accent);background:var(--accent-dim);}
+.quiz-opt.sel{border-color:var(--accent);background:var(--accent-dim);}
+.quiz-opt.correct{border-color:var(--green);background:rgba(78,203,138,.08);}
+.quiz-opt.wrong{border-color:var(--red);background:rgba(224,82,82,.08);}
+.q-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--faint);flex-shrink:0;margin-top:3px;transition:all .15s;}
+.quiz-opt.sel .q-dot{border-color:var(--accent);background:var(--accent);}
+.quiz-opt.correct .q-dot{border-color:var(--green);background:var(--green);}
+.quiz-opt.wrong .q-dot{border-color:var(--red);background:var(--red);}
+.qfb{font-size:12.5px;padding:7px 11px;border-radius:5px;margin-top:7px;display:none;line-height:1.5;}
+.qfb.on{display:block;}
+.qfb.c{background:rgba(78,203,138,.08);color:var(--green);border:1px solid rgba(78,203,138,.18);}
+.qfb.w{background:rgba(224,82,82,.08);color:#f08080;border:1px solid rgba(224,82,82,.18);}
+.quiz-score{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:22px;text-align:center;display:none;margin-top:14px;}
+.quiz-score.on{display:block;}
+.qs-num{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--accent);}
+.qs-lbl{font-size:12.5px;color:var(--muted);margin-top:3px;}
+
+/* ─── FOOTER / NAV ───────────────────────────────────────── */
+.mod-footer{padding:28px 64px 52px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);}
+.fnav{font-family:'JetBrains Mono',monospace;font-size:11.5px;padding:11px 22px;border-radius:6px;border:1px solid var(--border);cursor:pointer;background:var(--surface);color:var(--text);transition:all .15s;letter-spacing:.04em;display:flex;align-items:center;gap:7px;}
+.fnav:hover:not(:disabled){border-color:var(--accent);color:var(--accent);}
+.fnav:disabled{opacity:.3;cursor:not-allowed;}
+.fnav.complete{background:var(--accent);color:#0b0d13;border-color:var(--accent);font-weight:700;}
+.fnav.complete:hover{background:#f0b84a;}
+
+/* ─── COMPLETION ─────────────────────────────────────────── */
+#completion{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:60px;text-align:center;}
+#completion.on{display:flex;}
+.comp-badge{width:80px;height:80px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:24px;}
+.comp-h1{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;margin-bottom:14px;}
+.comp-p{font-size:16px;color:var(--muted);max-width:480px;line-height:1.75;margin-bottom:32px;}
+
+/* ─── MISC ───────────────────────────────────────────────── */
+.hidden{display:none!important;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--faint);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+@media(max-width:880px){
+  :root{--sidebar:0px;}
+  #sidebar{display:none;}
+  .mod-header,.mod-body,.mod-footer{padding-left:20px;padding-right:20px;}
+  .mh-h1{font-size:28px;}
+  .cg{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ────────────────────────────────────────────── -->
+<aside id="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">Technical Writing<br>Mastery</div>
+    <div class="sb-sub">// 10 Modules · Interactive</div>
+  </div>
+  <div class="sb-progress">
+    <div class="sb-prog-row"><span>Progress</span><span id="prog-pct">0 / 10</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+  </div>
+  <nav class="sb-list" id="sb-list"></nav>
+</aside>
+
+<!-- ── MAIN ───────────────────────────────────────────────── -->
+<main id="main">
+
+<!-- Welcome -->
+<div id="welcome">
+  <div class="wc-tag">// Interactive Course</div>
+  <h1 class="wc-h1">Master the Craft of<br><em>Technical Writing</em></h1>
+  <p class="wc-p">Go from clueless to confident. Real principles, real exercises, real developer documentation — built for your first job and beyond.</p>
+  <div class="wc-stats">
+    <div class="wc-stat"><div class="wc-stat-n">10</div><div class="wc-stat-l">Modules</div></div>
+    <div class="wc-stat"><div class="wc-stat-n">30+</div><div class="wc-stat-l">Exercises</div></div>
+    <div class="wc-stat"><div class="wc-stat-n">~4h</div><div class="wc-stat-l">Total</div></div>
+  </div>
+  <button class="wc-start" onclick="showModule(0)">Begin Course →</button>
+</div>
+
+<!-- Module view -->
+<div id="mod-view" class="hidden"></div>
+
+<!-- Completion -->
+<div id="completion">
+  <div class="comp-badge">✦</div>
+  <h1 class="comp-h1">Course Complete</h1>
+  <p class="comp-p">You've worked through all 10 modules. You now have the foundation, vocabulary, and practical instincts to write clear technical documentation on the job — from day one.</p>
+  <button class="wc-start" onclick="showModule(0)">Review from Start</button>
+</div>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  COURSE DATA
+// ═══════════════════════════════════════════════════════════
+
+const MODULES = [
+
+// ─── MODULE 01 ────────────────────────────────────────────
+{
+  num:'01', title:"The Technical Writer's Mindset", subtitle:'Foundation',
+  desc:'What technical writing actually is — and why most developers do it wrong.',
+  read:'14', exCount:2,
+  content:`
+<h2>What Technical Writing Actually Is</h2>
+<p>Technical writing is not about demonstrating your expertise. It is not storytelling, it is not marketing copy, and it is not academic prose. <strong>Technical writing exists for one reason: to reduce the cognitive load required for someone to accomplish a task or understand a concept.</strong></p>
+<p>That's it. If your reader has to read your documentation twice, you have failed. If they have to hold three concepts in their head to understand the fourth, you have failed. The measure of good technical writing is how fast someone gets to the thing they need — and how little friction they encountered on the way.</p>
+<div class="co warn"><div class="co-lbl">Common Mistake</div>Many developers write documentation to explain how they built something. Your reader doesn't care. They want to know how to <em>use</em> it. Build vs. use is the fundamental context shift you must make every time you write.</div>
+
+<h2>The Four Cs Framework</h2>
+<p>Good technical writing satisfies four properties, in priority order:</p>
+<ul>
+  <li><strong>Clear</strong> — One unambiguous interpretation. No hedging, no vague language.</li>
+  <li><strong>Correct</strong> — Technically accurate. Wrong docs are worse than no docs.</li>
+  <li><strong>Concise</strong> — Every word earns its place. No filler, no padding.</li>
+  <li><strong>Consistent</strong> — Same terms, same structure, same voice throughout.</li>
+</ul>
+<p>Priority matters. A concise sentence that is wrong is useless. A consistent style that is unclear has missed the point. Always fix Clarity first, then Correctness, then Conciseness.</p>
+
+<h2>TW vs. Other Writing Forms</h2>
+<p>Understanding what technical writing is <em>not</em> helps you make better decisions faster.</p>
+<table class="tw-tbl">
+  <thead><tr><th>Form</th><th>Primary Goal</th><th>Success Metric</th></tr></thead>
+  <tbody>
+    <tr><td>Technical Writing</td><td>Enable action / comprehension</td><td>Task completion speed</td></tr>
+    <tr><td>Journalism</td><td>Inform &amp; engage</td><td>Readership, recall</td></tr>
+    <tr><td>Academic Writing</td><td>Prove a thesis rigorously</td><td>Peer acceptance</td></tr>
+    <tr><td>Marketing Copy</td><td>Persuade &amp; convert</td><td>Conversion rate</td></tr>
+    <tr><td>Creative Writing</td><td>Evoke emotion</td><td>Emotional response</td></tr>
+  </tbody>
+</table>
+<p>This distinction matters because every other writing form you have trained yourself to do in school works <em>against</em> you in technical writing. Elegant variation (using different words for the same thing) is good journalism but terrible in API docs. Dense argumentation is good academia but destroys documentation readability.</p>
+
+<h2>The Writer's Primary Obligation: The Reader</h2>
+<p>Every decision in technical writing is made in service of the reader. Before you write a single word, you must answer: <strong>Who is this person? What do they need to accomplish? What do they already know?</strong></p>
+<p>This sounds obvious but it is the most violated principle in all of software documentation. Engineers write for themselves — for an audience of one that already knows everything. The moment you write "as you know" or "obviously", you have lost a reader.</p>
+<div class="co tip"><div class="co-lbl">Rule of Thumb</div>Write for the smart person who does not know your specific system. They are competent, they are busy, and they will close the tab if you waste their time.</div>
+
+<h2>The Difference One Good Sentence Makes</h2>
+<p>Compare these two opening lines for the same function:</p>
+<div class="cg">
+  <div class="cg-card bad"><div class="cg-lbl">✗ Bad</div><p>This function, which was implemented in the context of the broader authentication subsystem, provides a mechanism by which credentials supplied by the caller may be validated against the stored user record.</p></div>
+  <div class="cg-card good"><div class="cg-lbl">✓ Good</div><p>Verifies a user's credentials against the database. Returns <code>true</code> if valid, <code>false</code> otherwise.</p></div>
+</div>
+<p>The bad version is 37 words. The good version is 14. The bad version buries the verb. The good version leads with it. The bad version is written from the author's perspective. The good version is written from the reader's.</p>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e01a',
+      title:'Rewrite for Clarity',
+      prompt:'The following is an introduction to a function. Rewrite it to be clear, correct, and concise. Lead with what the function does, not how it was built.',
+      original:'This utility method, which is part of the core session management infrastructure and was added in version 2.3 as a result of the security audit, has been designed to facilitate the process of determining whether or not the currently active session token, which is passed in as an argument, should be considered as having not yet reached its expiration threshold.',
+      answer:'Checks whether a session token is still valid (i.e., not yet expired). Returns true if the token is valid, false if it has expired.',
+      tips:[
+        'Lead with the verb: "Checks whether..."',
+        'Eliminate origin story — readers don\'t care when it was added',
+        'Replace "facilitate the process of" with the actual verb',
+        'Replace "not yet reached its expiration threshold" with "not yet expired"'
+      ]
+    },
+    {
+      type:'rewrite', id:'e01b',
+      title:'Apply the Four Cs',
+      prompt:'Identify which of the Four Cs (Clear, Correct, Concise, Consistent) this passage violates, then fix them.',
+      original:'The system should, in most cases, be able to handle the request. When it processes things, the response will contain either a successful outcome or an error-type thing. It is generally recommended that developers check the response status. The API usually returns something useful.',
+      answer:'The endpoint returns either a 200 OK response with the requested data, or an error response (4xx/5xx) with a machine-readable error code and message. Always check the response status code before processing the body.',
+      tips:[
+        'Violations: Not Clear ("error-type thing"), Not Correct ("usually"), Not Concise ("in most cases"), Not Consistent ("things" vs. structured response)',
+        '"Should be able to handle" is vague — state what actually happens',
+        'Replace vague nouns ("thing", "something") with precise technical terms',
+        '"Generally recommended" implies optional — if it\'s required, say so'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'A colleague writes: "Click the button to initiate the process of authentication." What is the primary problem with this sentence?',
+      opts:['It uses passive voice','It buries the verb behind unnecessary nominalisation','It is technically incorrect','It lacks a code example'],
+      correct:1,
+      exp:'"Initiate the process of authentication" turns the verb "authenticate" into a noun phrase, adding four words of padding. The fix: "Click the button to authenticate." Nominalisation is one of the most common technical writing errors.'
+    },
+    {
+      q:'You are documenting a new API endpoint. In what order should you prioritise the Four Cs?',
+      opts:['Concise → Clear → Correct → Consistent','Clear → Correct → Concise → Consistent','Correct → Consistent → Clear → Concise','Consistent → Concise → Clear → Correct'],
+      correct:1,
+      exp:'Clarity comes first — an unclear sentence that is perfectly concise still fails the reader. Correctness comes second — a clear but wrong statement is dangerous. Conciseness third — trim after the meaning is right. Consistency last — ensure terminology aligns across the document.'
+    },
+    {
+      q:'Which phrase is a technical writing anti-pattern?',
+      opts:['"Returns an array of user objects"','"Verifies the token is not expired"','"As you know, the API requires authentication"','"Pass the userId as a string"'],
+      correct:2,
+      exp:'"As you know" is a classic curse-of-knowledge phrase. It assumes the reader already knows what you\'re about to say — which means you\'re either insulting them (if they do know) or confusing them (if they don\'t). Never assume prior knowledge; state it explicitly.'
+    }
+  ]
+},
+
+// ─── MODULE 02 ────────────────────────────────────────────
+{
+  num:'02', title:'Audience Analysis', subtitle:'Know Your Reader',
+  desc:'The single biggest variable in technical writing — and how to get it right every time.',
+  read:'12', exCount:2,
+  content:`
+<h2>The Curse of Knowledge</h2>
+<p>In 1990, a Stanford study asked people to tap a well-known song with their fingers while a listener tried to guess it. The tappers predicted listeners would guess correctly 50% of the time. The actual rate was 2.5%. The tappers, who could hear the melody in their heads, could not imagine what it was like to <em>not</em> know it.</p>
+<p>This is the Curse of Knowledge, and it is the single biggest failure mode in technical writing. Once you know how your system works, you cannot un-know it. You automatically skip context that is obvious to you but essential to your reader.</p>
+<div class="co warn"><div class="co-lbl">Watch For This</div>Phrases like "simply", "just", "obviously", "as expected", and "of course" are symptoms of the Curse of Knowledge. They signal that you have forgotten what it was like to not know.</div>
+
+<h2>Three Dimensions of Audience</h2>
+<p>Before writing any document, define your audience across three dimensions:</p>
+<h3>1. Technical Skill Level</h3>
+<ul>
+  <li><strong>Novice</strong> — New to the domain. Needs concepts explained. Do not assume prerequisite knowledge.</li>
+  <li><strong>Intermediate</strong> — Familiar with the domain but not your system. Can skip foundational theory, needs your-system-specific guidance.</li>
+  <li><strong>Expert</strong> — Knows the domain deeply. Wants concise reference material. Explanations feel condescending.</li>
+</ul>
+<h3>2. Role / Context</h3>
+<ul>
+  <li><strong>Developers</strong> — Want code examples, precise types, error codes, edge cases.</li>
+  <li><strong>Operators / DevOps</strong> — Want deployment steps, config options, monitoring hooks, failure modes.</li>
+  <li><strong>Business Users</strong> — Want outcomes, not mechanisms. Avoid implementation details.</li>
+  <li><strong>Decision Makers</strong> — Want architecture overview, security posture, pricing implications.</li>
+</ul>
+<h3>3. Task Context</h3>
+<p>Is the reader trying to: <em>Learn</em> (conceptual, wants explanation), <em>Do</em> (task-focused, wants steps), or <em>Reference</em> (already knows how, just needs the exact parameter name)? These three modes require fundamentally different documents.</p>
+
+<h2>Writing for Multiple Audiences</h2>
+<p>Most real-world documentation serves a mixed audience. The solution is <strong>layered content</strong> — structure the document so experts can scan to what they need, while novices can follow the full narrative.</p>
+<p>Put the summary, key outcome, and minimal viable example at the top. Put prerequisites, conceptual explanations, and edge cases below the fold. Use progressive disclosure: core concepts first, advanced nuance behind a header the expert can skip to.</p>
+
+<h2>Jargon: When to Use It, When to Avoid It</h2>
+<p>Jargon is not always bad. For an expert audience, precise technical terms are more efficient than plain-language circumlocutions. Telling a senior DevOps engineer to "restart the process manager" when you mean "restart systemd" is imprecise and slightly insulting.</p>
+<p>The rule: <strong>use the vocabulary your reader uses</strong>. If you are writing for backend developers, "idempotent", "TTL", and "eventual consistency" are acceptable without definition. If you are writing for business analysts, they are not.</p>
+<div class="co info"><div class="co-lbl">Practical Test</div>Read your draft aloud as if you are the target reader encountering your system for the first time. Every time you would think "what does that mean?" — mark it. That is either jargon that needs defining, or a concept that needs context.</div>
+
+<h2>A Real Example: The Same Content for Three Audiences</h2>
+<div class="cg">
+  <div class="cg-card bad"><div class="cg-lbl">For Business Users</div><p>Webhooks let your application receive real-time notifications when events happen in our platform, without needing to poll our API repeatedly.</p></div>
+  <div class="cg-card good"><div class="cg-lbl">For Developers</div><p>Register a webhook endpoint to receive HTTP POST requests from our servers when events occur. We send a signed JSON payload; verify the <code>X-Signature</code> header before processing.</p></div>
+</div>
+<p>Neither version is "better." Both are correct for their audience. The failure is writing the developer version for a business user — or writing the business version for a developer who needs implementation details.</p>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e02a',
+      title:'Translate for a Business Audience',
+      prompt:'Rewrite this developer-focused paragraph for a non-technical business stakeholder (a Product Manager deciding whether to use your API). Remove implementation details; focus on outcome and value.',
+      original:'Our REST API uses OAuth 2.0 with PKCE for the authorization code flow. Tokens are JWTs signed with RS256 and expire after 3600 seconds. Refresh tokens use a rotating strategy with a 30-day sliding window. Rate limits are enforced at 1000 req/min per client_id using a token bucket algorithm with a burst capacity of 200.',
+      answer:'Access to the API is secured using industry-standard authentication. Sessions stay active for up to 30 days and refresh automatically — users won\'t be repeatedly asked to log in. The API is designed to handle high request volumes reliably, with automatic rate management to protect system stability.',
+      tips:[
+        'Replace "OAuth 2.0 with PKCE" with "industry-standard authentication"',
+        'Translate "rotating refresh tokens with 30-day sliding window" into user experience: "sessions stay active for up to 30 days"',
+        'Replace "token bucket algorithm" with what it means: "reliable high-volume handling"',
+        'Frame everything in terms of benefit to the product/user, not implementation'
+      ]
+    },
+    {
+      type:'rewrite', id:'e02b',
+      title:'Remove Curse-of-Knowledge Language',
+      prompt:'Remove or fix every phrase that assumes the reader already knows something they may not. Add one sentence of context where needed.',
+      original:'Simply call the standard init() method as usual, then obviously pass in your config object. The callback will fire when ready, as expected. Just make sure you\'ve set up the environment beforehand.',
+      answer:'Call the init() method and pass your configuration object as the first argument. When initialization is complete, the callback function you provide will be called. Before calling init(), make sure your API key is set in the environment variable MYAPP_API_KEY.',
+      tips:[
+        'Remove "simply", "obviously", "as expected", "just" — they add friction for novices',
+        '"As usual" and "as expected" assume shared context that may not exist',
+        '"Set up the environment" is vague — specify which environment variable or config',
+        'Replace "will fire when ready" with a precise description of when and how'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'You are writing API docs for an endpoint. Your audience is "intermediate backend developers". Which of the following should you include without definition?',
+      opts:['HTTP status codes (200, 404, 500)','What a REST API is','What JSON is','What authentication means'],
+      correct:0,
+      exp:'Intermediate backend developers know HTTP status codes, REST, JSON, and authentication. You can use these terms without definition. What they do not know is your specific implementation — your specific error codes, your auth scheme, your rate limits. Focus your explanations there.'
+    },
+    {
+      q:'A reader is visiting your docs to quickly check the exact name of a query parameter they use every week. What type of documentation are they looking for?',
+      opts:['A tutorial (learning mode)','A how-to guide (task mode)','Reference documentation (lookup mode)','A conceptual explanation (understanding mode)'],
+      correct:2,
+      exp:'This is reference mode — the reader already knows how to use the feature, they just need to look up a specific detail. Reference docs should be scannable, densely packed, and avoid explanatory prose. Tutorials and how-to guides are for readers learning something new.'
+    },
+    {
+      q:'Which of the following is a correct way to handle writing for a mixed-skill audience?',
+      opts:['Write two separate documents — one for each audience','Use progressive disclosure: core info first, advanced details further down','Put all background and context at the top so beginners aren\'t lost','Use a glossary to define every term used in the document'],
+      correct:1,
+      exp:'Progressive disclosure lets experts scan to what they need while giving novices a coherent path through the material. Writing two separate docs is expensive and causes documentation drift. Front-loading all context buries the main content. Glossaries help but don\'t solve structural hierarchy.'
+    }
+  ]
+},
+
+// ─── MODULE 03 ────────────────────────────────────────────
+{
+  num:'03', title:'Document Types', subtitle:'Diátaxis Framework',
+  desc:'Learn the four types of technical documentation and know exactly when to write each one.',
+  read:'13', exCount:2,
+  content:`
+<h2>Why Document Type Matters</h2>
+<p>The most common reason documentation fails is not bad writing — it is writing the wrong <em>type</em> of document for what the reader needs. A tutorial and a reference page serve completely different purposes, require different structures, and are read in completely different ways. Mixing them produces something that fails at both.</p>
+<p>The <strong>Diátaxis framework</strong> (developed by Daniele Procida) provides a clean, battle-tested taxonomy of four document types, arranged along two axes: <em>practical vs. theoretical</em> knowledge, and <em>studying vs. working</em> context.</p>
+
+<h2>The Four Document Types</h2>
+<h3>1. Tutorials — Learning-Oriented</h3>
+<p>A tutorial teaches a skill through hands-on practice. The reader is a <em>learner</em>. Your job is to guide them through a concrete experience that builds competence, not to explain everything comprehensively.</p>
+<ul>
+  <li>The reader follows along and <em>does</em> something</li>
+  <li>Outcome is a working result, not just information</li>
+  <li>Analogous to a cooking class, not a recipe</li>
+  <li>Example: "Build your first REST API with FastAPI"</li>
+</ul>
+<h3>2. How-To Guides — Task-Oriented</h3>
+<p>A how-to guide solves a specific problem for a reader who already has the skill but needs the steps. They are not learning; they are doing. They know <em>what</em> they want — they need to know <em>how</em>.</p>
+<ul>
+  <li>Goal-focused: accomplishes a real-world task</li>
+  <li>Assumes prerequisite knowledge; does not explain fundamentals</li>
+  <li>Analogous to a recipe, not a cooking class</li>
+  <li>Example: "How to set up JWT authentication"</li>
+</ul>
+<h3>3. Reference — Information-Oriented</h3>
+<p>Reference documentation describes the machinery of your system — functions, parameters, endpoints, options, return values. Readers consult it, they do not read it linearly. It must be accurate, complete, and structured for scanning.</p>
+<ul>
+  <li>Neutral, descriptive, fact-dense</li>
+  <li>No narrative, minimal explanation, no examples of "how" — just "what"</li>
+  <li>Analogous to an encyclopedia entry</li>
+  <li>Example: "API Reference: POST /v1/users"</li>
+</ul>
+<h3>4. Explanation — Understanding-Oriented</h3>
+<p>Explanations illuminate concepts, decisions, and context. They answer "why?" and "how does this actually work?" They are not task-focused and cannot be used as how-to guides — their purpose is to deepen understanding.</p>
+<ul>
+  <li>Discursive and conceptual; takes a position</li>
+  <li>Explains trade-offs, history, design decisions</li>
+  <li>Analogous to a background briefing or design doc</li>
+  <li>Example: "Why we use event-driven architecture"</li>
+</ul>
+
+<h2>The Failure Mode of Mixing Types</h2>
+<div class="co danger"><div class="co-lbl">Anti-Pattern</div>A tutorial that keeps stopping to explain concepts is neither a good tutorial nor a good explanation. A how-to guide that teaches from scratch defeats its own purpose. A reference page that tells a story is unreadable as a lookup tool. Keep types separate and pure.</div>
+<p>In practice, this means: when someone asks you to "write some docs for this feature," your first question is: what type of document do they need? What is the reader trying to do — learn, accomplish a task, look something up, or understand the context?</p>
+
+<h2>Additional Document Types in Real Jobs</h2>
+<table class="tw-tbl">
+  <thead><tr><th>Type</th><th>Purpose</th><th>Who Reads It</th></tr></thead>
+  <tbody>
+    <tr><td>README</td><td>Project orientation, quick start</td><td>New contributors, evaluators</td></tr>
+    <tr><td>Changelog / Release Notes</td><td>What changed and why it matters</td><td>Users upgrading versions</td></tr>
+    <tr><td>Runbook</td><td>Operational procedures for incidents</td><td>On-call engineers</td></tr>
+    <tr><td>Architecture Decision Record (ADR)</td><td>Record why a design choice was made</td><td>Future maintainers</td></tr>
+    <tr><td>RFC / Design Doc</td><td>Propose and debate a change before building</td><td>Team, stakeholders</td></tr>
+    <tr><td>Internal Wiki Article</td><td>Explain how something works internally</td><td>Team members</td></tr>
+  </tbody>
+</table>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e03a',
+      title:'Classify and Fix a Mixed Document',
+      prompt:'The following documentation tries to be a how-to guide, but it keeps drifting into tutorial and explanation territory. Identify what type it should be, remove the drift, and tighten it into a clean how-to guide.',
+      original:'Authentication is an important part of securing APIs, and our system uses OAuth 2.0, which you might not be familiar with. OAuth 2.0 was created in 2012 and works by... [background]. Anyway, to add authentication to your app, first you need to understand what a client ID is. A client ID is a unique identifier that... [explanation]. Once you understand that, go to the dashboard and click Settings. Then click API Keys. You will see a form. Fill in the name field. What is a good name? Something descriptive, like "my-app-prod".',
+      answer:'To generate an API key:\n1. Go to your dashboard and click Settings → API Keys.\n2. Click New API Key.\n3. Enter a descriptive name (e.g., "my-app-prod") and click Create.\n4. Copy the key — it will only be shown once.\n\nYou will need this key to authenticate API requests. See Authentication Overview for background on how our auth model works.',
+      tips:[
+        'A how-to guide assumes knowledge — remove the OAuth 2.0 history and definition of "client ID"',
+        'Convert narrative prose ("go to the dashboard and click...") to numbered steps',
+        'Move conceptual content ("what is a client ID") to a linked explanation doc',
+        'End with what to do next, not with more explanation'
+      ]
+    },
+    {
+      type:'rewrite', id:'e03b',
+      title:'Write a Reference Entry',
+      prompt:'The following prose describes a function. Rewrite it as a clean reference entry. Include: one-line description, parameters table, return value, and one example.',
+      original:'The getUserById function is something you can call when you need to retrieve user information. You pass in the user\'s ID (which is a string) and also you need to pass in whether you want their profile information or not (that\'s a boolean). It returns a promise and when it resolves you get back an object with the user data in it, or if the user isn\'t found it throws an error.',
+      answer:'getUserById(id, includeProfile)\n\nRetrieves a user record by ID.\n\nParameters:\n- id (string) — The unique user identifier.\n- includeProfile (boolean) — If true, includes the user\'s profile data in the response.\n\nReturns: Promise<User> — Resolves with the user object. Throws UserNotFoundError if no user exists with the given ID.\n\nExample:\nconst user = await getUserById("usr_123", true);',
+      tips:[
+        'Lead with a one-line action description (verb + object)',
+        'Use a parameter table or structured list — not prose',
+        'Specify types precisely: string, boolean, Promise<User>',
+        'Document the error case explicitly — what gets thrown and when'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'A user emails: "I know how to use your product, but I can\'t figure out how to configure SAML SSO." What type of document should you write?',
+      opts:['Tutorial','How-To Guide','Reference','Explanation'],
+      correct:1,
+      exp:'The user already has the skill (they "know how to use your product"). They have a specific goal (configure SAML SSO). This is exactly the how-to guide use case: a concrete task for a competent practitioner. A tutorial would re-teach skills they already have.'
+    },
+    {
+      q:'Which of these belongs in a Reference page, NOT a how-to guide?',
+      opts:['Step-by-step instructions to deploy a container','The complete list of all available environment variables and their types','An explanation of why the system uses blue-green deployments','A getting-started guide for new users'],
+      correct:1,
+      exp:'A complete list of parameters, types, and values is reference material — it is looked up, not followed. How-to guides contain steps. Explanations contain reasoning. Getting-started content is usually a tutorial.'
+    },
+    {
+      q:'Your docs have a section titled "Understanding Rate Limiting" that explains what rate limiting is, why it exists, and how the algorithm works. What Diátaxis type is this?',
+      opts:['Tutorial','How-To Guide','Reference','Explanation'],
+      correct:3,
+      exp:'"Understanding" content that explains concepts, reasons, and mechanisms is Explanation (also called Conceptual Documentation). It is not task-focused and cannot be used as a recipe. It deepens understanding for readers who want to know the why behind the what.'
+    }
+  ]
+},
+
+// ─── MODULE 04 ────────────────────────────────────────────
+{
+  num:'04', title:'Core Writing Principles', subtitle:'Craft',
+  desc:'The sentence-level rules that separate professional technical writing from amateur documentation.',
+  read:'16', exCount:2,
+  content:`
+<h2>Active Voice — The Default Position</h2>
+<p>Active voice places the actor before the action: <strong>Subject → Verb → Object</strong>. The sentence has momentum. The reader knows who does what, without effort.</p>
+<div class="cg">
+  <div class="cg-card bad"><div class="cg-lbl">Passive Voice</div><p>The request is processed by the server. An error will be returned if the token has expired. The configuration file should be updated by the administrator.</p></div>
+  <div class="cg-card good"><div class="cg-lbl">Active Voice</div><p>The server processes the request. The API returns an error if the token has expired. The administrator should update the configuration file.</p></div>
+</div>
+<p>Passive voice is not always wrong. Use it deliberately in two cases: (1) when the actor is unknown or irrelevant, and (2) when the <em>object</em> of the action is more important than the actor. "Your data is encrypted at rest" is fine — the actor (our system) is implicit and the important thing is the outcome.</p>
+
+<h2>Sentence Length and Rhythm</h2>
+<p>Long sentences are not inherently bad. Short sentences are not inherently good. The problem is <strong>uniformity</strong>. A wall of long sentences is exhausting. A wall of short sentences feels robotic. Vary your rhythm.</p>
+<p>A useful heuristic: if a sentence exceeds 25 words, look for a natural split. Clauses beginning with "which", "that", "and", "but", "because", and "however" are often split points. Each sentence should contain one complete thought.</p>
+<div class="co warn"><div class="co-lbl">Anti-Pattern: The Serial Compound</div>"The function takes an argument and it validates it and if it passes it proceeds to the next step and if not it throws an error." → Split this into three sentences. Each "and" is probably a sentence boundary.</div>
+
+<h2>Parallel Structure</h2>
+<p>When items appear in a list, series, or set of headings, they must be <strong>grammatically parallel</strong> — the same grammatical form throughout.</p>
+<div class="cg">
+  <div class="cg-card bad"><div class="cg-lbl">Not Parallel</div><p>The system can: authenticate users, rate limiting, and to process webhooks.</p></div>
+  <div class="cg-card good"><div class="cg-lbl">Parallel</div><p>The system can: authenticate users, apply rate limits, and process webhooks.</p></div>
+</div>
+<p>For headings, decide on a pattern and enforce it: all nouns ("Authentication", "Rate Limiting"), all verb phrases ("Authenticate Users", "Limit Requests"), or all gerunds ("Authenticating", "Rate Limiting"). Mixing breaks the visual contract with your reader.</p>
+
+<h2>Nominalisation — The Silent Killer</h2>
+<p>Nominalisation converts a verb into a noun. "Perform authentication" instead of "authenticate." "Make a request" instead of "request." "Give consideration to" instead of "consider." The verb is the power of a sentence; turning it into a noun buries that power inside a prepositional phrase.</p>
+<table class="tw-tbl">
+  <thead><tr><th>Nominalised (Weak)</th><th>Verb-Led (Strong)</th></tr></thead>
+  <tbody>
+    <tr><td>Perform an analysis of...</td><td>Analyse...</td></tr>
+    <tr><td>Provide a summary of...</td><td>Summarise...</td></tr>
+    <tr><td>Make an assumption that...</td><td>Assume...</td></tr>
+    <tr><td>Give an indication of...</td><td>Indicate...</td></tr>
+    <tr><td>Run the initialization of...</td><td>Initialize...</td></tr>
+  </tbody>
+</table>
+
+<h2>Precise Language</h2>
+<p>Vague language in technical writing is a bug. Every hedge, every approximation, every "usually" or "might" that is not genuinely accurate is a defect. If something always happens, say always. If something is required, say required — not "recommended." If a value is always a string, say string — not "text-based."</p>
+<p>Words to audit in every draft: <em>usually, typically, generally, often, might, may, can, should, some, many, most, various, certain, appropriate, relevant.</em> For each one, ask: is this genuinely uncertain, or am I hedging because I am unsure? If you are unsure, go check. Then write with precision.</p>
+<div class="co info"><div class="co-lbl">Positive vs Negative Framing</div>Tell readers what to do, not just what not to do. "Do not use spaces in the filename" → "Use underscores or hyphens between words in the filename." The positive form gives a concrete action. The negative form leaves them guessing.</div>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e04a',
+      title:'Fix Active Voice and Nominalisations',
+      prompt:'Rewrite the following paragraph. Convert passive constructions to active, and replace all nominalisations with strong verbs. Aim to reduce word count by at least 25%.',
+      original:'Authentication of the user is performed by the server upon receipt of the credentials. Validation of the token is conducted before processing of the request is undertaken. If determination is made that the token has reached expiration, a rejection of the request will be issued by the system and an error response will be returned to the caller.',
+      answer:'The server authenticates the user when it receives their credentials. It validates the token before processing the request. If the token has expired, the system rejects the request and returns an error response to the caller.',
+      tips:[
+        '"Authentication is performed" → "authenticates"',
+        '"Validation is conducted" → "validates"',
+        '"Determination is made that" → "if"',
+        '"Rejection will be issued" → "rejects"',
+        'Original: 57 words. Target: ~35 words'
+      ]
+    },
+    {
+      type:'rewrite', id:'e04b',
+      title:'Enforce Parallel Structure',
+      prompt:'Rewrite this list of API capabilities so all items are grammatically parallel. Choose one pattern and apply it consistently.',
+      original:'The API allows you to:\n- Create new users\n- Reading user profiles is supported\n- To update existing records\n- Deletion of users by admin\n- The search functionality queries users by name or email',
+      answer:'The API allows you to:\n- Create new users\n- Read user profiles\n- Update existing records\n- Delete users (admin only)\n- Search users by name or email',
+      tips:[
+        'Choose the infinitive verb pattern: "Create", "Read", "Update", "Delete", "Search"',
+        'Every item should be the same grammatical form',
+        'Strip the explanation from the bullet — it belongs in the description, not the list item',
+        'Move qualifiers like "(admin only)" to the end of the line, not the beginning'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'Which sentence correctly uses passive voice appropriately?',
+      opts:[
+        'The user is authenticated by clicking the login button.',
+        'The function is called by the developer to fetch data.',
+        'All passwords are hashed using bcrypt before storage.',
+        'The error is thrown by the validation module.'
+      ],
+      correct:2,
+      exp:'"Passwords are hashed using bcrypt" — the actor (our system) is implied and unimportant; what matters is the outcome and the method. This is appropriate passive. The other options have clear, important actors (user, developer, validation module) that should be named as subjects.'
+    },
+    {
+      q:'"Give consideration to using environment variables for sensitive configuration." What is wrong with this sentence?',
+      opts:[
+        'It uses passive voice',
+        'It uses nominalisation: "give consideration" instead of "consider"',
+        'It is too short',
+        'It is incorrect — you should not use env vars for secrets'
+      ],
+      correct:1,
+      exp:'"Give consideration to" is a classic nominalisation of the verb "consider." The fix: "Consider using environment variables for sensitive configuration." Five words become one. The sentence is shorter, clearer, and more direct.'
+    },
+    {
+      q:'Your docs say: "Users should probably make sure to potentially avoid using the root account where possible." What is the primary problem?',
+      opts:[
+        'Too many hedge words make the requirement ambiguous',
+        'It uses active voice when passive would be better',
+        'The sentence is too short',
+        'It is incorrect technical advice'
+      ],
+      correct:0,
+      exp:'"Should probably", "potentially", and "where possible" collectively drain the sentence of all imperative force. If this is a security requirement, say: "Do not use the root account. Create a dedicated IAM user with least-privilege permissions." If it genuinely has exceptions, specify them precisely.'
+    }
+  ]
+},
+
+// ─── MODULE 05 ────────────────────────────────────────────
+{
+  num:'05', title:'Document Structure', subtitle:'Information Architecture',
+  desc:'How to organise technical content so readers find what they need without reading everything.',
+  read:'14', exCount:2,
+  content:`
+<h2>Headings Are Navigation, Not Labels</h2>
+<p>Most writers use headings as section labels. Good technical writers use headings as <strong>navigation tools</strong> — they should work as a standalone table of contents that lets a reader locate any concept without reading the body text.</p>
+<p>A heading should be specific and action-oriented where possible. Compare:</p>
+<div class="cg">
+  <div class="cg-card bad"><div class="cg-lbl">Label Headings (Weak)</div><p>Introduction<br>Configuration<br>Authentication<br>Notes<br>Troubleshooting</p></div>
+  <div class="cg-card good"><div class="cg-lbl">Navigation Headings (Strong)</div><p>What This Guide Covers<br>Set Up Your Environment Variables<br>Authenticate with an API Key<br>Required vs. Optional Parameters<br>Fix Common Authentication Errors</p></div>
+</div>
+
+<h2>The Inverted Pyramid</h2>
+<p>Borrowed from journalism: put the most important information first. Not the historical context, not the "why we built this", not the prerequisites. The <strong>primary outcome</strong> first, the supporting detail after.</p>
+<p>In practice: every document should answer "what does this give me / what can I do with this?" in the first three sentences. Every section should state its conclusion before supporting it. Readers scan; they decide whether to keep reading based on the first sentence of each section.</p>
+
+<h2>Chunking</h2>
+<p>Chunking is breaking content into discrete, self-contained units. Each chunk should cover one concept, be labelled with a heading, and be readable independently. This is not just a stylistic preference — it is how readers process technical information. Short-term working memory holds 7 ± 2 concepts; chunking respects that limit.</p>
+<p>Rules for good chunks:</p>
+<ul>
+  <li>One H2 section = one main concept</li>
+  <li>No paragraph longer than 5-6 lines (in rendered form)</li>
+  <li>Numbered lists for sequential steps; bulleted lists for unordered items</li>
+  <li>Use callout boxes to separate warnings, tips, and notes from the main flow</li>
+</ul>
+
+<h2>Progressive Disclosure</h2>
+<p>Progressive disclosure means showing the minimum information needed at each stage, with more detail accessible as needed. It directly maps to the three reader modes from Module 2.</p>
+<ol>
+  <li><strong>Level 1 — Summary</strong>: What this is and the minimal viable example. Enough for an expert to get started.</li>
+  <li><strong>Level 2 — Detail</strong>: Parameters, options, return values, prerequisites. Enough to implement correctly.</li>
+  <li><strong>Level 3 — Depth</strong>: Edge cases, performance considerations, security implications, troubleshooting. Enough to handle real-world complexity.</li>
+</ol>
+<p>Do not force Level 3 readers (novices working through everything) to wade through Level 1 content they do not need. Do not bury Level 1 content (the quick example) behind three screens of Level 3 detail.</p>
+
+<h2>Lists: When to Use Them (and When Not To)</h2>
+<p>Lists are powerful but overused in technical writing. Use lists when:</p>
+<ul>
+  <li>Items are genuinely parallel and unordered (bulleted list)</li>
+  <li>Items are sequential and order matters (numbered list)</li>
+  <li>There are 3+ items that would otherwise form a run-on sentence</li>
+</ul>
+<p>Do <em>not</em> use lists when: you have only two items (a sentence handles this better), when items have a natural narrative flow, or when you are fragmenting a coherent explanation into bullets to avoid writing prose.</p>
+<div class="co warn"><div class="co-lbl">Over-Bulleting</div>Bullet-point heavy docs feel like an outline, not a document. Three to five bullet points per section maximum. If you have 12 bullets, you need sub-headings and structure, not a longer list.</div>
+
+<h2>The Perfect README Structure</h2>
+<p>A README is the single most important piece of documentation for a software project. It should answer five questions in order:</p>
+<ol>
+  <li><strong>What is this?</strong> — One paragraph, plain language. What problem it solves.</li>
+  <li><strong>How do I install it?</strong> — The minimum commands to get it running.</li>
+  <li><strong>How do I use it?</strong> — One concrete example of the most common use case.</li>
+  <li><strong>How do I configure it?</strong> — Key options, with defaults and types.</li>
+  <li><strong>How do I contribute / get help?</strong> — Links to full docs, issue tracker, license.</li>
+</ol>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e05a',
+      title:'Restructure a Disorganised Document',
+      prompt:'The following doc intro buries the key information. Rewrite it using the inverted pyramid: most important first. Cut anything that does not help the reader immediately.',
+      original:'Welcome to the documentation for our DataSync API. Our company was founded in 2018 and has been building developer tools ever since. The DataSync API was originally an internal tool that we decided to open up to the public in 2022 after several customers asked us to. Before you can use the API, you will need to sign up for an account and create a project. You might also want to read about our architecture. The DataSync API lets you synchronise data between your application and our cloud storage in real time.',
+      answer:'The DataSync API synchronises data between your application and our cloud storage in real-time.\n\nTo get started:\n1. Create a free account at app.datasync.io\n2. Create a project and copy your API key\n3. Follow the Quick Start guide below\n\nFor architecture background and advanced configuration, see the full documentation.',
+      tips:[
+        'Lead with what the API does — not company history',
+        'Remove founding year, internal-tool backstory — these belong on the "About" page',
+        'Convert the prerequisites to a numbered quick-start list',
+        'Offer a path to depth ("see full docs") rather than force-feeding it upfront'
+      ]
+    },
+    {
+      type:'rewrite', id:'e05b',
+      title:'Write Navigational Headings',
+      prompt:'Replace these generic label-headings with specific, action-oriented navigation headings. Each should tell the reader what they will accomplish in that section.',
+      original:'1. Overview\n2. Setup\n3. Usage\n4. Options\n5. Errors\n6. Examples',
+      answer:'1. What This Library Does\n2. Install and Configure in 5 Minutes\n3. Make Your First API Call\n4. Configure Request Options and Defaults\n5. Handle and Debug Common Errors\n6. End-to-End Implementation Examples',
+      tips:[
+        '"Overview" → "What This Library Does" — tells the reader the purpose',
+        '"Setup" → "Install and Configure in 5 Minutes" — sets expectation of effort',
+        '"Usage" → "Make Your First API Call" — specific and actionable',
+        '"Options" → "Configure Request Options and Defaults" — precise scope',
+        '"Errors" → "Handle and Debug Common Errors" — action-oriented'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'You are reviewing docs and find this heading: "Notes." What should you change it to?',
+      opts:[
+        'Leave it — "Notes" is fine as a generic catch-all',
+        'Delete the section entirely',
+        'Replace it with a specific heading like "Important Limitations" or "Known Caveats"',
+        'Change it to "Additional Information"'
+      ],
+      correct:2,
+      exp:'"Notes" is a label, not a navigation heading. The reader cannot tell what is in that section without reading it. A specific heading — "Important Limitations", "Security Considerations", "Known Caveats" — tells the reader what they will find and whether they need to read it.'
+    },
+    {
+      q:'What is progressive disclosure in documentation?',
+      opts:[
+        'Hiding content behind a login wall until users pay',
+        'Presenting the minimum information needed at each stage, with more detail accessible further down',
+        'Gradually revealing the full answer across multiple pages to keep users engaged',
+        'Using expand/collapse UI components to hide content'
+      ],
+      correct:1,
+      exp:'Progressive disclosure means structuring content so that the essential overview comes first (enough for experts to act), with increasing detail below it. This respects all skill levels simultaneously — experts get what they need immediately, novices can read everything. It is about structure, not UI tricks.'
+    },
+    {
+      q:'When should you use a numbered list instead of a bulleted list?',
+      opts:[
+        'When the list has more than five items',
+        'When items are sequential and order matters',
+        'When you want to make the section look more official',
+        'Numbered and bulleted lists are interchangeable'
+      ],
+      correct:1,
+      exp:'Use numbered lists only when sequence matters — installation steps, a multi-step process, a ranked priority order. Use bulleted lists for unordered, parallel items. Using numbers for unordered content misleads the reader into thinking sequence matters.'
+    }
+  ]
+},
+
+// ─── MODULE 06 ────────────────────────────────────────────
+{
+  num:'06', title:'Writing for Developers', subtitle:'APIs, READMEs & Code',
+  desc:'The specific craft of developer documentation — the format most likely to matter on your first day.',
+  read:'18', exCount:2,
+  content:`
+<h2>What Makes Developer Docs Different</h2>
+<p>Developer documentation has a unique contract with its reader: they are building something, often under time pressure, and they will test every claim you make against real code. A vague description of a parameter that takes three interpretations will result in three bug reports. Wrong type information will result in runtime errors. A missing error code means a developer will not handle a failure case.</p>
+<p>The most important properties of developer docs, in priority order: <strong>Correct, Complete, Concrete</strong>. Every endpoint, every parameter, every return value, every error must be documented. If it exists and is not documented, it might as well not exist.</p>
+
+<h2>API Endpoint Documentation Anatomy</h2>
+<p>A well-documented API endpoint contains, in this order:</p>
+<ol>
+  <li><strong>One-line description</strong> — What this endpoint does. Action verb + object.</li>
+  <li><strong>HTTP method and path</strong> — <code>POST /v1/users</code></li>
+  <li><strong>Authentication requirements</strong> — Required scope, header format.</li>
+  <li><strong>Request parameters</strong> — Path, query, and body parameters with: name, type, required/optional, description, validation rules, defaults.</li>
+  <li><strong>Request example</strong> — A complete, runnable curl or code example.</li>
+  <li><strong>Response schema</strong> — All returned fields with types.</li>
+  <li><strong>Response example</strong> — A real JSON payload.</li>
+  <li><strong>Error codes</strong> — Every possible error, with cause and resolution.</li>
+</ol>
+<div class="cb"><div class="cb-lbl">Example: Endpoint Documentation</div><pre><span class="a">## Create a User</span>
+<span class="c">POST /v1/users</span>
+
+Creates a new user account. Returns the created user object.
+Requires Bearer token with the <span class="g">users:write</span> scope.
+
+<span class="a">### Request Body (JSON)</span>
+| Field    | Type   | Required | Description                        |
+|----------|--------|----------|------------------------------------|
+| email    | string | Yes      | User email. Must be valid format.  |
+| name     | string | Yes      | Display name. 1–100 characters.    |
+| role     | string | No       | Default: "member". Enum: member,   |
+|          |        |          | admin, viewer.                     |
+
+<span class="a">### Response — 201 Created</span>
+{
+  "id": "usr_01HX3K...",
+  "email": "sam@example.com",
+  "name": "Sam",
+  "role": "member",
+  "created_at": "2025-01-15T10:30:00Z"
+}
+
+<span class="a">### Errors</span>
+| Status | Code                | Cause                     |
+|--------|---------------------|---------------------------|
+| 400    | invalid_email       | Email format invalid.     |
+| 409    | email_exists        | Email already registered. |
+| 422    | missing_required    | Required field absent.    |</pre></div>
+
+<h2>Code Example Best Practices</h2>
+<p>Code examples are the most-read part of any developer documentation. Developers copy, adapt, and run them before reading anything else. Make them count:</p>
+<ul>
+  <li><strong>Show the complete, runnable minimum</strong> — no "..." placeholders where real code should be</li>
+  <li><strong>Use realistic values</strong> — not <code>foo</code>, <code>test</code>, or <code>xxx</code></li>
+  <li><strong>Show the success case first</strong>, error handling after</li>
+  <li><strong>Include import statements</strong> — do not assume the developer knows which module</li>
+  <li><strong>Annotate non-obvious lines</strong> with a comment, not a paragraph</li>
+  <li><strong>Test every example</strong> — copy it yourself and run it before publishing</li>
+</ul>
+
+<h2>The Perfect README Formula</h2>
+<p>A README has a specific job: get a developer from "just found this project" to "running code" in under 5 minutes. Structure it exactly:</p>
+<div class="cb"><div class="cb-lbl">README Structure</div><pre><span class="a"># project-name</span>
+<span class="c">&gt; One sentence: what it does and who it's for.</span>
+
+<span class="g">## Install</span>
+<span class="b">npm install project-name</span>
+
+<span class="g">## Quick Start</span>
+<span class="c"># Minimal working example — copy-paste and run</span>
+<span class="b">import { thing } from 'project-name'
+const result = await thing.doMainAction({ key: 'value' })
+console.log(result)</span>
+
+<span class="g">## API</span>
+<span class="c">Document each exported function/class here.</span>
+
+<span class="g">## Configuration</span>
+<span class="c">Table: option name | type | default | description</span>
+
+<span class="g">## Contributing</span>
+<span class="c">How to run tests, open issues, submit PRs.</span>
+
+<span class="g">## License</span>
+MIT</pre></div>
+
+<h2>Changelog Writing</h2>
+<p>A changelog communicates what changed, for whom, and what they need to do. The gold standard format is <strong>Keep a Changelog</strong> (keepachangelog.com). Group changes by type: Added, Changed, Deprecated, Removed, Fixed, Security. Always include the version number and date.</p>
+<div class="cb"><div class="cb-lbl">Good vs. Bad Changelog Entry</div><pre><span class="r">## Bad — too vague</span>
+### [1.4.0] - 2025-06-01
+- Bug fixes and improvements
+- Performance updates
+- Various fixes
+
+<span class="g">## Good — specific and actionable</span>
+### [1.4.0] - 2025-06-01
+#### Added
+- POST /v1/webhooks endpoint to register event listeners (#412)
+
+#### Fixed  
+- getUserById() now throws UserNotFoundError instead of returning
+  null when the user does not exist. Update callers that check
+  for null return values. (#389)
+
+#### Security
+- Tokens are now hashed before storage. Existing tokens remain
+  valid; rotation is recommended by 2025-08-01.</pre></div>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e06a',
+      title:'Document an API Endpoint',
+      prompt:'Write clean endpoint documentation for the following endpoint. Include: one-line description, method + path, required auth, at least 3 request parameters with types and required status, and 2 error codes.',
+      original:'There is a GET endpoint at /api/v2/orders that gets a list of orders. You can filter by status (like pending or completed) and by customer ID. You need to be authenticated. It might error if you pass bad values.',
+      answer:'## List Orders\nGET /api/v2/orders\n\nReturns a paginated list of orders. Requires Bearer token with the orders:read scope.\n\n### Query Parameters\n| Param       | Type   | Required | Description                                          |\n|-------------|--------|----------|------------------------------------------------------|\n| status      | string | No       | Filter by status. Enum: pending, completed, cancelled|\n| customer_id | string | No       | Filter to a specific customer\'s orders.              |\n| limit       | number | No       | Results per page. Default: 20. Max: 100.             |\n\n### Errors\n| Status | Code          | Cause                              |\n|--------|---------------|------------------------------------|\n| 400    | invalid_status| status value not in allowed enum.  |\n| 401    | unauthorized  | Missing or invalid Bearer token.   |',
+      tips:[
+        'Always specify the HTTP method (GET, POST, etc.) alongside the path',
+        'Document what "no auth" means precisely — which header, which scope',
+        'Include defaults for optional parameters — "limit: 20" is crucial for pagination',
+        '"Might error if you pass bad values" → specific 400 error code with cause'
+      ]
+    },
+    {
+      type:'rewrite', id:'e06b',
+      title:'Write a README Quick Start',
+      prompt:'The following code snippet has been provided with no context. Write a README Quick Start section for it: one-sentence description of what the library does, install command, and the minimum working code example with annotations.',
+      original:'// Code to document:\nconst mailer = new Mailer({ apiKey: process.env.MAIL_API_KEY })\nawait mailer.send({\n  to: "user@example.com",\n  subject: "Welcome",\n  html: "<h1>Hello!</h1>"\n})',
+      answer:'> Send transactional emails from Node.js with a single function call.\n\n## Install\nnpm install @co/mailer\n\n## Quick Start\nimport { Mailer } from \'@co/mailer\'\n\n// Initialise once with your API key (store in env, never hardcode)\nconst mailer = new Mailer({ apiKey: process.env.MAIL_API_KEY })\n\n// Send an email\nawait mailer.send({\n  to: "user@example.com",      // Recipient address\n  subject: "Welcome",           // Email subject line\n  html: "<h1>Hello!</h1>"       // HTML body (use text: for plain text)\n})',
+      tips:[
+        'Start with a one-line description (not "this library") — state the benefit',
+        'Import statement is mandatory — readers need to know the module name',
+        'Annotate non-obvious parts with inline comments',
+        'Point out the security practice: env var, never hardcode',
+        'Mention the alternative option (text: for plain text) inline'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'A developer opens your API docs for an endpoint. What should appear first on the page?',
+      opts:[
+        'A history of when the endpoint was added',
+        'A one-line action description and the HTTP method + path',
+        'A list of all possible error codes',
+        'A prerequisite reading list'
+      ],
+      correct:1,
+      exp:'The first thing a developer needs is: what does this endpoint do, and how do I call it? One-line description + HTTP method and path. Everything else (auth, params, errors) is detail that supports implementation. Front-loading error codes or prerequisites violates the inverted pyramid.'
+    },
+    {
+      q:'Your changelog entry says: "Fixed a bug in the user service." What is wrong with this?',
+      opts:[
+        'It should include more technical jargon',
+        'It is not specific about what was broken, what changed, or what callers need to do',
+        'Changelogs should not include bug fixes, only new features',
+        'It is too long'
+      ],
+      correct:1,
+      exp:'A changelog entry must tell users: what broke, what the fix is, and whether they need to change anything in their code. "Fixed a bug in the user service" provides none of this. Affected users cannot determine if they are impacted, and they cannot tell if the fix introduces a breaking change.'
+    },
+    {
+      q:'Why should code examples in docs use realistic values (like real email addresses and real-looking IDs) instead of placeholder values like "foo" or "xxx"?',
+      opts:[
+        'Because placeholders are reserved for HTML',
+        'Because realistic values help developers understand the expected data shape and format',
+        'For legal reasons',
+        'Because search engines index code examples'
+      ],
+      correct:1,
+      exp:'Developers read code examples to understand the format and shape of data, not just the syntax. "user@example.com" tells them it\'s a valid email format. "usr_01HX3K..." tells them IDs have a prefix and a specific structure. "foo" tells them nothing. Realistic examples are self-documenting.'
+    }
+  ]
+},
+
+// ─── MODULE 07 ────────────────────────────────────────────
+{
+  num:'07', title:'Style Guides & Voice', subtitle:'Consistency at Scale',
+  desc:'Learn to write consistently across large doc sets, and know the industry-standard guides by heart.',
+  read:'13', exCount:2,
+  content:`
+<h2>Why Style Guides Exist</h2>
+<p>At scale, inconsistency is a user experience problem. If your docs sometimes call it "login" and sometimes "sign in," users do not know if these are the same thing. If one section uses second-person ("you") and another uses third-person ("the user"), the tone fractures. If some pages use title case headings and others use sentence case, the product feels unfinished.</p>
+<p>A style guide is not bureaucracy — it is a shared decision record. It answers "what do we do in this case?" once, so that every writer on the team does not have to redecide it independently.</p>
+
+<h2>The Two Industry-Standard Guides</h2>
+<h3>Google Developer Documentation Style Guide</h3>
+<p>The dominant reference for software and API documentation. Key rules you must know:</p>
+<ul>
+  <li><strong>Second person</strong> — Address the reader as "you," not "the user" or "the developer"</li>
+  <li><strong>Active voice</strong> — Default position (with documented exceptions)</li>
+  <li><strong>Present tense</strong> — "The function returns..." not "The function will return..."</li>
+  <li><strong>Sentence case for headings</strong> — "Set up your environment" not "Set Up Your Environment"</li>
+  <li><strong>Oxford comma</strong> — "Create, read, update, and delete"</li>
+  <li><strong>Contractions are acceptable</strong> — "Don't", "you'll" — conversational but professional</li>
+  <li><strong>Code formatting for all code elements</strong> — Even single words: <code>true</code>, <code>null</code>, function names</li>
+</ul>
+<h3>Microsoft Writing Style Guide</h3>
+<p>Broader scope — covers UI text, error messages, and accessibility alongside documentation. Key rules:</p>
+<ul>
+  <li>Prioritise clarity over cleverness — no puns in error messages</li>
+  <li>Use plain language — write for a global audience (avoid idioms)</li>
+  <li>Avoid "please" in instructions — it implies optionality when the action is required</li>
+  <li>Use specific, actionable error messages — tell the user what to do, not just what went wrong</li>
+</ul>
+<div class="co info"><div class="co-lbl">Free Resource</div>Both guides are freely available online. Bookmark: developers.google.com/style and docs.microsoft.com/style-guide. Read the core rules sections — you do not need to read them cover to cover.</div>
+
+<h2>Voice and Tone</h2>
+<p><strong>Voice</strong> is consistent — it is your documentation's personality: clear, direct, professional. It does not change between pages. <strong>Tone</strong> adapts to context — a getting-started guide can be warmer and more encouraging; an error message must be precise and solution-focused; a security warning should be serious but not alarming.</p>
+<p>For most developer documentation, the target voice is: <em>a knowledgeable colleague talking to a peer</em>. Not a textbook. Not a customer service script. A smart person explaining something clearly to another smart person.</p>
+
+<h2>Critical Terminology Decisions</h2>
+<p>The biggest consistency wins come from nailing your terminology. Every product has terms that must be used with precision. Build a terminology table early:</p>
+<table class="tw-tbl">
+  <thead><tr><th>Use This</th><th>Not This</th><th>Why</th></tr></thead>
+  <tbody>
+    <tr><td>Sign in / Sign out</td><td>Login / Logout (as verbs)</td><td>"Login" is a noun; "sign in" is the verb form</td></tr>
+    <tr><td>Select (UI)</td><td>Click (UI)</td><td>"Select" works for touch, mouse, and keyboard</td></tr>
+    <tr><td>Enter (text fields)</td><td>Type / Input</td><td>Consistent with Google Style Guide</td></tr>
+    <tr><td>API key</td><td>API token / secret key</td><td>Use one term throughout the product</td></tr>
+    <tr><td>true / false</td><td>True / False / TRUE</td><td>Code literals are lowercase and code-formatted</td></tr>
+  </tbody>
+</table>
+
+<h2>Writing for Global Audiences</h2>
+<p>If your docs will be read internationally or translated, write for localisation from the start:</p>
+<ul>
+  <li>Avoid idioms: "hit the ground running", "under the hood", "out of the box" — these do not translate</li>
+  <li>Avoid cultural references and jokes</li>
+  <li>Use simple sentence structures — complex embedding is hard to translate</li>
+  <li>Use ISO date formats (2025-01-15) rather than "January 15th" or "15/01/25"</li>
+  <li>Specify timezone when mentioning times: "12:00 UTC" not "12:00 noon"</li>
+</ul>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e07a',
+      title:'Apply Google Developer Style Guide',
+      prompt:'The following paragraph violates several Google Developer Style Guide rules. Apply the rules: active voice, present tense, second person, sentence case, no idioms, and code formatting for code elements.',
+      original:'The Developer Will need to set the environment variable to TRUE before Running the Application. Once this has been done by the developer, The Application Should Start Normally. It is worth noting that if the variable has not been set, an error will be thrown and the whole thing will blow up.',
+      answer:'Set the FEATURE_FLAG environment variable to <code>true</code> before you run the application. If you omit this variable, the application throws a ConfigurationError on startup.',
+      tips:[
+        '"Developer Will need to" → "Set" (active, imperative, second person)',
+        '"TRUE" → code-formatted <code>true</code> (lowercase, code element)',
+        '"Running The Application" → "run the application" (sentence case, present tense)',
+        '"the whole thing will blow up" → "throws a ConfigurationError" (no idioms, precise)',
+        '"It is worth noting that" — delete entirely, just state the fact'
+      ]
+    },
+    {
+      type:'rewrite', id:'e07b',
+      title:'Fix Terminology Inconsistency',
+      prompt:'The following paragraph uses three different terms for the same concept. Identify the inconsistency and rewrite using consistent terminology. Also fix any "please" instructions.',
+      original:'Please log in to the dashboard using your credentials. Once you have logged into the system, navigate to Settings. Please make sure you are signed into the correct account before proceeding. If you need to sign-in again, please click the Sign In button at the top right.',
+      answer:'Sign in to the dashboard using your credentials. After signing in, navigate to Settings. Make sure you are signed in to the correct account before proceeding. To sign in again, select Sign in at the top right.',
+      tips:[
+        'Choose one term: "sign in" (as two words, verb form) — use it everywhere',
+        '"Login" as a verb, "log in" as a verb, and "sign-in" are all inconsistent with each other',
+        'Remove all three "please" instances — instructions are not requests',
+        '"Click" → "select" — works for all input modalities',
+        '"Sign In" (noun, button label) stays capitalised as it matches the UI'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'According to the Google Developer Documentation Style Guide, how should you format the value "true" when referencing it as a code literal in prose?',
+      opts:['True','TRUE','<code>true</code> (code-formatted, lowercase)','"true" (in quotation marks)'],
+      correct:2,
+      exp:'Code literals — including boolean values, null, function names, and parameter values — should be formatted as inline code (backtick in Markdown, <code> in HTML) and written in their actual case. For most languages, boolean literals are lowercase: true, false, null.'
+    },
+    {
+      q:'A UI button says "Delete Account". Following Microsoft Style Guide principles, which error message is best if the action fails?',
+      opts:[
+        'Error: Operation failed.',
+        'We\'re sorry, but something went wrong while trying to delete your account. Please try again later!',
+        'Account deletion failed. Check that you have the "admin" role, then try again.',
+        'Please note that your account could not be deleted at this time due to an error.'
+      ],
+      correct:2,
+      exp:'Microsoft Style Guide: be specific about what failed, explain the cause, and give the user an actionable next step. Option 3 does all three. Option 1 is too vague. Option 2 is apologetic and lacks specificity. Option 4 uses "please note" and is passive.'
+    },
+    {
+      q:'Why should you avoid the phrase "out of the box" in technical documentation?',
+      opts:[
+        'It is too informal for professional docs',
+        'It is an idiom that does not translate well for global audiences',
+        'It is overused and cliché',
+        'It implies the product ships in physical packaging'
+      ],
+      correct:1,
+      exp:'Idioms are a localisation risk. "Out of the box," "under the hood," "hit the ground running," and similar phrases may be opaque to non-native English speakers and difficult to translate accurately. Replace with literal language: "by default" or "without configuration" instead of "out of the box."'
+    }
+  ]
+},
+
+// ─── MODULE 08 ────────────────────────────────────────────
+{
+  num:'08', title:'Diagrams & Visual Communication', subtitle:'When to Show, Not Tell',
+  desc:'When visuals add value, which type to use, and how to make them work without the visual.',
+  read:'11', exCount:2,
+  content:`
+<h2>The Core Question: Does This Need a Diagram?</h2>
+<p>Not every concept benefits from a visual. Before creating any diagram, answer: is there a relationship, sequence, or structure here that prose alone cannot convey efficiently? If yes — diagram. If prose handles it in two clear sentences, the diagram adds friction, not value.</p>
+<p>Visuals are almost always worth the effort for:</p>
+<ul>
+  <li><strong>System architecture</strong> — Components and how they connect</li>
+  <li><strong>Multi-step flows with branching</strong> — Decision trees, authentication flows</li>
+  <li><strong>Sequence diagrams</strong> — Time-ordered interactions between services</li>
+  <li><strong>Data relationships</strong> — Entity relationships, schema structures</li>
+  <li><strong>State machines</strong> — Allowed states and transitions</li>
+</ul>
+<p>Visuals are usually <em>not</em> needed for: a list of parameters, a numbered installation sequence, a comparison table (the table is already visual), or a single concept that takes one paragraph to explain.</p>
+
+<h2>Diagram Types and When to Use Them</h2>
+<table class="tw-tbl">
+  <thead><tr><th>Type</th><th>Use When</th><th>Tool</th></tr></thead>
+  <tbody>
+    <tr><td>Architecture diagram</td><td>Showing components and infrastructure relationships</td><td>draw.io, Lucidchart, Mermaid</td></tr>
+    <tr><td>Sequence diagram</td><td>Showing time-ordered messages between services/actors</td><td>Mermaid, PlantUML</td></tr>
+    <tr><td>Flowchart</td><td>Showing a process with decision points</td><td>Mermaid, draw.io</td></tr>
+    <tr><td>Entity-relationship diagram</td><td>Showing database schema relationships</td><td>dbdiagram.io, Mermaid</td></tr>
+    <tr><td>State machine diagram</td><td>Showing allowed states and transitions</td><td>Mermaid, XState visualizer</td></tr>
+  </tbody>
+</table>
+
+<h2>Mermaid — Diagrams as Code</h2>
+<p>Mermaid lets you write diagrams in plain text, which renders to SVG. This is the right approach for documentation that lives alongside code — it version-controls, diffs, and reviews just like code. GitHub and most documentation platforms (Docusaurus, GitBook, Notion) render Mermaid natively.</p>
+<div class="cb"><div class="cb-lbl">Mermaid Sequence Diagram Example</div><pre><span class="b">sequenceDiagram</span>
+    <span class="a">participant C as Client</span>
+    <span class="a">participant A as Auth Server</span>
+    <span class="a">participant R as Resource API</span>
+    <span class="g">C->>A: POST /token {client_id, secret}</span>
+    <span class="g">A-->>C: {access_token, expires_in}</span>
+    <span class="g">C->>R: GET /data (Bearer token)</span>
+    <span class="r">R->>A: Validate token</span>
+    <span class="r">A-->>R: Token valid</span>
+    <span class="g">R-->>C: 200 OK {data}</span></pre></div>
+
+<h2>Every Diagram Needs a Text Description</h2>
+<p>Diagrams are inaccessible to screen readers and fail to render in plain-text environments. Every diagram in your documentation must be accompanied by a text description that conveys the same information. This is not a caption — it is a full prose explanation of the diagram's content.</p>
+<div class="co tip"><div class="co-lbl">Accessibility Rule</div>If a diagram were removed from your page, would the reader lose information they cannot get from the surrounding text? If yes, that information must exist in prose form — either as a description of the diagram or as the prose content the diagram illustrates.</div>
+
+<h2>Screenshots in Documentation</h2>
+<p>Screenshots are the most expensive type of documentation to maintain. Every UI change breaks them. Follow these rules:</p>
+<ul>
+  <li>Use screenshots only for UI steps where the visual location of an element is essential</li>
+  <li>Annotate screenshots (arrows, numbered callouts) rather than writing prose that refers to visual position ("the button in the top right...")</li>
+  <li>Version-lock screenshots — note which product version the screenshot was taken in</li>
+  <li>Never use a screenshot as a substitute for a code block</li>
+</ul>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e08a',
+      title:'Write a Diagram Text Description',
+      prompt:'Write a prose description of the following API authentication flow that could replace the diagram if it failed to render. Your description should convey all the steps and actors.',
+      original:'[Diagram shows: User → Browser → sends credentials → Auth Service → validates → returns JWT → Browser stores JWT → Browser uses JWT in header → Resource API → validates JWT → returns data]',
+      answer:'When a user signs in, the browser sends their credentials (email and password) to the Auth Service. The Auth Service validates the credentials against the database. If valid, it returns a signed JWT (JSON Web Token) to the browser. The browser stores this token (typically in memory or a secure cookie). For all subsequent API calls, the browser includes the JWT in the Authorization header as a Bearer token. The Resource API validates the token\'s signature and expiry before returning the requested data. The Auth Service is not contacted again for subsequent requests — the JWT is self-contained.',
+      tips:[
+        'Name all actors (User, Browser, Auth Service, Resource API)',
+        'Describe the direction of each interaction ("sends to", "returns to")',
+        'Include the what (credentials, JWT) not just the action',
+        'Add the key insight: JWT is self-contained, Auth Service not re-contacted',
+        'Use present tense ("sends", "validates") to describe the flow'
+      ]
+    },
+    {
+      type:'rewrite', id:'e08b',
+      title:'Choose the Right Diagram Type',
+      prompt:'For each of the following documentation needs, state which diagram type you would use and briefly explain why. Keep each answer to one sentence.',
+      original:'1. Document all the states an order can be in (pending, paid, shipped, delivered, cancelled)\n2. Show how our microservices communicate when a user makes a purchase\n3. Document the structure of our database tables and their foreign key relationships\n4. Show the decision logic for how we assign a support ticket priority level',
+      answer:'1. State machine diagram — shows allowed states and the transitions between them, which is exactly what an order lifecycle represents.\n2. Sequence diagram — shows time-ordered message passing between named services, which is how microservice interactions are best visualised.\n3. Entity-relationship (ER) diagram — designed specifically to show database entities and the relationships (including foreign keys) between them.\n4. Flowchart — shows a process with branching decision points, which is how conditional priority logic works.',
+      tips:[
+        'State machine: any system with named states and defined transitions',
+        'Sequence: any time-ordered exchange of messages between two or more actors',
+        'ER diagram: database schemas, data models, entity relationships',
+        'Flowchart: decision trees, conditional logic, branching processes'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'Why is Mermaid (diagram-as-code) preferable to screenshot-based diagrams in a code repository?',
+      opts:[
+        'Mermaid diagrams look better visually',
+        'Mermaid diagrams can be version-controlled, diffed, and reviewed in pull requests',
+        'Screenshot diagrams are too large to store in Git',
+        'Mermaid is the only format supported by GitHub'
+      ],
+      correct:1,
+      exp:'Diagrams-as-code (Mermaid, PlantUML) live alongside code in version control. When the architecture changes, you update the diagram text in the same PR as the code change. You can diff it, review it, and track its history. Screenshot-based diagrams are binary blobs that cannot be meaningfully diffed and become stale without any visible warning.'
+    },
+    {
+      q:'A technical writer asks: "Should I add a diagram to explain what our API rate limiting does?" What is the best response?',
+      opts:[
+        'Yes — always add diagrams to API documentation',
+        'Only if the relationship or process is too complex to convey clearly in two to three sentences of prose',
+        'No — diagrams are only for architecture, not API behaviour',
+        'Yes — diagrams always improve comprehension'
+      ],
+      correct:1,
+      exp:'The test is whether prose alone is sufficient. Rate limiting policy ("1000 req/min per API key, with a 200-request burst") is well-served by a short explanation and maybe a table. If the rate limiting has complex bucket fill/drain mechanics that benefit from visualisation, a diagram adds value. "Always add" and "never add" are both wrong.'
+    },
+    {
+      q:'Your docs have an architecture diagram showing how five microservices connect. What must the diagram have alongside it?',
+      opts:[
+        'A legend explaining all the arrow types',
+        'A prose description that conveys the same information as the diagram',
+        'A link to the source file for the diagram',
+        'A version number indicating when it was last updated'
+      ],
+      correct:1,
+      exp:'Every diagram must be accompanied by a prose description that conveys the same information — for accessibility (screen readers), for plain-text environments, and as a fallback if the diagram fails to render. The prose description is not a caption; it is a full explanation of the diagram\'s content.'
+    }
+  ]
+},
+
+// ─── MODULE 09 ────────────────────────────────────────────
+{
+  num:'09', title:'Editing & Review', subtitle:'The Process Behind Good Writing',
+  desc:'Professional editing is a multi-pass process. Learn the systematic approach that catches everything.',
+  read:'13', exCount:2,
+  content:`
+<h2>Why First Drafts Are Always Wrong</h2>
+<p>No professional writer submits first drafts. The first draft is for getting ideas on paper. Editing is where writing happens. The mistake most developers make with documentation is treating it as a one-pass process: write it, ship it, move on. The result is documentation that is technically correct but fails its reader.</p>
+<p>Professional editing is a multi-pass, layered process. Each pass targets a different level of the document. Trying to fix structure, clarity, and spelling in a single read is how things get missed.</p>
+
+<h2>The Four Editing Passes</h2>
+<h3>Pass 1: Structural Edit</h3>
+<p>Read the document at the level of sections and headings only. Ask: Is the document the right type? Is the content in the right order? Is anything missing that the reader needs? Is anything present that the reader does not need? Do not fix sentences yet — fix the architecture first.</p>
+
+<h3>Pass 2: Paragraph-Level Edit</h3>
+<p>Read each paragraph as a unit. Ask: Does this paragraph make one clear point? Does the first sentence state that point? Are the supporting sentences relevant to the first sentence? Is there anything in this paragraph that belongs in a different paragraph?</p>
+
+<h3>Pass 3: Sentence-Level Edit</h3>
+<p>Read each sentence individually. Apply the Four Cs from Module 4. Look for: passive voice, nominalisations, vague language, hedge words, long run-on sentences, non-parallel lists, inconsistent terminology.</p>
+
+<h3>Pass 4: Word-Level Edit</h3>
+<p>Proofread for spelling, grammar, punctuation, and code formatting. Verify: are all code elements formatted consistently? Are all product names spelled correctly and capitalised correctly? Are all links working? Are all parameter names matching the actual API?</p>
+
+<h2>Self-Editing Techniques That Work</h2>
+<h3>The Read-Aloud Test</h3>
+<p>Read your documentation aloud. This catches two things prose-reading misses: (1) sentences where you have to re-read to understand the structure — your brain will stumble, (2) sentences that are technically grammatical but sound robotic or awkward when spoken.</p>
+<h3>The Distance Technique</h3>
+<p>Write, then leave at least 30 minutes before editing. Your brain will auto-correct errors it knows you made. After distance, you read what is actually there rather than what you intended to write.</p>
+<h3>The Reader's Lens</h3>
+<p>Before editing, write one sentence: "I am writing this for [specific person] who is trying to [specific goal]." Then edit with that person in your head. Ask for every sentence: "Does this help them get to their goal faster?"</p>
+
+<h2>Technical Accuracy Review</h2>
+<p>Documentation that is well-written but technically wrong is worse than no documentation — it sends developers in the wrong direction confidently. Before publishing, every doc must pass a technical accuracy review:</p>
+<ul>
+  <li>All code examples have been executed and produce the stated output</li>
+  <li>All parameter names match the current implementation</li>
+  <li>All default values are current</li>
+  <li>All error codes are valid and have current descriptions</li>
+  <li>All version numbers and dates are accurate</li>
+  <li>A developer familiar with the system has reviewed for omissions</li>
+</ul>
+<div class="co danger"><div class="co-lbl">Never Ship Unverified Code Examples</div>Copy every code example in your documentation. Paste it into a real environment. Run it. If it fails, fix it before publishing. Unexecuted code examples are documentation debt that immediately undermines reader trust.</div>
+
+<h2>Giving and Receiving Doc Feedback</h2>
+<p>When reviewing someone else's documentation, be specific about what and why. "This is confusing" is not useful feedback. "The third paragraph assumes the reader knows what a webhook is — either define it or link to the glossary" is actionable.</p>
+<p>When receiving feedback, treat doc feedback the same as code review — it is about the work, not you. The reader's confusion is always valid data. If someone did not understand your explanation, your explanation did not work for that reader.</p>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e09a',
+      title:'Multi-Pass Edit',
+      prompt:'Edit the following documentation through at least 3 passes: structural, sentence-level, and word-level. Aim to improve clarity, fix passive voice, remove vague language, and make it more useful to the reader.',
+      original:'The process of authentication is handled by the authentication system. It should be noted that users will need to ensure that their credentials have been inputted correctly. If the inputting of incorrect credentials is done three times, it can be expected that the account will be locked. The duration of the lockout period is 15 minutes. Users may find it helpful to use the password reset functionality if they have forgotten what their password is.',
+      answer:'To sign in, enter your email address and password on the sign-in page.\n\nIf you enter the wrong password three times, your account locks for 15 minutes. To regain access immediately, reset your password using the Forgot your password? link on the sign-in page.',
+      tips:[
+        'Pass 1 (Structure): Two paragraphs is better than one — separate the sign-in instruction from the lockout behaviour',
+        'Pass 2 (Paragraph): Each paragraph now has one clear point',
+        'Pass 3 (Sentence): "process of authentication is handled" → "to sign in"; "inputting of credentials" → "enter your password"',
+        'Pass 4 (Word): "password reset functionality" → "Forgot your password? link" — use the actual UI label'
+      ]
+    },
+    {
+      type:'rewrite', id:'e09b',
+      title:'Write Actionable Review Feedback',
+      prompt:'The following doc review comment is unhelpful. Rewrite it as specific, actionable feedback that the writer can act on immediately.',
+      original:'"This section is confusing and hard to follow. The technical stuff doesn\'t make sense. Also the structure is off."',
+      answer:'"The third paragraph jumps straight into rate limit headers without explaining what rate limiting is or why it matters. New readers will be lost. I\'d suggest either: (a) adding a one-sentence definition at the start of the section, or (b) linking to the Rate Limiting Concepts explanation doc before this paragraph.\n\nAlso, the steps for handling a 429 response (lines 12-18) would be clearer as a numbered list rather than a paragraph — the sequence matters, and the current format makes it hard to follow."',
+      tips:[
+        'Identify the exact location: "third paragraph", "lines 12-18"',
+        'Explain why it is a problem: "New readers will be lost"',
+        'Offer a concrete solution: "add a one-sentence definition" or "link to..."',
+        'Separate structural feedback from content feedback',
+        'Avoid subjective language: not "confusing" but "this specific thing is unclear because..."'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'In the four-pass editing process, when should you fix passive voice and sentence structure?',
+      opts:[
+        'Pass 1 (Structural edit)',
+        'Pass 2 (Paragraph-level edit)',
+        'Pass 3 (Sentence-level edit)',
+        'Pass 4 (Word-level edit / proofreading)'
+      ],
+      correct:2,
+      exp:'Sentence-level editing (Pass 3) is where you apply the Four Cs: fix passive voice, nominalisations, vague language, and sentence structure. Fixing sentences before fixing the structure (Pass 1) is wasted effort — you might restructure or delete paragraphs during Pass 1, making your sentence-level edits irrelevant.'
+    },
+    {
+      q:'Why is the "distance technique" effective for self-editing?',
+      opts:[
+        'It gives you time to research factual claims',
+        'Your brain auto-corrects familiar errors when reading immediately after writing — distance lets you read what is actually there',
+        'It reduces the emotional attachment to your writing',
+        'It allows the document to be reviewed by someone else in the meantime'
+      ],
+      correct:1,
+      exp:'When you edit immediately after writing, your brain predicts what the text says based on what you intended to write. It auto-fills missing words, correct spelling, and glosses over awkward phrasing. After 30+ minutes of distance, you read the actual text rather than your intention of it — errors become visible.'
+    },
+    {
+      q:'A code example in your docs returns a "User" object, but the actual API now returns a "Profile" object due to a refactor. What category of documentation defect is this?',
+      opts:[
+        'Style consistency issue',
+        'Structural problem',
+        'Technical accuracy failure',
+        'Formatting issue'
+      ],
+      correct:2,
+      exp:'This is a technical accuracy failure — the documentation is factually wrong. A misnamed return type will cause developers to write code against a contract that does not exist, resulting in runtime errors. Technical accuracy is Pass 4 review territory, and every code example must be verified against the current implementation before and after publication.'
+    }
+  ]
+},
+
+// ─── MODULE 10 ────────────────────────────────────────────
+{
+  num:'10', title:'Tools, Workflows & Docs-as-Code', subtitle:'Ship Docs Like an Engineer',
+  desc:'The professional toolkit: Markdown, static site generators, CI/CD for docs, and how to work in a docs-as-code environment.',
+  read:'15', exCount:2,
+  content:`
+<h2>Docs-as-Code: The Modern Standard</h2>
+<p><strong>Docs-as-code</strong> is the practice of writing, reviewing, and publishing documentation using the same tools and workflows as software development: plain text files (usually Markdown), version control (Git), pull request review, and automated pipelines (CI/CD).</p>
+<p>This approach is now the standard at most software companies because it solves fundamental documentation problems: docs live with the code that they describe, documentation changes are reviewed the same way code changes are, and automated pipelines catch broken links, spelling errors, and style violations before they reach production.</p>
+
+<h2>Markdown Mastery</h2>
+<p>Markdown is the universal language of technical documentation. You need to know it cold.</p>
+<div class="cb"><div class="cb-lbl">Essential Markdown Syntax</div><pre><span class="c"># H1 — document title (only one per doc)</span>
+<span class="c">## H2 — major section</span>
+<span class="c">### H3 — subsection</span>
+
+<span class="g">**bold text**</span>   <span class="a">*italic text*</span>   <span class="b">&#96;inline code&#96;</span>
+
+<span class="c">Numbered list:</span>
+<span class="g">1. First step
+2. Second step</span>
+
+<span class="c">Unordered list:</span>
+<span class="g">- Item one
+- Item two</span>
+
+<span class="c">Code block with syntax highlighting:</span>
+<span class="b">&#96;&#96;&#96;javascript
+const result = await fetch('/api/users')
+&#96;&#96;&#96;</span>
+
+<span class="c">Link:        </span><span class="g">[link text](https://example.com)</span>
+<span class="c">Image:       </span><span class="g">![alt text](./image.png)</span>
+<span class="c">Table:</span>
+<span class="g">| Header | Header |
+|--------|--------|
+| Cell   | Cell   |</span>
+
+<span class="c">Blockquote / callout:</span>
+<span class="a">&gt; **Note:** This is important context.</span></pre></div>
+
+<h2>Static Site Generators for Docs</h2>
+<p>A static site generator (SSG) takes your Markdown files and produces a documentation website. You focus on content; the SSG handles navigation, search, theming, and deployment.</p>
+<table class="tw-tbl">
+  <thead><tr><th>Tool</th><th>Best For</th><th>Language</th></tr></thead>
+  <tbody>
+    <tr><td>Docusaurus</td><td>Open-source projects, developer portals</td><td>React / MDX</td></tr>
+    <tr><td>MkDocs + Material</td><td>Clean, minimal docs sites; Python projects</td><td>Python / Markdown</td></tr>
+    <tr><td>Mintlify</td><td>API documentation, hosted solution</td><td>MDX</td></tr>
+    <tr><td>GitBook</td><td>Internal wikis and product docs</td><td>Markdown / GUI</td></tr>
+    <tr><td>Starlight (Astro)</td><td>High-performance documentation sites</td><td>Astro / MDX</td></tr>
+  </tbody>
+</table>
+
+<h2>CI/CD for Documentation</h2>
+<p>A professional docs pipeline runs automated checks on every pull request, the same way a CI pipeline runs tests on code. Common checks:</p>
+<ul>
+  <li><strong>Spell checking</strong> — <code>cspell</code> or <code>codespell</code> catch typos before they reach production</li>
+  <li><strong>Link checking</strong> — <code>lychee</code> or <code>broken-link-checker</code> find dead links automatically</li>
+  <li><strong>Prose linting</strong> — <code>Vale</code> enforces your style guide rules programmatically (word choice, sentence length, passive voice)</li>
+  <li><strong>Markdown linting</strong> — <code>markdownlint</code> catches formatting inconsistencies</li>
+  <li><strong>Build check</strong> — the site must build successfully (catches broken front matter, invalid syntax)</li>
+</ul>
+<div class="cb"><div class="cb-lbl">GitHub Actions — Docs CI Pipeline</div><pre><span class="a">name: Docs CI</span>
+<span class="b">on: [pull_request]</span>
+
+<span class="a">jobs:</span>
+  <span class="g">check:</span>
+    <span class="b">runs-on: ubuntu-latest</span>
+    <span class="b">steps:</span>
+      <span class="g">- uses: actions/checkout@v4</span>
+      
+      <span class="c">      # Spell check</span>
+      <span class="g">- run: npx cspell "docs/**/*.md"</span>
+      
+      <span class="c">      # Style guide enforcement</span>
+      <span class="g">- uses: errata-ai/vale-action@reviewdog</span>
+        <span class="b">with: {files: docs/}</span>
+      
+      <span class="c">      # Check for broken links</span>
+      <span class="g">- uses: lycheeverse/lychee-action@v1</span>
+      
+      <span class="c">      # Build the site</span>
+      <span class="g">- run: npm run build</span></pre></div>
+
+<h2>Git Workflow for Documentation</h2>
+<p>Documentation follows the same branching strategy as code. On most teams:</p>
+<ul>
+  <li>Work on a feature branch: <code>git checkout -b docs/add-webhook-guide</code></li>
+  <li>Open a PR that describes the content change and its motivation</li>
+  <li>Get both a technical review (is it accurate?) and an editorial review (is it clear?)</li>
+  <li>Merge to main; CI deploys the updated documentation site automatically</li>
+</ul>
+<p>For documentation that must ship with a feature: open the docs PR in the same repository as the feature PR, or cross-reference them. Documentation that ships after the feature ships is documentation debt — users encounter the undocumented feature immediately.</p>
+
+<h2>Vale — Automated Style Guide Enforcement</h2>
+<p>Vale is a prose linter that enforces style guide rules in your CI pipeline. You configure it with a <code>.vale.ini</code> file and rule packages. It checks for: passive voice, overly long sentences, banned phrases, incorrect terminology, and custom rules specific to your product vocabulary.</p>
+<div class="co tip"><div class="co-lbl">Start Here</div>Google's and Microsoft's Vale rule packages are open source at github.com/errata-ai. Add them to any repository to get professional-grade prose linting in under 10 minutes.</div>
+`,
+  exercises:[
+    {
+      type:'rewrite', id:'e10a',
+      title:'Write a Complete README in Markdown',
+      prompt:'Write a complete README.md in proper Markdown for the following library: a Node.js library called "queuely" that provides a simple job queue backed by Redis. It exports one class: Queue. You create a queue with new Queue(name, { redisUrl }), add jobs with queue.add(data), and process jobs with queue.process(handler). It supports concurrency via { concurrency: 5 } in the process options.',
+      answer:'# queuely\n\n> Simple, Redis-backed job queue for Node.js.\n\n## Install\n\n```bash\nnpm install queuely\n```\n\n## Quick Start\n\n```javascript\nimport { Queue } from \'queuely\'\n\nconst emailQueue = new Queue(\'emails\', {\n  redisUrl: process.env.REDIS_URL\n})\n\n// Add a job\nawait emailQueue.add({ to: \'user@example.com\', subject: \'Welcome\' })\n\n// Process jobs (runs in background)\nawait emailQueue.process(async (job) => {\n  await sendEmail(job.data)\n}, { concurrency: 5 }) // Process up to 5 jobs at once\n```\n\n## API\n\n### `new Queue(name, options)`\n\nCreates a new queue.\n\n| Option | Type | Required | Description |\n|--------|------|----------|-------------|\n| name | string | Yes | Queue identifier. |\n| options.redisUrl | string | Yes | Redis connection URL. |\n\n### `queue.add(data)`\n\nAdds a job to the queue. Returns a Promise that resolves when the job is enqueued.\n\n### `queue.process(handler, options?)`\n\nStarts consuming jobs from the queue.\n\n| Option | Type | Default | Description |\n|--------|------|---------|-------------|\n| concurrency | number | 1 | Max parallel jobs. |\n\n## License\n\nMIT',
+      tips:[
+        'Use a blockquote (>) for the one-sentence description',
+        'Install section: just the command, no prose padding',
+        'Quick Start: one complete, runnable example with comments on non-obvious lines',
+        'API section: one entry per exported function/class, parameter table with types',
+        'Concurrency option documented with its default value — crucial for usage'
+      ]
+    },
+    {
+      type:'rewrite', id:'e10b',
+      title:'Design a Docs CI Checklist',
+      prompt:'A new team member asks: "What automated checks should we run on every docs PR?" Write a concise, prioritised list of 5 checks, with one sentence explaining why each one matters.',
+      original:'[No original — write from scratch based on what you have learned]',
+      answer:'1. Build check (npm run build) — Fails fast if any file has broken front matter, invalid syntax, or import errors that would break the deployed site.\n2. Spell check (cspell) — Catches typos before users see them; especially important for code examples where a typo is a bug.\n3. Link checker (lychee) — Broken links are the most common documentation defect; catching them automatically prevents dead-end user journeys.\n4. Vale prose linting — Enforces style guide rules (passive voice, banned phrases, terminology) programmatically, removing the need for human reviewers to check mechanical consistency.\n5. Markdown linting (markdownlint) — Ensures consistent formatting (heading hierarchy, list style, code fences) across all contributors.',
+      tips:[
+        'Order by impact: a broken build is more critical than a style lint warning',
+        'Include the tool name for each check — abstract "spell checking" is less useful than "cspell"',
+        'One sentence of justification per check — the "why" is as important as the "what"',
+        'Start with fast-fail checks (build) before slow checks (link checking)'
+      ]
+    }
+  ],
+  quiz:[
+    {
+      q:'What is the primary advantage of docs-as-code over traditional documentation tools (like Confluence or Google Docs)?',
+      opts:[
+        'Markdown is easier to write than rich text editors',
+        'Documentation changes are reviewed in pull requests alongside code changes, keeping docs and code in sync',
+        'Static sites load faster than wiki software',
+        'Markdown files take up less storage space'
+      ],
+      correct:1,
+      exp:'The core benefit of docs-as-code is workflow integration. When docs live in the same repository as code, documentation changes can be reviewed in the same PR as the code changes they describe. This makes it structurally harder for docs to fall out of sync with the code. The review process also improves documentation quality through the same peer review mechanism used for code.'
+    },
+    {
+      q:'Vale is a CI tool for documentation. What does it check?',
+      opts:[
+        'Whether all code examples compile successfully',
+        'Whether all links in the documentation are valid',
+        'Whether prose follows style guide rules (passive voice, terminology, sentence length)',
+        'Whether the documentation site builds without errors'
+      ],
+      correct:2,
+      exp:'Vale is a prose linter — it checks the quality of the writing itself against configurable style rules. It can flag passive voice, overly long sentences, banned words, incorrect terminology, and custom rules specific to your style guide. Link checking is done by tools like lychee; build checking is done by the build process itself.'
+    },
+    {
+      q:'Documentation for a new feature is ready three days after the feature ships. What is the correct way to describe this situation?',
+      opts:[
+        'Documentation debt — users encountered an undocumented feature immediately after release',
+        'Acceptable — documentation always follows features',
+        'Not a problem — users can figure it out from the code',
+        'A style guide violation'
+      ],
+      correct:0,
+      exp:'Documentation that ships after the feature it describes is documentation debt. Users encounter the undocumented feature immediately at release and must either guess, file support tickets, or give up. The correct workflow: documentation should be reviewed and merged alongside (or before) the code it documents, not after. "Docs ship with the feature" is a professional standard.'
+    }
+  ]
+}
+
+]; // end MODULES
+
+
+// ═══════════════════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════════════════
+
+const state = {
+  current: -1,
+  completed: new Set(),
+  quizAnswers: {}, // moduleIdx -> { qIdx -> optIdx }
+  quizSubmitted: {}, // moduleIdx -> bool
+};
+
+// ═══════════════════════════════════════════════════════════
+//  SIDEBAR RENDER
+// ═══════════════════════════════════════════════════════════
+
+function buildSidebar(){
+  const list = document.getElementById('sb-list');
+  list.innerHTML = MODULES.map((m,i)=>`
+    <div class="sb-item ${state.completed.has(i)?'done':''} ${state.current===i?'active':''}"
+         onclick="showModule(${i})" id="sb-${i}">
+      <div class="sb-dot">${state.completed.has(i)?'✓':m.num}</div>
+      <div class="sb-lbl">${m.title}</div>
+    </div>
+  `).join('');
+  const pct = Math.round(state.completed.size/MODULES.length*100);
+  document.getElementById('prog-fill').style.width = pct+'%';
+  document.getElementById('prog-pct').textContent = state.completed.size+' / '+MODULES.length;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SHOW MODULE
+// ═══════════════════════════════════════════════════════════
+
+function showModule(idx){
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('completion').classList.remove('on');
+  const view = document.getElementById('mod-view');
+  view.classList.remove('hidden');
+  state.current = idx;
+  buildSidebar();
+  view.innerHTML = renderModule(idx);
+  view.scrollTop = 0;
+  window.scrollTo(0,0);
+}
+
+function showWelcome(){
+  state.current = -1;
+  document.getElementById('welcome').classList.remove('hidden');
+  document.getElementById('mod-view').classList.add('hidden');
+  document.getElementById('completion').classList.remove('on');
+  buildSidebar();
+}
+
+function showCompletion(){
+  document.getElementById('welcome').classList.add('hidden');
+  document.getElementById('mod-view').classList.add('hidden');
+  document.getElementById('completion').classList.add('on');
+  state.current = -1;
+  buildSidebar();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER MODULE
+// ═══════════════════════════════════════════════════════════
+
+function renderModule(idx){
+  const m = MODULES[idx];
+  const isDone = state.completed.has(idx);
+  return `
+<div class="mod-wrap">
+  <div class="mod-header" data-n="${m.num}">
+    <div class="mh-eye">Module ${m.num} — ${m.subtitle}</div>
+    <h1 class="mh-h1">${m.title}</h1>
+    <p class="mh-desc">${m.desc}</p>
+    <div class="mh-meta">
+      <div class="mh-chip">⏱ <b>${m.read} min</b> read</div>
+      <div class="mh-chip">✏️ <b>${m.exCount}</b> exercises</div>
+      <div class="mh-chip ${isDone?'':'hidden'}">✓ <b style="color:var(--green)">Completed</b></div>
+    </div>
+  </div>
+
+  <div class="mod-body">
+    ${m.content}
+    ${m.exercises.map((ex,ei)=>renderExercise(idx,ei,ex)).join('')}
+    <div class="quiz-wrap">
+      ${renderQuiz(idx,m.quiz)}
+    </div>
+  </div>
+
+  <div class="mod-footer">
+    <button class="fnav" ${idx===0?'disabled':''} onclick="showModule(${idx-1})">← Previous</button>
+    <button class="fnav complete" onclick="completeAndNext(${idx})">
+      ${isDone ? (idx===MODULES.length-1?'Completed ✓':'Next Module →') : 'Mark Complete & Continue →'}
+    </button>
+  </div>
+</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER EXERCISE
+// ═══════════════════════════════════════════════════════════
+
+function renderExercise(midx, eidx, ex){
+  const uid = `ex_${midx}_${eidx}`;
+  const isBlank = ex.original === '[No original — write from scratch based on what you have learned]';
+  return `
+<div class="ex-wrap">
+  <div class="ex-head">
+    <span class="ex-tag">Exercise ${eidx+1}</span>
+    <span class="ex-title">${ex.title}</span>
+  </div>
+  <div class="ex-body">
+    <p class="ex-prompt">${ex.prompt}</p>
+    ${isBlank ? '' : `<div class="ex-orig"><strong style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);">Original:</strong><br><br>${ex.original.replace(/\n/g,'<br>')}</div>`}
+    <textarea class="ex-ta" id="${uid}_ta" placeholder="Write your answer here..."></textarea>
+    <div class="ex-actions">
+      <button class="btn btn-primary" onclick="revealAnswer('${uid}')">Reveal Model Answer</button>
+      <button class="btn btn-ghost" onclick="clearExercise('${uid}')">Clear</button>
+    </div>
+    <div class="ex-reveal" id="${uid}_reveal">
+      <div class="ex-rev-lbl">✓ Model Answer</div>
+      <div>${ex.answer.replace(/\n/g,'<br>')}</div>
+      ${ex.tips && ex.tips.length ? `<div class="ex-tips"><div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Key Principles Applied</div><ul>${ex.tips.map(t=>`<li>${t}</li>`).join('')}</ul></div>` : ''}
+    </div>
+  </div>
+</div>`;
+}
+
+function revealAnswer(uid){
+  const reveal = document.getElementById(uid+'_reveal');
+  if(reveal) reveal.classList.toggle('on');
+}
+
+function clearExercise(uid){
+  const ta = document.getElementById(uid+'_ta');
+  if(ta) ta.value = '';
+  const reveal = document.getElementById(uid+'_reveal');
+  if(reveal) reveal.classList.remove('on');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER QUIZ
+// ═══════════════════════════════════════════════════════════
+
+function renderQuiz(midx, questions){
+  if(!state.quizAnswers[midx]) state.quizAnswers[midx] = {};
+  const html = questions.map((q,qi)=>`
+    <div class="quiz-q" id="qq_${midx}_${qi}">
+      <div class="quiz-qnum">Question ${qi+1} of ${questions.length}</div>
+      <div class="quiz-qtxt">${q.q}</div>
+      <div class="quiz-opts">
+        ${q.opts.map((opt,oi)=>`
+          <div class="quiz-opt" id="qo_${midx}_${qi}_${oi}"
+               onclick="selectOpt(${midx},${qi},${oi},${q.correct})">
+            <div class="q-dot"></div><span>${opt}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="qfb" id="qfb_${midx}_${qi}"></div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="quiz-hdr">Module Quiz</div>
+    ${html}
+    <div style="margin-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-primary" onclick="submitQuiz(${midx})">Check Answers</button>
+      <button class="btn btn-ghost" onclick="resetQuiz(${midx})">Reset</button>
+    </div>
+    <div class="quiz-score" id="qs_${midx}">
+      <div class="qs-num" id="qs_num_${midx}">0/${questions.length}</div>
+      <div class="qs-lbl">Score — Review the feedback above to understand any mistakes.</div>
+    </div>
+  `;
+}
+
+function selectOpt(midx, qi, oi, correct){
+  if(state.quizSubmitted[midx]) return;
+  if(!state.quizAnswers[midx]) state.quizAnswers[midx] = {};
+  state.quizAnswers[midx][qi] = oi;
+  // Update UI: deselect all options for this question, select clicked
+  const m = MODULES[midx];
+  m.quiz[qi].opts.forEach((_,i)=>{
+    const el = document.getElementById(`qo_${midx}_${qi}_${i}`);
+    if(el){ el.classList.remove('sel','correct','wrong'); }
+  });
+  const sel = document.getElementById(`qo_${midx}_${qi}_${oi}`);
+  if(sel) sel.classList.add('sel');
+}
+
+function submitQuiz(midx){
+  const m = MODULES[midx];
+  const answers = state.quizAnswers[midx] || {};
+  let score = 0;
+  m.quiz.forEach((q,qi)=>{
+    const chosen = answers[qi];
+    m.quiz[qi].opts.forEach((_,oi)=>{
+      const el = document.getElementById(`qo_${midx}_${qi}_${oi}`);
+      if(el) el.classList.remove('sel','correct','wrong','locked');
+    });
+    const fbEl = document.getElementById(`qfb_${midx}_${qi}`);
+    if(chosen === undefined){
+      if(fbEl){ fbEl.textContent = 'You did not answer this question.'; fbEl.className='qfb w on'; }
+      return;
+    }
+    if(chosen === q.correct){
+      score++;
+      const el = document.getElementById(`qo_${midx}_${qi}_${chosen}`);
+      if(el) el.classList.add('correct','locked');
+      if(fbEl){ fbEl.textContent = '✓ Correct — '+q.exp; fbEl.className='qfb c on'; }
+    } else {
+      const wrongEl = document.getElementById(`qo_${midx}_${qi}_${chosen}`);
+      const rightEl = document.getElementById(`qo_${midx}_${qi}_${q.correct}`);
+      if(wrongEl) wrongEl.classList.add('wrong','locked');
+      if(rightEl) rightEl.classList.add('correct','locked');
+      if(fbEl){ fbEl.textContent = '✗ Incorrect — '+q.exp; fbEl.className='qfb w on'; }
+    }
+  });
+  // lock all options
+  document.querySelectorAll(`[id^="qo_${midx}_"]`).forEach(el=>el.classList.add('locked'));
+  state.quizSubmitted[midx] = true;
+  const scoreBox = document.getElementById(`qs_${midx}`);
+  const scoreNum = document.getElementById(`qs_num_${midx}`);
+  if(scoreBox) scoreBox.classList.add('on');
+  if(scoreNum) scoreNum.textContent = score+'/'+m.quiz.length;
+}
+
+function resetQuiz(midx){
+  state.quizAnswers[midx] = {};
+  state.quizSubmitted[midx] = false;
+  showModule(midx);
+  // scroll to quiz
+  setTimeout(()=>{
+    const qw = document.querySelector('.quiz-wrap');
+    if(qw) qw.scrollIntoView({behavior:'smooth'});
+  },100);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMPLETE AND NAVIGATE
+// ═══════════════════════════════════════════════════════════
+
+function completeAndNext(idx){
+  state.completed.add(idx);
+  buildSidebar();
+  if(idx < MODULES.length-1){
+    showModule(idx+1);
+  } else {
+    showCompletion();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+
+buildSidebar();
+</script>
+</body>
+</html>

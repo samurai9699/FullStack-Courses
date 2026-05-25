@@ -1,0 +1,3708 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Mastery — Complete Interactive Course</title>
+<style>
+/* ================================================================
+   CSS MASTERY COURSE — Application Design System & Styles
+   ================================================================ */
+
+/* --- Reset --- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;overflow:hidden;height:100vh}
+img,svg{display:block;max-width:100%}
+button{font:inherit;cursor:pointer;border:none;background:none}
+a{color:inherit;text-decoration:none}
+ul,ol{list-style:none}
+input,textarea{font:inherit;border:none;outline:none}
+
+/* --- Design Tokens (Dark Theme Default) --- */
+:root{
+  --bg-0:#07070c;--bg-1:#0c0c14;--bg-2:#13131e;--bg-3:#1a1a2a;--bg-4:#232338;
+  --border:rgba(255,255,255,.06);--border-hover:rgba(255,255,255,.12);--border-active:rgba(108,138,255,.35);
+  --accent:#6c8aff;--accent-hover:#8ba3ff;--accent-bg:rgba(108,138,255,.12);--accent-bg-strong:rgba(108,138,255,.22);
+  --green:#5de58a;--green-bg:rgba(93,229,138,.12);
+  --yellow:#f5c542;--yellow-bg:rgba(245,197,66,.12);
+  --red:#f56565;--red-bg:rgba(245,101,101,.12);
+  --purple:#b18aff;--purple-bg:rgba(177,138,255,.12);
+  --text-1:#e8e8f0;--text-2:#9494b0;--text-3:#5c5c78;
+  --sidebar-w:290px;--header-h:56px;--radius-sm:6px;--radius-md:10px;--radius-lg:14px;--radius-xl:20px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.4);--shadow-md:0 4px 12px rgba(0,0,0,.4);--shadow-lg:0 12px 40px rgba(0,0,0,.5);
+  --code-bg:#101018;--code-border:rgba(255,255,255,.06);
+  --font-mono:'SFMono-Regular','Cascadia Code','Fira Code','JetBrains Mono',Consolas,'Liberation Mono',monospace;
+  --transition-fast:.15s ease;--transition-normal:.25s ease;--transition-slow:.4s ease;
+}
+
+/* --- Light Theme --- */
+[data-theme="light"]{
+  --bg-0:#f2f3f7;--bg-1:#ffffff;--bg-2:#f7f8fa;--bg-3:#ebedf2;--bg-4:#dde0e8;
+  --border:rgba(0,0,0,.08);--border-hover:rgba(0,0,0,.14);--border-active:rgba(108,138,255,.4);
+  --accent-bg:rgba(108,138,255,.08);--accent-bg-strong:rgba(108,138,255,.15);
+  --green-bg:rgba(93,229,138,.1);--yellow-bg:rgba(245,197,66,.1);--red-bg:rgba(245,101,101,.1);--purple-bg:rgba(177,138,255,.1);
+  --text-1:#1a1a2e;--text-2:#5a5a76;--text-3:#9090aa;
+  --code-bg:#f5f6fa;--code-border:rgba(0,0,0,.08);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06);--shadow-md:0 4px 12px rgba(0,0,0,.08);--shadow-lg:0 12px 40px rgba(0,0,0,.12);
+}
+
+/* --- App Layout --- */
+body{background:var(--bg-0);color:var(--text-1)}
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* --- Sidebar --- */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;
+  background:var(--bg-1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:transform var(--transition-normal);z-index:100;
+}
+.sidebar-header{
+  padding:20px 20px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+}
+.sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sidebar-logo-icon{
+  width:32px;height:32px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;
+}
+.sidebar-logo-text{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.sidebar-logo-sub{font-size:11px;color:var(--text-3);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.sidebar-search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:8px 10px;font-size:13px;color:var(--text-2);transition:border-color var(--transition-fast);
+}
+.sidebar-search:focus-within{border-color:var(--accent)}
+.sidebar-search input{flex:1;background:transparent;color:var(--text-1);font-size:13px}
+.sidebar-search input::placeholder{color:var(--text-3)}
+.sidebar-search-kbd{
+  font-size:10px;padding:2px 5px;border-radius:3px;
+  background:var(--bg-2);border:1px solid var(--border);color:var(--text-3);font-family:var(--font-mono);
+}
+.sidebar-nav{flex:1;overflow-y:auto;padding:8px 0}
+.sidebar-nav::-webkit-scrollbar{width:4px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:4px}
+
+/* Module group */
+.nav-module{margin-bottom:2px}
+.nav-module-header{
+  display:flex;align-items:center;gap:8px;width:100%;
+  padding:10px 20px;font-size:12.5px;font-weight:600;color:var(--text-2);
+  text-transform:uppercase;letter-spacing:.6px;transition:color var(--transition-fast);
+}
+.nav-module-header:hover{color:var(--text-1)}
+.nav-module-header .chevron{
+  font-size:10px;transition:transform var(--transition-fast);color:var(--text-3);margin-left:auto;
+}
+.nav-module.open .chevron{transform:rotate(90deg)}
+.nav-module-header .module-icon{font-size:14px;width:20px;text-align:center}
+.nav-module-lessons{display:none;padding:2px 0 6px}
+.nav-module.open .nav-module-lessons{display:block}
+
+/* Lesson item */
+.nav-lesson{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:7px 20px 7px 44px;font-size:13px;color:var(--text-2);
+  transition:all var(--transition-fast);position:relative;
+}
+.nav-lesson:hover{color:var(--text-1);background:var(--bg-3)}
+.nav-lesson.active{color:var(--accent);background:var(--accent-bg)}
+.nav-lesson.active::before{
+  content:'';position:absolute;left:0;top:4px;bottom:4px;width:3px;
+  background:var(--accent);border-radius:0 3px 3px 0;
+}
+.nav-lesson-dot{
+  width:16px;height:16px;border-radius:50%;border:2px solid var(--bg-4);
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all var(--transition-fast);
+}
+.nav-lesson.completed .nav-lesson-dot{
+  background:var(--green);border-color:var(--green);color:#07070c;
+}
+.nav-lesson-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sidebar-progress{
+  padding:16px 20px;border-top:1px solid var(--border);flex-shrink:0;
+}
+.sidebar-progress-label{font-size:11px;color:var(--text-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.sidebar-progress-bar{height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden}
+.sidebar-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:3px;transition:width var(--transition-slow)}
+.sidebar-progress-text{font-size:12px;color:var(--text-2);margin-top:6px}
+
+/* --- Main Content --- */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.main-header{
+  height:var(--header-h);display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;border-bottom:1px solid var(--border);flex-shrink:0;gap:16px;
+  background:var(--bg-1);
+}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-3);min-width:0}
+.breadcrumb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.breadcrumb .bc-accent{color:var(--accent);font-weight:600}
+.header-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.header-btn{
+  width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;
+  color:var(--text-2);transition:all var(--transition-fast);font-size:16px;
+}
+.header-btn:hover{background:var(--bg-3);color:var(--text-1)}
+.menu-btn{display:none}
+.main-body{
+  flex:1;overflow-y:auto;padding:32px 40px 80px;scroll-behavior:smooth;
+}
+.main-body::-webkit-scrollbar{width:6px}
+.main-body::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:6px}
+.content-wrapper{max-width:820px;margin:0 auto}
+
+/* --- Lesson Content Typography --- */
+.lesson-title{font-size:2rem;font-weight:700;letter-spacing:-.5px;margin-bottom:8px;line-height:1.25}
+.lesson-subtitle{font-size:1.05rem;color:var(--text-2);margin-bottom:32px;line-height:1.6}
+.content-section{margin-bottom:32px}
+.content-section h2{
+  font-size:1.35rem;font-weight:700;letter-spacing:-.3px;margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);color:var(--text-1);
+}
+.content-section h3{font-size:1.1rem;font-weight:600;margin:20px 0 10px;color:var(--text-1)}
+.content-section p{color:var(--text-2);margin-bottom:14px;font-size:.935rem;line-height:1.75}
+.content-section ul,.content-section ol{
+  margin:0 0 16px 20px;color:var(--text-2);font-size:.935rem;line-height:1.8;
+}
+.content-section ul{list-style:disc}
+.content-section ol{list-style:decimal}
+.content-section li{margin-bottom:4px}
+.content-section strong{color:var(--text-1);font-weight:600}
+.content-section code:not([class]){
+  font-family:var(--font-mono);font-size:.85em;padding:2px 6px;
+  background:var(--accent-bg);color:var(--accent);border-radius:4px;
+}
+
+/* --- Code Block --- */
+.code-block{
+  margin:16px 0;border-radius:var(--radius-md);overflow:hidden;
+  border:1px solid var(--code-border);background:var(--code-bg);
+}
+.code-block-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px;background:var(--bg-2);border-bottom:1px solid var(--code-border);font-size:12px;
+}
+.code-block-lang{color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-mono)}
+.code-block-copy{
+  color:var(--text-3);font-size:11px;padding:3px 8px;border-radius:4px;
+  transition:all var(--transition-fast);font-weight:500;
+}
+.code-block-copy:hover{background:var(--bg-3);color:var(--text-1)}
+.code-block pre{
+  padding:16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;
+  color:var(--text-1);tab-size:2;
+}
+.code-block pre::-webkit-scrollbar{height:4px}
+.code-block pre::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:4px}
+
+/* Syntax Highlighting */
+.hl-comment{color:var(--text-3);font-style:italic}
+.hl-keyword{color:var(--purple)}
+.hl-selector{color:var(--green)}
+.hl-property{color:var(--accent)}
+.hl-value{color:var(--yellow)}
+.hl-string{color:var(--green)}
+.hl-number{color:var(--yellow)}
+.hl-tag{color:var(--red)}
+.hl-attr{color:var(--yellow)}
+.hl-punct{color:var(--text-3)}
+
+/* --- Info Boxes --- */
+.info-box{
+  padding:14px 18px;border-radius:var(--radius-md);margin:16px 0;
+  font-size:.9rem;line-height:1.65;display:flex;gap:12px;
+}
+.info-box-icon{font-size:16px;flex-shrink:0;margin-top:2px}
+.info-box.tip{background:var(--green-bg);border:1px solid rgba(93,229,138,.2);color:var(--green)}
+.info-box.warning{background:var(--yellow-bg);border:1px solid rgba(245,197,66,.2);color:var(--yellow)}
+.info-box.note{background:var(--accent-bg);border:1px solid rgba(108,138,255,.2);color:var(--accent)}
+.info-box.danger{background:var(--red-bg);border:1px solid rgba(245,101,101,.2);color:var(--red)}
+
+/* --- Tables --- */
+.content-table{
+  width:100%;border-collapse:collapse;margin:16px 0;font-size:.875rem;
+}
+.content-table th{
+  text-align:left;padding:10px 14px;background:var(--bg-2);color:var(--text-2);
+  font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.5px;
+  border-bottom:1px solid var(--border);
+}
+.content-table td{
+  padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-2);
+}
+.content-table tr:hover td{background:var(--bg-3)}
+.content-table code{
+  font-family:var(--font-mono);font-size:.82em;padding:2px 5px;
+  background:var(--accent-bg);color:var(--accent);border-radius:3px;
+}
+
+/* --- Interactive Playground --- */
+.playground{
+  margin:20px 0;border-radius:var(--radius-lg);overflow:hidden;
+  border:1px solid var(--border);background:var(--bg-2);
+}
+.playground-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;background:var(--bg-3);border-bottom:1px solid var(--border);
+}
+.playground-title{font-size:13px;font-weight:600;color:var(--text-1)}
+.playground-actions{display:flex;gap:6px}
+.playground-btn{
+  padding:6px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;
+  transition:all var(--transition-fast);
+}
+.playground-btn.primary{background:var(--accent);color:#fff}
+.playground-btn.primary:hover{background:var(--accent-hover)}
+.playground-btn.secondary{background:var(--bg-4);color:var(--text-2)}
+.playground-btn.secondary:hover{color:var(--text-1)}
+.playground-body{display:grid;grid-template-columns:1fr 1fr;min-height:260px}
+.playground-editor{
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+}
+.playground-editor-label{
+  padding:6px 14px;font-size:11px;font-weight:600;color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.5px;background:var(--bg-2);border-bottom:1px solid var(--border);
+}
+.playground-editor textarea{
+  flex:1;padding:14px;background:var(--code-bg);color:var(--text-1);
+  font-family:var(--font-mono);font-size:13px;line-height:1.7;resize:none;
+  tab-size:2;
+}
+.playground-preview{
+  display:flex;flex-direction:column;
+}
+.playground-preview-label{
+  padding:6px 14px;font-size:11px;font-weight:600;color:var(--text-3);
+  text-transform:uppercase;letter-spacing:.5px;background:var(--bg-2);border-bottom:1px solid var(--border);
+}
+.playground-preview iframe{
+  flex:1;width:100%;border:none;background:#fff;
+}
+.playground-feedback{
+  padding:10px 18px;font-size:13px;border-top:1px solid var(--border);
+  display:none;align-items:center;gap:8px;
+}
+.playground-feedback.show{display:flex}
+.playground-feedback.success{background:var(--green-bg);color:var(--green)}
+.playground-feedback.error{background:var(--red-bg);color:var(--red)}
+.playground-feedback.info{background:var(--accent-bg);color:var(--accent)}
+
+/* --- Quiz Engine --- */
+.quiz-container{margin:20px 0}
+.quiz-question{
+  padding:20px;border-radius:var(--radius-md);border:1px solid var(--border);
+  background:var(--bg-2);margin-bottom:14px;transition:border-color var(--transition-fast);
+}
+.quiz-question.answered-correct{border-color:rgba(93,229,138,.4)}
+.quiz-question.answered-wrong{border-color:rgba(245,101,101,.4)}
+.quiz-q-text{font-size:.95rem;font-weight:600;margin-bottom:14px;color:var(--text-1);line-height:1.6}
+.quiz-options{display:flex;flex-direction:column;gap:8px}
+.quiz-option{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-radius:var(--radius-sm);border:1px solid var(--border);
+  font-size:.9rem;color:var(--text-2);transition:all var(--transition-fast);cursor:pointer;
+}
+.quiz-option:hover{background:var(--bg-3);color:var(--text-1);border-color:var(--border-hover)}
+.quiz-option.selected{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
+.quiz-option.correct{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.quiz-option.wrong{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.quiz-option-marker{
+  width:22px;height:22px;border-radius:50%;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;
+  transition:all var(--transition-fast);
+}
+.quiz-option.selected .quiz-option-marker{border-color:var(--accent);background:var(--accent);color:#fff}
+.quiz-option.correct .quiz-option-marker{border-color:var(--green);background:var(--green);color:#07070c}
+.quiz-option.wrong .quiz-option-marker{border-color:var(--red);background:var(--red);color:#fff}
+.quiz-explanation{
+  margin-top:12px;padding:12px 14px;border-radius:var(--radius-sm);
+  font-size:.85rem;line-height:1.65;display:none;
+}
+.quiz-explanation.show{display:block}
+.quiz-explanation.correct{background:var(--green-bg);color:var(--green)}
+.quiz-explanation.wrong{background:var(--red-bg);color:var(--red)}
+.quiz-score{
+  text-align:center;padding:24px;border-radius:var(--radius-md);
+  background:var(--bg-2);border:1px solid var(--border);margin-top:16px;
+}
+.quiz-score-value{font-size:2.5rem;font-weight:700;color:var(--accent)}
+.quiz-score-label{font-size:.9rem;color:var(--text-2);margin-top:4px}
+.quiz-actions{display:flex;gap:10px;margin-top:16px;justify-content:center}
+
+/* --- Buttons --- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;
+  transition:all var(--transition-fast);
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.btn-secondary{background:var(--bg-3);color:var(--text-2);border:1px solid var(--border)}
+.btn-secondary:hover{color:var(--text-1);border-color:var(--border-hover)}
+.btn-success{background:var(--green);color:#07070c}
+.btn-sm{padding:7px 14px;font-size:12px}
+
+/* --- Badges --- */
+.badges-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:16px 0}
+.badge-card{
+  text-align:center;padding:18px 12px;border-radius:var(--radius-md);
+  border:1px solid var(--border);background:var(--bg-2);transition:all var(--transition-fast);
+}
+.badge-card.earned{border-color:var(--accent);background:var(--accent-bg)}
+.badge-card.locked{opacity:.45}
+.badge-icon{font-size:28px;margin-bottom:8px}
+.badge-name{font-size:12px;font-weight:600;color:var(--text-1)}
+.badge-desc{font-size:10px;color:var(--text-3);margin-top:4px}
+
+/* --- Lesson Nav --- */
+.lesson-nav{
+  display:flex;justify-content:space-between;gap:16px;
+  margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
+}
+.lesson-nav-btn{
+  flex:1;display:flex;align-items:center;gap:10px;padding:16px;
+  border-radius:var(--radius-md);border:1px solid var(--border);
+  background:var(--bg-2);transition:all var(--transition-fast);max-width:50%;
+}
+.lesson-nav-btn:hover{border-color:var(--accent);background:var(--accent-bg)}
+.lesson-nav-btn .lnb-dir{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.lesson-nav-btn .lnb-title{font-size:.9rem;font-weight:600;color:var(--text-1)}
+.lesson-nav-btn.next{flex-direction:row-reverse;text-align:right}
+
+/* --- Mark Complete --- */
+.complete-bar{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-top:24px;padding:16px;border-radius:var(--radius-md);
+  border:1px solid var(--border);background:var(--bg-2);
+}
+.complete-bar.completed{
+  background:var(--green-bg);border-color:rgba(93,229,138,.2);
+}
+
+/* --- Welcome / Landing --- */
+.welcome-hero{text-align:center;padding:40px 0 24px}
+.welcome-hero h1{font-size:2.5rem;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.welcome-hero h1 .gradient-text{
+  background:linear-gradient(135deg,var(--accent),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.welcome-hero p{font-size:1.1rem;color:var(--text-2);max-width:520px;margin:0 auto;line-height:1.7}
+.welcome-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:32px 0}
+.welcome-stat{
+  text-align:center;padding:20px 12px;border-radius:var(--radius-md);
+  border:1px solid var(--border);background:var(--bg-2);
+}
+.welcome-stat-value{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.welcome-stat-label{font-size:12px;color:var(--text-3);margin-top:4px;font-weight:500}
+.welcome-modules{margin-top:24px}
+.welcome-module-card{
+  display:flex;align-items:center;gap:16px;padding:16px 18px;
+  border-radius:var(--radius-md);border:1px solid var(--border);
+  background:var(--bg-2);margin-bottom:10px;cursor:pointer;
+  transition:all var(--transition-fast);
+}
+.welcome-module-card:hover{border-color:var(--accent);background:var(--accent-bg);transform:translateX(4px)}
+.welcome-module-icon{font-size:24px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);background:var(--bg-3)}
+.welcome-module-info{flex:1}
+.welcome-module-info h3{font-size:.95rem;font-weight:600;margin-bottom:2px}
+.welcome-module-info p{font-size:.8rem;color:var(--text-3)}
+.welcome-module-count{font-size:12px;color:var(--text-3);font-weight:600}
+.welcome-cta{display:flex;justify-content:center;gap:12px;margin-top:28px}
+
+/* --- Search Modal --- */
+.search-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;
+  display:none;align-items:flex-start;justify-content:center;padding-top:12vh;
+  backdrop-filter:blur(4px);
+}
+.search-overlay.open{display:flex}
+.search-modal{
+  width:560px;max-width:90vw;border-radius:var(--radius-lg);
+  background:var(--bg-1);border:1px solid var(--border);box-shadow:var(--shadow-lg);
+  overflow:hidden;animation:slideDown .2s ease;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.search-modal-input{
+  display:flex;align-items:center;gap:12px;padding:16px 18px;
+  border-bottom:1px solid var(--border);
+}
+.search-modal-input input{
+  flex:1;font-size:15px;background:transparent;color:var(--text-1);
+}
+.search-modal-input input::placeholder{color:var(--text-3)}
+.search-modal-results{max-height:340px;overflow-y:auto;padding:6px}
+.search-result-item{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-radius:var(--radius-sm);cursor:pointer;font-size:13.5px;color:var(--text-2);
+  transition:all var(--transition-fast);
+}
+.search-result-item:hover,.search-result-item.active{background:var(--accent-bg);color:var(--accent)}
+.search-result-item .sr-module{font-size:11px;color:var(--text-3);margin-left:auto}
+.search-empty{padding:24px;text-align:center;color:var(--text-3);font-size:14px}
+
+/* --- Responsive --- */
+@media(max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;transform:translateX(-100%);box-shadow:var(--shadow-lg)}
+  .sidebar.open{transform:translateX(0)}
+  .menu-btn{display:flex}
+  .main-body{padding:24px 18px 60px}
+  .playground-body{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  .playground-editor{border-right:none;border-bottom:1px solid var(--border)}
+  .welcome-stats{grid-template-columns:repeat(2,1fr)}
+  .lesson-nav{flex-direction:column}
+  .lesson-nav-btn{max-width:100%}
+}
+@media(max-width:500px){
+  .lesson-title{font-size:1.5rem}
+  .main-header{padding:0 16px}
+  .welcome-hero h1{font-size:1.8rem}
+}
+
+/* --- Utilities --- */
+.hidden{display:none!important}
+.text-center{text-align:center}
+.mt-2{margin-top:8px}.mt-4{margin-top:16px}.mt-6{margin-top:24px}
+.mb-2{margin-bottom:8px}.mb-4{margin-bottom:16px}
+.flex-center{display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon">CM</div>
+        <div>
+          <div class="sidebar-logo-text">CSS Mastery</div>
+          <div class="sidebar-logo-sub">Interactive Course</div>
+        </div>
+      </div>
+      <div class="sidebar-search" id="sidebarSearch" role="search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search topics..." id="sidebarSearchInput" aria-label="Search topics">
+        <span class="sidebar-search-kbd">/</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav" role="navigation" aria-label="Course navigation"></nav>
+    <div class="sidebar-progress">
+      <div class="sidebar-progress-label">Course Progress</div>
+      <div class="sidebar-progress-bar"><div class="sidebar-progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="sidebar-progress-text" id="progressText">0% complete</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="main-header">
+      <div style="display:flex;align-items:center;gap:12px;min-width:0">
+        <button class="header-btn menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
+        <div class="breadcrumb" id="breadcrumb"></div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle dark/light mode">◐</button>
+        <button class="header-btn" id="badgesBtn" aria-label="Achievements" title="Achievements">🏆</button>
+      </div>
+    </header>
+    <div class="main-body" id="mainBody">
+      <div class="content-wrapper" id="contentArea"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay" role="dialog" aria-label="Search lessons">
+  <div class="search-modal">
+    <div class="search-modal-input">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search lessons, topics, concepts..." id="searchInput" aria-label="Search">
+      <span style="font-size:12px;color:var(--text-3);cursor:pointer" id="searchClose">ESC</span>
+    </div>
+    <div class="search-modal-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- Badges Modal -->
+<div class="search-overlay" id="badgesOverlay" role="dialog" aria-label="Achievements">
+  <div class="search-modal" style="width:640px">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)">
+      <span style="font-size:15px;font-weight:700">Achievements</span>
+      <span style="font-size:20px;cursor:pointer;color:var(--text-3)" id="badgesClose">×</span>
+    </div>
+    <div style="padding:20px;max-height:400px;overflow-y:auto">
+      <div class="badges-grid" id="badgesGrid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   CSS MASTERY COURSE — Complete Application Logic
+   ================================================================ */
+
+// ============================================================
+// SECTION 1: COURSE DATA — All modules, lessons, and content
+// ============================================================
+const COURSE = {
+  modules: [
+    {
+      id:'foundations', title:'CSS Foundations', icon:'📐',
+      description:'Master the building blocks of CSS',
+      lessons:[
+        {id:'what-is-css',title:'What is CSS?',duration:'8 min'},
+        {id:'syntax-and-applying',title:'Syntax & How to Apply CSS',duration:'10 min'},
+        {id:'selectors',title:'Selectors Deep Dive',duration:'15 min'},
+        {id:'specificity-cascade',title:'Specificity & The Cascade',duration:'12 min'},
+        {id:'units-values',title:'Units & Values',duration:'10 min'},
+        {id:'colors-typography',title:'Colors & Typography',duration:'12 min'}
+      ]
+    },
+    {
+      id:'box-layout', title:'Box Model & Layout', icon:'📦',
+      description:'Understand how elements are sized and positioned',
+      lessons:[
+        {id:'box-model',title:'The Box Model',duration:'12 min'},
+        {id:'display-property',title:'Display Property',duration:'10 min'},
+        {id:'positioning',title:'Positioning',duration:'14 min'},
+        {id:'flexbox',title:'Flexbox',duration:'20 min'},
+        {id:'css-grid',title:'CSS Grid',duration:'22 min'}
+      ]
+    },
+    {
+      id:'responsive', title:'Responsive Design', icon:'📱',
+      description:'Build sites that work on every screen',
+      lessons:[
+        {id:'media-queries',title:'Media Queries',duration:'14 min'},
+        {id:'fluid-typography',title:'Fluid Typography & Sizing',duration:'10 min'},
+        {id:'container-queries',title:'Container Queries',duration:'12 min'},
+        {id:'responsive-patterns',title:'Modern Responsive Patterns',duration:'16 min'}
+      ]
+    },
+    {
+      id:'visual-styling', title:'Visual Styling', icon:'🎨',
+      description:'Make things beautiful with backgrounds, shadows, and effects',
+      lessons:[
+        {id:'backgrounds-gradients',title:'Backgrounds & Gradients',duration:'14 min'},
+        {id:'shadows-borders',title:'Shadows & Borders',duration:'10 min'},
+        {id:'filters-blend',title:'Filters & Blend Modes',duration:'12 min'},
+        {id:'masking-clipping',title:'Masking & Clipping',duration:'10 min'}
+      ]
+    },
+    {
+      id:'motion', title:'Motion & Animation', icon:'✨',
+      description:'Bring interfaces to life',
+      lessons:[
+        {id:'transitions',title:'Transitions',duration:'14 min'},
+        {id:'transforms',title:'Transforms',duration:'14 min'},
+        {id:'keyframes',title:'Keyframe Animations',duration:'16 min'},
+        {id:'animation-best',title:'Animation Best Practices',duration:'10 min'}
+      ]
+    },
+    {
+      id:'modern-css', title:'Modern CSS', icon:'🚀',
+      description:'Cutting-edge CSS features',
+      lessons:[
+        {id:'custom-properties',title:'Custom Properties',duration:'14 min'},
+        {id:'css-functions',title:'CSS Functions',duration:'12 min'},
+        {id:'css-nesting',title:'CSS Nesting',duration:'8 min'},
+        {id:'logical-properties',title:'Logical Properties',duration:'10 min'},
+        {id:'pseudo-elements',title:'Pseudo-elements & Pseudo-classes',duration:'16 min'}
+      ]
+    },
+    {
+      id:'architecture', title:'CSS Architecture', icon:'🏗️',
+      description:'Write scalable, maintainable CSS',
+      lessons:[
+        {id:'bem-methodology',title:'BEM Methodology',duration:'12 min'},
+        {id:'utility-first',title:'Utility-First Concepts',duration:'10 min'},
+        {id:'performance',title:'Performance & Optimization',duration:'12 min'},
+        {id:'scalable-systems',title:'Scalable CSS Systems',duration:'14 min'}
+      ]
+    },
+    {
+      id:'professional', title:'Professional Practice', icon:'💼',
+      description:'Industry-standard workflows and debugging',
+      lessons:[
+        {id:'debugging',title:'Debugging CSS',duration:'16 min'},
+        {id:'browser-compat',title:'Browser Compatibility',duration:'10 min'},
+        {id:'accessibility',title:'Accessibility & CSS',duration:'14 min'},
+        {id:'dark-mode',title:'Dark Mode Implementation',duration:'12 min'},
+        {id:'production',title:'Production Best Practices',duration:'10 min'}
+      ]
+    },
+    {
+      id:'projects', title:'Capstone Projects', icon:'🎯',
+      description:'Apply everything you have learned',
+      lessons:[
+        {id:'project-navbar',title:'Responsive Navbar',duration:'20 min'},
+        {id:'project-cards',title:'Card Component System',duration:'20 min'},
+        {id:'project-landing',title:'Responsive Landing Page',duration:'30 min'},
+        {id:'project-dashboard',title:'Dashboard UI',duration:'35 min'},
+        {id:'project-pricing',title:'Pricing Page',duration:'25 min'},
+        {id:'project-animation',title:'Animation Showcase',duration:'25 min'}
+      ]
+    }
+  ]
+};
+
+// ============================================================
+// SECTION 2: LESSON CONTENT DATABASE
+// ============================================================
+function getLessonContent(moduleId, lessonId) {
+  const L = {};
+  const modules = COURSE.modules;
+
+  // Helper to build content
+  function h(parts) { return parts; }
+
+  // ---- FOUNDATIONS ----
+
+  L['what-is-css'] = h({
+    title: 'What is CSS?',
+    subtitle: 'Understanding the language that styles the web',
+    sections: [
+      { type:'text', html:`<h2>What is CSS?</h2>
+<p><strong>CSS</strong> stands for <strong>Cascading Style Sheets</strong>. It is the language used to describe how HTML elements should be displayed on screen, on paper, or in other media.</p>
+<p>If HTML is the skeleton of a web page, CSS is the skin, clothing, and style. While HTML defines <em>what</em> content is on the page, CSS defines <em>how</em> it looks.</p>` },
+      { type:'info', variant:'tip', icon:'💡', text:'CSS does not change the content of your HTML — it only changes how that content is presented visually.' },
+      { type:'text', html:`<h3>The Role of CSS</h3>
+<p>CSS handles all visual aspects of a web page:</p>
+<ul>
+  <li><strong>Layout</strong> — where elements are positioned on the page</li>
+  <li><strong>Colors</strong> — text colors, background colors, gradients</li>
+  <li><strong>Typography</strong> — font families, sizes, weights, spacing</li>
+  <li><strong>Spacing</strong> — margins, padding, gaps between elements</li>
+  <li><strong>Visual effects</strong> — shadows, borders, animations, transparency</li>
+  <li><strong>Responsiveness</strong> — adapting the layout for different screen sizes</li>
+</ul>` },
+      { type:'text', html:`<h2>How Browsers Render CSS</h2>
+<p>Understanding the rendering pipeline helps you write better CSS:</p>
+<ol>
+  <li><strong>HTML Parsing</strong> — The browser reads the HTML and builds the DOM (Document Object Model)</li>
+  <li><strong>CSS Parsing</strong> — The browser reads all CSS (inline, embedded, linked) and builds the CSSOM (CSS Object Model)</li>
+  <li><strong>Render Tree</strong> — The DOM and CSSOM are combined into the Render Tree, which includes only visible elements with their computed styles</li>
+  <li><strong>Layout (Reflow)</strong> — The browser calculates the exact position and size of every element</li>
+  <li><strong>Paint</strong> — Pixels are drawn to the screen</li>
+  <li><strong>Composite</strong> — Layers are composited together for the final image</li>
+</ol>` },
+      { type:'code', lang:'html', title:'A simple HTML + CSS example', code:`<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    /* This is a CSS rule */
+    h1 {
+      color: #2563eb;
+      font-size: 2rem;
+      text-align: center;
+    }
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hello, CSS!</h1>
+  <p>This paragraph is styled by CSS.</p>
+</body>
+</html>` },
+      { type:'text', html:`<h3>Three Ways to Apply CSS</h3>
+<p>There are three methods to add CSS to an HTML document:</p>
+<table class="content-table">
+  <thead><tr><th>Method</th><th>Description</th><th>Best For</th></tr></thead>
+  <tbody>
+    <tr><td><code>Inline</code></td><td>Using the <code>style</code> attribute directly on elements</td><td>Quick tests only — avoid in production</td></tr>
+    <tr><td><code>Internal</code></td><td>Using a <code>&lt;style&gt;</code> tag in the <code>&lt;head&gt;</code></td><td>Single-page documents</td></tr>
+    <tr><td><code>External</code></td><td>Linking to a separate <code>.css</code> file</td><td><strong>All production websites</strong></td></tr>
+  </tbody>
+</table>` },
+      { type:'info', variant:'note', icon:'📝', text:'External stylesheets are the professional standard because they allow caching, separation of concerns, and reuse across multiple pages.' },
+      { type:'quiz', questions:[
+        {q:'What does CSS stand for?', options:['Computer Style Sheets','Cascading Style Sheets','Creative Style Sheets','Colorful Style Sheets'], correct:1, explain:'CSS stands for Cascading Style Sheets. The "cascading" refers to how styles are applied based on priority and inheritance.'},
+        {q:'Which part of the rendering pipeline calculates element positions?', options:['Paint','Parse','Layout (Reflow)','Composite'], correct:2, explain:'Layout (also called Reflow) is where the browser calculates the exact position and size of each element in the render tree.'},
+        {q:'Which method of applying CSS is recommended for production websites?', options:['Inline styles','Internal stylesheet','External stylesheet','Style attributes'], correct:2, explain:'External stylesheets are recommended because they enable caching, separation of concerns, and reuse.'}
+      ]},
+      { type:'exercise', id:'ex-what-css', title:'Try It: Your First CSS',
+        instructions:'Write CSS to make the heading red and the paragraph italic.',
+        html:'<div class="playground-target"><h1>Style Me</h1><p>I need to be italic.</p></div>',
+        initialCSS:'/* Write your CSS below */\nh1 {\n  \n}\np {\n  \n}',
+        solution:'h1 {\n  color: red;\n}\np {\n  font-style: italic;\n}',
+        validator: (css) => css.includes('color') && css.includes('font-style') }
+    ]
+  });
+
+  L['syntax-and-applying'] = h({
+    title:'Syntax & How to Apply CSS',
+    subtitle:'Understanding the building blocks of CSS rules',
+    sections:[
+      {type:'text',html:`<h2>CSS Rule Structure</h2>
+<p>A CSS rule consists of a <strong>selector</strong> and a <strong>declaration block</strong>:</p>` },
+      {type:'code',lang:'css',title:'Rule Anatomy',code:`selector {
+  property: value;
+  property: value;
+}
+
+/* Example */
+h1 {
+  color: #1e40af;
+  font-size: 2rem;
+  margin-bottom: 16px;
+}`},
+      {type:'text',html:`<h3>Key Terminology</h3>
+<ul>
+  <li><strong>Selector</strong> — which HTML elements to target (e.g., <code>h1</code>, <code>.class-name</code>, <code>#id</code>)</li>
+  <li><strong>Declaration Block</strong> — the curly braces <code>{ }</code> containing all the style declarations</li>
+  <li><strong>Declaration</strong> — a single property-value pair (e.g., <code>color: blue</code>)</li>
+  <li><strong>Property</strong> — the CSS feature being set (e.g., <code>color</code>, <code>font-size</code>)</li>
+  <li><strong>Value</strong> — the assigned value for the property</li>
+</ul>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Every declaration must end with a semicolon (;). Forgetting semicolons is the #1 source of CSS bugs for beginners.'},
+      {type:'text',html:`<h3>CSS Comments</h3>
+<p>Use <code>/* */</code> for comments. Comments are ignored by the browser.</p>`},
+      {type:'code',lang:'css',title:'Comments',code:`/* This is a single-line comment */
+
+/*
+  This is a
+  multi-line comment
+*/
+
+h1 {
+  color: blue; /* Inline comment */
+}`},
+      {type:'text',html:`<h3>Shorthand Properties</h3>
+<p>Many CSS properties have shorthand versions that combine multiple values:</p>
+<table class="content-table">
+  <thead><tr><th>Longhand</th><th>Shorthand</th></tr></thead>
+  <tbody>
+    <tr><td><code>margin-top: 10px; margin-right: 20px; margin-bottom: 10px; margin-left: 20px;</code></td><td><code>margin: 10px 20px;</code></td></tr>
+    <tr><td><code>font-style: italic; font-weight: bold; font-size: 16px; font-family: Arial;</code></td><td><code>font: italic bold 16px Arial;</code></td></tr>
+    <tr><td><code>background-color: #fff; background-image: url(img.png); background-repeat: no-repeat;</code></td><td><code>background: #fff url(img.png) no-repeat;</code></td></tr>
+    <tr><td><code>border-width: 1px; border-style: solid; border-color: #ccc;</code></td><td><code>border: 1px solid #ccc;</code></td></tr>
+  </tbody>
+</table>`},
+      {type:'text',html:`<h3>CSS is Case-Insensitive (Mostly)</h3>
+<p>CSS property names and most values are case-insensitive. However, things inside quotes — like font names, URLs, and class/ID names in selectors — <strong>are</strong> case-sensitive.</p>`},
+      {type:'quiz',questions:[
+        {q:'What symbol ends each CSS declaration?', options:['Period (.)','Comma (,)','Semicolon (;)','Colon (:)'], correct:2, explain:'Each CSS declaration must end with a semicolon (;). The colon separates the property from its value.'},
+        {q:'Which is the correct shorthand for margin-top: 10px; margin-right: 20px; margin-bottom: 10px; margin-left: 20px;?', options:['margin: 10px 20px 10px;','margin: 10px 20px;','margin: 20px 10px;','margin: 10px 20px 20px 10px;'], correct:1, explain:'When top/bottom are the same and left/right are the same, you can use 2 values: margin: 10px 20px;'}
+      ]},
+      {type:'exercise',id:'ex-syntax',title:'Practice: Write CSS Rules',
+        instructions:'Write a rule that gives the .box element a blue background, white text, and 20px padding.',
+        html:'<div class="box" style="padding:0;border:1px dashed #999">I am a box</div>',
+        initialCSS:'.box {\n  /* Set background to blue */\n  \n  /* Set text to white */\n  \n  /* Set padding to 20px */\n  \n}',
+        solution:'.box {\n  background: blue;\n  color: white;\n  padding: 20px;\n}',
+        validator: css => css.includes('background') && css.includes('color') && css.includes('padding')}
+    ]
+  });
+
+  L['selectors'] = h({
+    title:'Selectors Deep Dive',
+    subtitle:'Precisely target any element on the page',
+    sections:[
+      {type:'text',html:`<h2>CSS Selectors</h2>
+<p>Selectors are patterns used to target the HTML elements you want to style. Mastering selectors is fundamental to writing efficient CSS.</p>
+<h3>Basic Selectors</h3>
+<table class="content-table">
+  <thead><tr><th>Selector</th><th>Example</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>Universal</code></td><td><code>*</code></td><td>Selects all elements</td></tr>
+    <tr><td><code>Type</code></td><td><code>p</code></td><td>Selects all &lt;p&gt; elements</td></tr>
+    <tr><td><code>Class</code></td><td><code>.highlight</code></td><td>Selects elements with class="highlight"</td></tr>
+    <tr><td><code>ID</code></td><td><code>#header</code></td><td>Selects the element with id="header"</td></tr>
+    <tr><td><code>Attribute</code></td><td><code>[type="email"]</code></td><td>Selects elements with matching attributes</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Basic Selectors in Action',code:`/* Universal selector */
+* {
+  box-sizing: border-box;
+}
+
+/* Type selector */
+h1 {
+  font-size: 2rem;
+}
+
+/* Class selector */
+.card {
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* ID selector */
+#main-nav {
+  position: sticky;
+  top: 0;
+}
+
+/* Attribute selector */
+input[type="email"] {
+  border: 2px solid blue;
+}`},
+      {type:'text',html:`<h3>Combinator Selectors</h3>
+<p>Combinators define the relationship between selectors:</p>
+<table class="content-table">
+  <thead><tr><th>Combinator</th><th>Example</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>Descendant (space)</code></td><td><code>div p</code></td><td>All &lt;p&gt; inside &lt;div&gt; (any depth)</td></tr>
+    <tr><td><code>Child (&gt;)</code></td><td><code>div > p</code></td><td>&lt;p&gt; directly inside &lt;div&gt;</td></tr>
+    <tr><td><code>Adjacent sibling (+)</code></td><td><code>h2 + p</code></td><td>&lt;p&gt; immediately after &lt;h2&gt;</td></tr>
+    <tr><td><code>General sibling (~)</code></td><td><code>h2 ~ p</code></td><td>All &lt;p&gt; after &lt;h2&gt; (same parent)</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Combinator Selectors',code:`/* Descendant: any .card inside .grid, any depth */
+.grid .card {
+  margin-bottom: 16px;
+}
+
+/* Child: only direct children */
+.nav > li {
+  display: inline-block;
+}
+
+/* Adjacent sibling: first paragraph after h2 */
+h2 + p {
+  font-size: 1.1rem;
+  margin-top: 0;
+}
+
+/* General sibling: all paragraphs after h2 */
+h2 ~ p {
+  color: #555;
+}`},
+      {type:'text',html:`<h3>Grouping Selectors</h3>
+<p>Apply the same styles to multiple selectors using commas:</p>`},
+      {type:'code',lang:'css',title:'Grouping',code:`h1, h2, h3 {
+  font-family: Georgia, serif;
+  color: #1a1a2e;
+  line-height: 1.2;
+}`},
+      {type:'text',html:`<h3>Attribute Selectors</h3>
+<p>Attribute selectors are very powerful for targeting elements based on their HTML attributes:</p>
+<table class="content-table">
+  <thead><tr><th>Selector</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>[attr]</code></td><td>Has the attribute (any value)</td></tr>
+    <tr><td><code>[attr="val"]</code></td><td>Attribute equals "val" exactly</td></tr>
+    <tr><td><code>[attr~="val"]</code></td><td>Attribute contains "val" as a whole word</td></tr>
+    <tr><td><code>[attr^="val"]</code></td><td>Attribute starts with "val"</td></tr>
+    <tr><td><code>[attr$="val"]</code></td><td>Attribute ends with "val"</td></tr>
+    <tr><td><code>[attr*="val"]</code></td><td>Attribute contains "val" anywhere</td></tr>
+  </tbody>
+</table>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Prefer class selectors over ID selectors for styling. IDs have very high specificity and cannot be reused on a page.'},
+      {type:'quiz',questions:[
+        {q:'Which selector targets all <p> elements that are direct children of a <div>?', options:['div p','div > p','div + p','div ~ p'], correct:1, explain:'The child combinator (>) selects only direct children. A space (descendant) would select all nested <p> elements at any depth.'},
+        {q:'Which attribute selector matches a link whose href starts with "https"?', options:['[href="https"]','[href^="https"]','[href$="https"]','[href*="https"]'], correct:1, explain:'The ^= operator means "starts with". So [href^="https"] matches any href value that begins with "https".'},
+        {q:'What is the specificity order from lowest to highest?', options:['ID > Class > Type','Type > Class > ID','Type < Class < ID','Class < ID < Type'], correct:2, explain:'Specificity from lowest to highest: Type (element) selectors < Class selectors < ID selectors. Inline styles override all of these.'}
+      ]},
+      {type:'exercise',id:'ex-selectors',title:'Challenge: Target Elements Precisely',
+        instructions:'Write selectors to: 1) Make the list items inside .grocery-list green. 2) Make the first item after h3 bold. 3) Style the link with class "active" with an underline.',
+        html:'<div><h3>Grocery List</h3><ul class="grocery-list"><li class="active">Milk</li><li>Eggs</li><li>Bread</li></ul><p>More info: <a href="#" class="active">Details</a></p></div>',
+        initialCSS:'/* 1. Style grocery list items green */\n\n\n/* 2. Make first item after h3 bold */\n\n\n/* 3. Underline the .active link */\n\n',
+        solution:'.grocery-list li {\n  color: green;\n}\nh3 + .grocery-list li:first-child {\n  font-weight: bold;\na.active {\n  text-decoration: underline;\n}',
+        validator: css => css.includes('.grocery-list') && css.includes('a.active')}
+    ]
+  });
+
+  L['specificity-cascade'] = h({
+    title:'Specificity & The Cascade',
+    subtitle:'Understanding how browsers decide which styles win',
+    sections:[
+      {type:'text',html:`<h2>The Cascade</h2>
+<p>The word "cascading" in CSS refers to the algorithm the browser uses to resolve conflicts when multiple rules target the same element. The cascade considers:</p>
+<ol>
+  <li><strong>Origin & Importance</strong> — Author styles beat browser defaults. <code>!important</code> overrides everything.</li>
+  <li><strong>Specificity</strong> — More specific selectors win over less specific ones.</li>
+  <li><strong>Source Order</strong> — When specificity is equal, the last rule wins.</li>
+</ol>`},
+      {type:'text',html:`<h3>Specificity Calculation</h3>
+<p>Specificity is calculated as a three-part value: <strong>(ID, Class, Type)</strong></p>
+<table class="content-table">
+  <thead><tr><th>Selector</th><th>IDs</th><th>Classes</th><th>Types</th><th>Specificity</th></tr></thead>
+  <tbody>
+    <tr><td><code>p</code></td><td>0</td><td>0</td><td>1</td><td>0-0-1</td></tr>
+    <tr><td><code>.card</code></td><td>0</td><td>1</td><td>0</td><td>0-1-0</td></tr>
+    <tr><td><code>.card .title</code></td><td>0</td><td>2</td><td>0</td><td>0-2-0</td></tr>
+    <tr><td><code>#header</code></td><td>1</td><td>0</td><td>0</td><td>1-0-0</td></tr>
+    <tr><td><code>#nav .link</code></td><td>1</td><td>1</td><td>0</td><td>1-1-0</td></tr>
+    <tr><td><code>div#nav .link</code></td><td>1</td><td>1</td><td>1</td><td>1-1-1</td></tr>
+  </tbody>
+</table>`},
+      {type:'info',variant:'warning',icon:'⚠️',text:'The universal selector (*) and combinators (+, >, ~, " ") have zero specificity. Pseudo-classes (:hover, :nth-child) count as classes. Pseudo-elements (::before, ::after) count as type selectors.'},
+      {type:'text',html:`<h3>The !important Declaration</h3>
+<p><code>!important</code> overrides all other declarations for that property. Use it as a last resort:</p>`},
+      {type:'code',lang:'css',title:'!important',code:`p {
+  color: blue !important; /* This wins over everything */
+}
+#content p {
+  color: red; /* Loses because of !important above */
+}`},
+      {type:'info',variant:'danger',icon:'🚫',text:'Avoid !important in production code. It makes debugging extremely difficult. Instead, increase specificity or restructure your selectors.'},
+      {type:'text',html:`<h3>Inheritance</h3>
+<p>Some CSS properties are inherited from parent to child elements automatically:</p>
+<ul>
+  <li><strong>Inherited:</strong> <code>color</code>, <code>font-family</code>, <code>font-size</code>, <code>line-height</code>, <code>text-align</code>, <code>visibility</code>, <code>cursor</code></li>
+  <li><strong>Not inherited:</strong> <code>margin</code>, <code>padding</code>, <code>border</code>, <code>background</code>, <code>width</code>, <code>height</code>, <code>display</code></li>
+</ul>
+<p>You can control inheritance with these keywords:</p>
+<table class="content-table">
+  <thead><tr><th>Keyword</th><th>Effect</th></tr></thead>
+  <tbody>
+    <tr><td><code>inherit</code></td><td>Force the value to be inherited from the parent</td></tr>
+    <tr><td><code>initial</code></td><td>Reset to the CSS specification default</td></tr>
+    <tr><td><code>unset</code></td><td>Natural behavior: inherited properties inherit, others get initial</td></tr>
+    <tr><td><code>revert</code></td><td>Revert to the previous stylesheet origin's value</td></tr>
+  </tbody>
+</table>`},
+      {type:'quiz',questions:[
+        {q:'What is the specificity of #header .nav a?', options:['0-1-1','1-1-1','1-2-0','0-0-3'], correct:1, explain:'#header (1 ID) + .nav (1 class) + a (1 type) = 1-1-1'},
+        {q:'Which wins when two rules have the same specificity?', options:['The first rule','The rule with shorter selector','The last rule in source order','Neither — it is a conflict'], correct:2, explain:'When specificity is equal, source order determines the winner. The last declaration in the CSS wins.'},
+        {q:'Which of these properties is inherited by default?', options:['margin','padding','color','border'], correct:2, explain:'Color is an inherited property. Typography-related properties (color, font-family, font-size, line-height) are inherited. Box model properties (margin, padding, border) are not.'}
+      ]},
+      {type:'exercise',id:'ex-specificity',title:'Fix the Cascade Conflict',
+        instructions:'The paragraph should be blue. Fix the CSS to make it blue without removing any existing rules.',
+        html:'<div id="content"><p class="text">I should be blue!</p></div>',
+        initialCSS:'#content p {\n  color: red;\n}\n\n.text {\n  /* This needs to win! How? */\n  color: blue;\n}',
+        solution:'#content p {\n  color: red;\n}\n\n#content .text {\n  color: blue;\n}',
+        validator: css => css.includes('#content .text') || css.includes('!important')}
+    ]
+  });
+
+  L['units-values'] = h({
+    title:'Units & Values', subtitle:'Understanding absolute, relative, and functional values',
+    sections:[
+      {type:'text',html:`<h2>CSS Units</h2>
+<p>CSS uses various units for measurements. Understanding when to use each type is essential.</p>
+<h3>Absolute Units</h3>
+<p>Absolute units are fixed and do not scale. They are mainly used for print.</p>
+<table class="content-table">
+  <thead><tr><th>Unit</th><th>Name</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>px</code></td><td>Pixels</td><td>Most common absolute unit (1px = 1/96th of 1 inch)</td></tr>
+    <tr><td><code>pt</code></td><td>Points</td><td>1pt = 1/72nd of an inch (print)</td></tr>
+    <tr><td><code>cm</code>, <code>mm</code>, <code>in</code></td><td>Centimeters, etc.</td><td>Physical measurements (rarely used)</td></tr>
+  </tbody>
+</table>
+<h3>Relative Units</h3>
+<p>Relative units scale based on something else — parent size, root font size, or viewport.</p>
+<table class="content-table">
+  <thead><tr><th>Unit</th><th>Relative To</th><th>Best Use</th></tr></thead>
+  <tbody>
+    <tr><td><code>em</code></td><td>Parent element's font-size</td><td>Component-level sizing</td></tr>
+    <tr><td><code>rem</code></td><td>Root element's (html) font-size</td><td><strong>Global sizing (recommended)</strong></td></tr>
+    <tr><td><code>%</code></td><td>Parent element's size</td><td>Fluid widths</td></tr>
+    <tr><td><code>vw</code></td><td>1% of viewport width</td><td>Full-width elements</td></tr>
+    <tr><td><code>vh</code></td><td>1% of viewport height</td><td>Full-screen sections</td></tr>
+    <tr><td><code>vmin</code>/<code>vmax</code></td><td>Smaller/larger of vw, vh</td><td>Responsive type</td></tr>
+    <tr><td><code>ch</code></td><td>Width of the "0" character</td><td>Limiting line width</td></tr>
+    <tr><td><code>fr</code></td><td>Fraction of available space (Grid)</td><td>CSS Grid tracks</td></tr>
+  </tbody>
+</table>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Use rem for font sizes and spacing. This creates a consistent, scalable design system. Use em when you want sizes to scale relative to a component\'s context.'},
+      {type:'code',lang:'css',title:'Using rem vs em',code:`html {
+  font-size: 16px; /* This makes 1rem = 16px */
+}
+
+h1 {
+  font-size: 2rem;    /* 32px */
+  margin-bottom: 1em; /* 32px — relative to h1's font-size */
+}
+
+.card {
+  padding: 1.5rem;     /* 24px */
+  font-size: 0.875rem; /* 14px */
+}`},
+      {type:'text',html:`<h3>Viewport Units</h3>
+<p>Viewport units are relative to the browser window size:</p>
+<ul>
+  <li><code>100vw</code> = full viewport width</li>
+  <li><code>100vh</code> = full viewport height</li>
+  <li><code>100dvh</code> = dynamic viewport height (accounts for mobile browser chrome)</li>
+</ul>`},
+      {type:'quiz',questions:[
+        {q:'What does 1rem equal by default?', options:['10px','12px','16px','20px'], correct:2, explain:'By default, browsers set the root font-size to 16px. So 1rem = 16px unless you change the html font-size.'},
+        {q:'Which unit should you prefer for font sizes in a scalable design system?', options:['px','em','%','rem'], correct:3, explain:'rem is recommended because it is based on the root font-size, creating a consistent scale that is easy to adjust globally.'}
+      ]},
+      {type:'exercise',id:'ex-units',title:'Practice: Using Units',
+        instructions:'Set the heading to 2rem, the paragraph to 1rem, and the container width to 80% of its parent.',
+        html:'<div style="width:400px;border:2px solid #ccc;padding:10px"><div class="container"><h2>Scaled Heading</h2><p>This paragraph uses rem units for consistent sizing.</p></div></div>',
+        initialCSS:'h2 {\n  font-size: /* 2rem */;\n}\np {\n  font-size: /* 1rem */;\n}\n.container {\n  width: /* 80% */;\n}',
+        solution:'h2 {\n  font-size: 2rem;\n}\np {\n  font-size: 1rem;\n}\n.container {\n  width: 80%;\n}',
+        validator: css => css.includes('2rem') && css.includes('1rem') && css.includes('80%')}
+    ]
+  });
+
+  L['colors-typography'] = h({
+    title:'Colors & Typography', subtitle:'Mastering color systems and text styling',
+    sections:[
+      {type:'text',html:`<h2>CSS Colors</h2>
+<p>CSS supports multiple color formats:</p>
+<table class="content-table">
+  <thead><tr><th>Format</th><th>Example</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>Named</code></td><td><code>color: tomato</code></td><td>140+ named colors</td></tr>
+    <tr><td><code>Hex</code></td><td><code>#ff6347</code></td><td>RGB in hexadecimal (with optional alpha: #ff634780)</td></tr>
+    <tr><td><code>RGB</code></td><td><code>rgb(255, 99, 71)</code></td><td>Red, Green, Blue (0-255)</td></tr>
+    <tr><td><code>RGBA</code></td><td><code>rgba(255, 99, 71, 0.5)</code></td><td>RGB with alpha transparency</td></tr>
+    <tr><td><code>HSL</code></td><td><code>hsl(9, 100%, 64%)</code></td><td>Hue, Saturation, Lightness</td></tr>
+    <tr><td><code>HSLA</code></td><td><code>hsla(9, 100%, 64%, 0.5)</code></td><td>HSL with alpha</td></tr>
+    <tr><td><code>oklch</code></td><td><code>oklch(0.7 0.15 30)</code></td><td>Modern perceptually uniform color space</td></tr>
+  </tbody>
+</table>`},
+      {type:'text',html:`<h3>HSL — The Best Format for Design Systems</h3>
+<p>HSL (Hue, Saturation, Lightness) is the most intuitive color format for creating design systems:</p>
+<ul>
+  <li><strong>Hue:</strong> 0-360 degrees on the color wheel (0=red, 120=green, 240=blue)</li>
+  <li><strong>Saturation:</strong> 0% (gray) to 100% (vivid color)</li>
+  <li><strong>Lightness:</strong> 0% (black) to 100% (white)</li>
+</ul>`},
+      {type:'code',lang:'css',title:'Building a color palette with HSL',code:`:root {
+  --primary-h: 220;
+  --primary-50:  hsl(var(--primary-h) 100% 97%);
+  --primary-100: hsl(var(--primary-h) 95% 90%);
+  --primary-200: hsl(var(--primary-h) 90% 80%);
+  --primary-300: hsl(var(--primary-h) 80% 70%);
+  --primary-400: hsl(var(--primary-h) 70% 60%);
+  --primary-500: hsl(var(--primary-h) 60% 50%);
+  --primary-600: hsl(var(--primary-h) 55% 40%);
+  --primary-700: hsl(var(--primary-h) 50% 30%);
+  --primary-800: hsl(var(--primary-h) 45% 20%);
+  --primary-900: hsl(var(--primary-h) 40% 10%);
+}`},
+      {type:'text',html:`<h2>Typography</h2>
+<h3>Font Properties</h3>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Values</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td><code>font-family</code></td><td>Font names (comma-separated fallbacks)</td><td><code>font-family: Georgia, serif;</code></td></tr>
+    <tr><td><code>font-size</code></td><td>Units (rem preferred)</td><td><code>font-size: 1.25rem;</code></td></tr>
+    <tr><td><code>font-weight</code></td><td>100-900 or keywords</td><td><code>font-weight: 700;</code></td></tr>
+    <tr><td><code>font-style</code></td><td>normal, italic, oblique</td><td><code>font-style: italic;</code></td></tr>
+    <tr><td><code>line-height</code></td><td>Unitless (preferred), px, em, %</td><td><code>line-height: 1.6;</code></td></tr>
+    <tr><td><code>letter-spacing</code></td><td>Length value</td><td><code>letter-spacing: 0.02em;</code></td></tr>
+    <tr><td><code>text-align</code></td><td>left, center, right, justify</td><td><code>text-align: center;</code></td></tr>
+    <tr><td><code>text-transform</code></td><td>uppercase, lowercase, capitalize</td><td><code>text-transform: uppercase;</code></td></tr>
+    <tr><td><code>text-decoration</code></td><td>underline, line-through, etc.</td><td><code>text-decoration: none;</code></td></tr>
+  </tbody>
+</table>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Always use unitless values for line-height (e.g., 1.6 instead of 1.6em). Unitless values cascade correctly because they are recalculated for each element based on its own font-size.'},
+      {type:'text',html:`<h3>Font Stacks</h3>
+<p>Always provide fallback fonts in case the primary font is unavailable:</p>`},
+      {type:'code',lang:'css',title:'Font Stacks',code:`body {
+  /* System font stack for fast loading */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+               Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+h1, h2, h3 {
+  /* Serif stack for headings */
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+code, pre {
+  /* Monospace for code */
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+}`},
+      {type:'quiz',questions:[
+        {q:'What does the 50 in HSL(220, 80%, 50%) represent?', options:['Hue','Saturation','Lightness','Alpha'], correct:2, explain:'In HSL, the three values are: Hue (0-360), Saturation (0-100%), Lightness (0-100%). The third value is Lightness.'},
+        {q:'Why should you use unitless line-height?', options:['It is shorter to type','It recalculates correctly for each element based on its font-size','Browsers require it','It is more precise'], correct:1, explain:'Unitless line-height is multiplied by the element\'s own font-size when inherited, preventing unexpected spacing issues.'}
+      ]}
+    ]
+  });
+
+  // ---- BOX MODEL & LAYOUT ----
+
+  L['box-model'] = h({
+    title:'The Box Model', subtitle:'Understanding how every element is a rectangular box',
+    sections:[
+      {type:'text',html:`<h2>The CSS Box Model</h2>
+<p>Every element in CSS is a rectangular box. The box model describes how these boxes are sized and spaced:</p>
+<ul>
+  <li><strong>Content</strong> — The actual content (text, image, etc.)</li>
+  <li><strong>Padding</strong> — Space between the content and the border</li>
+  <li><strong>Border</strong> — A line around the padding</li>
+  <li><strong>Margin</strong> — Space outside the border (between this element and others)</li>
+</ul>`},
+      {type:'code',lang:'css',title:'Box Model Properties',code:`.box {
+  /* Content size */
+  width: 300px;
+  height: 200px;
+
+  /* Padding (inside the border) */
+  padding: 20px;
+  /* Individual sides: padding-top, padding-right, etc. */
+
+  /* Border */
+  border: 2px solid #333;
+
+  /* Margin (outside the border) */
+  margin: 16px;
+  /* Individual sides: margin-top, margin-right, etc. */
+}`},
+      {type:'text',html:`<h3>box-sizing — The Most Important CSS Reset</h3>
+<p>By default (<code>box-sizing: content-box</code>), <code>width</code> and <code>height</code> set the content area size. Padding and border are <strong>added on top</strong>, making the element larger than you specified.</p>
+<p><code>box-sizing: border-box</code> includes padding and border in the width/height calculation. This is far more intuitive.</p>`},
+      {type:'code',lang:'css',title:'Universal border-box',code:`/* This is the #1 CSS reset everyone should use */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* content-box (default): width + padding + border = total width */
+/* A 300px box with 20px padding = 340px total */
+.badge-box { box-sizing: content-box; width: 300px; padding: 20px; }
+
+/* border-box: width = total width (padding included) */
+/* A 300px box with 20px padding = 300px total */
+.good-box { box-sizing: border-box; width: 300px; padding: 20px; }`},
+      {type:'info',variant:'tip',icon:'💡',text:'Always use box-sizing: border-box on all elements. It prevents countless layout bugs and makes sizing predictable.'},
+      {type:'text',html:`<h3>Margin Collapsing</h3>
+<p>When two vertical margins meet, they <strong>collapse</strong> — only the larger margin is used. This happens with:</p>
+<ul>
+  <li>Adjacent siblings</li>
+  <li>Parent and first/last child</li>
+  <li>Empty blocks</li>
+</ul>`},
+      {type:'code',lang:'css',title:'Margin collapsing example',code:`.box-a { margin-bottom: 30px; }
+.box-b { margin-top: 20px; }
+/* Gap between them = 30px (not 50px) */
+/* The larger margin wins */`},
+      {type:'text',html:`<h3>Preventing Margin Collapse</h3>
+<p>Margin collapse does not happen with:</p>
+<ul>
+  <li><code>display: flex</code> or <code>display: grid</code> containers</li>
+  <li><code>overflow: auto</code> or <code>overflow: hidden</code> on the parent</li>
+  <li><code>padding</code> or <code>border</code> on the parent</li>
+</ul>`},
+      {type:'quiz',questions:[
+        {q:'With box-sizing: border-box, what does width: 200px; padding: 20px; produce?', options:['Content area of 200px, total of 240px','Content area of 160px, total of 200px','Content area of 200px, total of 200px','Content area of 220px, total of 240px'], correct:1, explain:'With border-box, the total width is 200px. Padding (20px × 2 = 40px) is subtracted from content, leaving 160px for content.'},
+        {q:'What is margin collapsing?', options:['Margins always add together','The smaller margin disappears and the larger one is used','Margins create a new stacking context','Margins convert to padding'], correct:1, explain:'When two vertical margins meet, they collapse — only the larger value is used, not the sum of both.'}
+      ]},
+      {type:'exercise',id:'ex-box-model',title:'Practice: Box Model',
+        instructions:'Create a box with: width 300px, 20px padding, 2px solid border, 16px margin. Use border-box sizing.',
+        html:'<div class="demo-box">I am a box</div>',
+        initialCSS:'*, *::before, *::after {\n  box-sizing: border-box;\n}\n\n.demo-box {\n  /* Your styles here */\n  background: #dbeafe;\n}',
+        solution:'*, *::before, *::after {\n  box-sizing: border-box;\n}\n\n.demo-box {\n  width: 300px;\n  padding: 20px;\n  border: 2px solid #2563eb;\n  margin: 16px;\n  background: #dbeafe;\n}',
+        validator: css => css.includes('width: 300px') && css.includes('padding') && css.includes('border')}
+    ]
+  });
+
+  L['display-property'] = h({
+    title:'Display Property', subtitle:'Controlling how elements participate in layout',
+    sections:[
+      {type:'text',html:`<h2>The Display Property</h2>
+<p>The <code>display</code> property is the most important CSS property for layout. It controls how an element generates boxes and participates in the layout flow.</p>
+<h3>Core Display Values</h3>
+<table class="content-table">
+  <thead><tr><th>Value</th><th>Behavior</th><th>Examples</th></tr></thead>
+  <tbody>
+    <tr><td><code>block</code></td><td>Full-width line break before and after</td><td>div, p, h1-h6, section</td></tr>
+    <tr><td><code>inline</code></td><td>Flows within text, no width/height control</td><td>span, a, em, strong</td></tr>
+    <tr><td><code>inline-block</code></td><td>Flows inline but accepts width/height</td><td>Buttons, badges</td></tr>
+    <tr><td><code>flex</code></td><td>Flex container — children laid out with flexbox</td><td>Nav bars, card layouts</td></tr>
+    <tr><td><code>grid</code></td><td>Grid container — children laid out on a grid</td><td>Page layouts, galleries</td></tr>
+    <tr><td><code>none</code></td><td>Removed from layout entirely (not rendered)</td><td>Hidden elements</td></tr>
+    <tr><td><code>contents</code></td><td>Element is invisible; children become direct children of parent</td><td>Wrapper removal</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Display examples',code:`/* Block: takes full width */
+h1 {
+  display: block;
+  width: 100%;
+}
+
+/* Inline: flows with text */
+.highlight {
+  display: inline;
+  background: yellow;
+}
+
+/* Inline-block: inline flow + block sizing */
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  width: 80px;
+  height: 24px;
+}
+
+/* Hidden completely */
+.hidden-message {
+  display: none;
+}`},
+      {type:'info',variant:'note',icon:'📝',text:'<code>display: none</code> removes the element from the document flow. <code>visibility: hidden</code> hides it but keeps its space. This is a critical distinction.'},
+      {type:'quiz',questions:[
+        {q:'What is the key difference between inline and inline-block?', options:['Inline-block supports width and height, inline does not','Inline-block breaks to a new line','Inline elements cannot have background colors','There is no difference'], correct:0, explain:'Inline elements ignore width and height properties. Inline-block elements respect them while still flowing inline with text.'}
+      ]}
+    ]
+  });
+
+  L['positioning'] = h({
+    title:'Positioning', subtitle:'Taking elements out of normal flow',
+    sections:[
+      {type:'text',html:`<h2>CSS Positioning</h2>
+<p>The <code>position</code> property determines how an element is placed in the document.</p>
+<table class="content-table">
+  <thead><tr><th>Value</th><th>Behavior</th><th>Offset Properties</th></tr></thead>
+  <tbody>
+    <tr><td><code>static</code></td><td>Normal flow (default)</td><td>top/right/bottom/left ignored</td></tr>
+    <tr><td><code>relative</code></td><td>Offset from normal position; original space preserved</td><td>Offsets from original position</td></tr>
+    <tr><td><code>absolute</code></td><td>Removed from flow; positioned relative to nearest positioned ancestor</td><td>Offsets from positioned ancestor</td></tr>
+    <tr><td><code>fixed</code></td><td>Removed from flow; positioned relative to viewport</td><td>Offsets from viewport</td></tr>
+    <tr><td><code>sticky</code></td><td>Scrolls normally, then "sticks" at offset position</td><td>Offsets from scroll container</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Common positioning patterns',code:`/* Absolute centering */
+.parent {
+  position: relative;
+}
+.centered-child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Sticky header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Fixed footer */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}`},
+      {type:'text',html:`<h3>z-index and Stacking Contexts</h3>
+<p><code>z-index</code> controls the stacking order of positioned elements. It only works on elements with a <code>position</code> other than <code>static</code>.</p>
+<p>A <strong>stacking context</strong> is created by elements with:</p>
+<ul>
+  <li><code>position</code> + <code>z-index</code> value</li>
+  <li><code>opacity</code> less than 1</li>
+  <li><code>transform</code>, <code>filter</code>, or <code>will-change</code></li>
+</ul>`},
+      {type:'info',variant:'warning',icon:'⚠️',text:'z-index only competes with siblings in the same stacking context. A z-index: 9999 element inside a parent with z-index: 1 can never appear above an element with z-index: 2 in a different parent context.'},
+      {type:'exercise',id:'ex-positioning',title:'Challenge: Center with Position',
+        instructions:'Center the .badge element inside the .card using absolute positioning and transform.',
+        html:'<div class="card" style="position:relative;width:200px;height:150px;background:#e0e7ff;border-radius:8px"><div class="badge">NEW</div></div>',
+        initialCSS:'.card {\n  position: relative;\n  width: 200px;\n  height: 150px;\n  background: #e0e7ff;\n  border-radius: 8px;\n}\n\n.badge {\n  background: #2563eb;\n  color: white;\n  padding: 4px 12px;\n  border-radius: 4px;\n  /* Center this */\n}',
+        solution:'.badge {\n  background: #2563eb;\n  color: white;\n  padding: 4px 12px;\n  border-radius: 4px;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n}',
+        validator: css => css.includes('position: absolute') && css.includes('transform')}
+    ]
+  });
+
+  L['flexbox'] = h({
+    title:'Flexbox', subtitle:'The one-dimensional layout system',
+    sections:[
+      {type:'text',html:`<h2>Flexbox Layout</h2>
+<p>Flexbox is designed for one-dimensional layouts — either a row or a column. It excels at distributing space and aligning items.</p>
+<h3>Setting Up Flexbox</h3>
+<p>Apply <code>display: flex</code> to the <strong>parent container</strong>. All direct children become <strong>flex items</strong>.</p>`},
+      {type:'text',html:`<h3>Container Properties (Parent)</h3>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Values</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>flex-direction</code></td><td>row, column, row-reverse, column-reverse</td><td>Main axis direction</td></tr>
+    <tr><td><code>flex-wrap</code></td><td>nowrap, wrap, wrap-reverse</td><td>Whether items wrap to new lines</td></tr>
+    <tr><td><code>justify-content</code></td><td>flex-start, center, flex-end, space-between, space-around, space-evenly</td><td>Alignment along main axis</td></tr>
+    <tr><td><code>align-items</code></td><td>stretch, flex-start, center, flex-end, baseline</td><td>Alignment along cross axis</td></tr>
+    <tr><td><code>gap</code></td><td>Length value</td><td>Space between items</td></tr>
+  </tbody>
+</table>`},
+      {type:'text',html:`<h3>Item Properties (Children)</h3>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Values</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>flex-grow</code></td><td>Number (default 0)</td><td>How much the item grows to fill space</td></tr>
+    <tr><td><code>flex-shrink</code></td><td>Number (default 1)</td><td>How much the item shrinks</td></tr>
+    <tr><td><code>flex-basis</code></td><td>Length or auto</td><td>Default size before growing/shrinking</td></tr>
+    <tr><td><code>flex</code></td><td>grow shrink basis</td><td>Shorthand</td></tr>
+    <tr><td><code>align-self</code></td><td>Same as align-items</td><td>Override alignment for this item</td></tr>
+    <tr><td><code>order</code></td><td>Integer</td><td>Visual reordering</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Common Flexbox Patterns',code:`/* Horizontal navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 20px;
+  height: 60px;
+}
+
+/* Card layout — wrap to multiple rows */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.card {
+  flex: 1 1 300px; /* grow, shrink, basis */
+}
+
+/* Centering anything */
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Sidebar layout */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+.sidebar { flex: 0 0 250px; }
+.main { flex: 1; }`},
+      {type:'info',variant:'tip',icon:'💡',text:'The flex shorthand "flex: 1" equals "flex: 1 1 0%", which makes items equal width. "flex: auto" equals "flex: 1 1 auto", which sizes items based on their content.'},
+      {type:'exercise',id:'ex-flexbox',title:'Challenge: Build a Flex Layout',
+        instructions:'Create a navbar: logo on the left, navigation links centered, and a button on the right. Use flexbox.',
+        html:'<nav class="navbar"><span class="logo">Logo</span><ul class="nav-links"><li>Home</li><li>About</li><li>Contact</li></ul><button class="cta">Sign Up</button></nav>',
+        initialCSS:'.navbar {\n  display: flex;\n  align-items: center;\n  padding: 16px 24px;\n  background: #1e293b;\n  color: white;\n  border-radius: 8px;\n}\n\n.nav-links {\n  display: flex;\n  gap: 16px;\n  list-style: none;\n  /* Center this group */\n}\n\n.cta {\n  margin-left: auto;\n  padding: 8px 16px;\n  background: #2563eb;\n  color: white;\n  border: none;\n  border-radius: 4px;\n}',
+        solution:'.navbar { display: flex; align-items: center; padding: 16px 24px; background: #1e293b; color: white; border-radius: 8px; }\n.nav-links { display: flex; gap: 16px; list-style: none; margin: 0 auto; }\n.cta { margin-left: auto; padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; }',
+        validator: css => css.includes('display: flex') && css.includes('margin: 0 auto')}
+    ]
+  });
+
+  L['css-grid'] = h({
+    title:'CSS Grid', subtitle:'The two-dimensional layout system',
+    sections:[
+      {type:'text',html:`<h2>CSS Grid</h2>
+<p>Grid is a two-dimensional layout system. While Flexbox handles one axis at a time, Grid handles rows AND columns simultaneously.</p>
+<h3>Grid Container Properties</h3>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Description</th><th>Example</th></tr></thead>
+  <tbody>
+    <tr><td><code>grid-template-columns</code></td><td>Define column tracks</td><td><code>200px 1fr 1fr</code></td></tr>
+    <tr><td><code>grid-template-rows</code></td><td>Define row tracks</td><td><code>auto 1fr auto</code></td></tr>
+    <tr><td><code>gap</code></td><td>Space between grid items</td><td><code>16px</code></td></tr>
+    <tr><td><code>grid-template-areas</code></td><td>Named template areas</td><td><code>"header header" "nav main"</code></td></tr>
+    <tr><td><code>justify-items</code></td><td>Align items horizontally in cells</td><td><code>center</code></td></tr>
+    <tr><td><code>align-items</code></td><td>Align items vertically in cells</td><td><code>center</code></td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Grid Layout Patterns',code:`/* Basic grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Responsive auto-fit grid */
+.auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Page layout with named areas */
+.page {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "nav    main"
+    "footer footer";
+  grid-template-columns: 250px 1fr;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  gap: 0;
+}
+.page-header { grid-area: header; }
+.page-nav    { grid-area: nav; }
+.page-main   { grid-area: main; }
+.page-footer { grid-area: footer; }`},
+      {type:'text',html:`<h3>Grid Item Placement</h3>
+<p>You can explicitly place items on the grid:</p>`},
+      {type:'code',lang:'css',title:'Grid item placement',code:`/* Span multiple columns */
+.hero {
+  grid-column: 1 / -1; /* span full width */
+}
+
+/* Place in specific area */
+.sidebar {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+/* Use line numbers */
+.card {
+  grid-column: 2 / 4;
+  grid-row: 1;
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'Use Grid for page-level layouts and card galleries. Use Flexbox for component-level layouts (navbars, buttons, form elements). They work great together!'},
+      {type:'exercise',id:'ex-grid',title:'Challenge: Create a Grid Layout',
+        instructions:'Create a 3-column grid of cards with 20px gaps that automatically wraps on smaller screens.',
+        html:'<div class="card-grid"><div class="grid-card">Card 1</div><div class="grid-card">Card 2</div><div class="grid-card">Card 3</div><div class="grid-card">Card 4</div><div class="grid-card">Card 5</div><div class="grid-card">Card 6</div></div>',
+        initialCSS:'.card-grid {\n  display: grid;\n  /* Create responsive columns */\n  \n  gap: 20px;\n}\n\n.grid-card {\n  background: #dbeafe;\n  padding: 24px;\n  border-radius: 8px;\n  text-align: center;\n}',
+        solution:'.card-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n  gap: 20px;\n}\n.grid-card { background: #dbeafe; padding: 24px; border-radius: 8px; text-align: center; }',
+        validator: css => css.includes('grid-template-columns') && css.includes('repeat')}
+    ]
+  });
+
+  // ---- RESPONSIVE DESIGN ----
+  L['media-queries'] = h({
+    title:'Media Queries', subtitle:'Adapting layouts for different screen sizes',
+    sections:[
+      {type:'text',html:`<h2>Media Queries</h2>
+<p>Media queries allow you to apply CSS rules based on device characteristics like screen width, height, orientation, and more.</p>
+<h3>Syntax</h3>`},
+      {type:'code',lang:'css',title:'Media Query Syntax',code:`/* Mobile-first approach (recommended) */
+/* Base styles for mobile */
+.container {
+  padding: 16px;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .container {
+    padding: 32px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 960px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+}`},
+      {type:'text',html:`<h3>Mobile-First vs Desktop-First</h3>
+<p><strong>Mobile-first</strong> writes base styles for mobile and uses <code>min-width</code> to add complexity for larger screens. This is the recommended approach because:</p>
+<ul>
+  <li>Smaller CSS file size (less override code)</li>
+  <li>Better performance on mobile devices</li>
+  <li>Forces you to prioritize essential content</li>
+  <li>Progressive enhancement</li>
+</ul>`},
+      {type:'text',html:`<h3>Common Breakpoints</h3>
+<table class="content-table">
+  <thead><tr><th>Name</th><th>Width</th><th>Typical Device</th></tr></thead>
+  <tbody>
+    <tr><td>Mobile</td><td>< 768px</td><td>Phones</td></tr>
+    <tr><td>Tablet</td><td>768px — 1023px</td><td>iPads, tablets</td></tr>
+    <tr><td>Desktop</td><td>1024px — 1279px</td><td>Laptops, small monitors</td></tr>
+    <tr><td>Large</td><td>≥ 1280px</td><td>Large monitors</td></tr>
+  </tbody>
+</table>`},
+      {type:'text',html:`<h3>Other Media Features</h3>`},
+      {type:'code',lang:'css',title:'Other Media Features',code:`/* Orientation */
+@media (orientation: landscape) {
+  .hero { height: 100vh; }
+}
+
+/* Prefers color scheme */
+@media (prefers-color-scheme: dark) {
+  body { background: #111; color: #eee; }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* Hover capability */
+@media (hover: hover) {
+  .btn:hover { background: blue; }
+}
+
+/* Print styles */
+@media print {
+  .no-print { display: none; }
+  body { color: #000; font-size: 12pt; }
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'Always design mobile-first. Start with the simplest layout and add complexity with min-width queries. This ensures your CSS is lean and your site loads fast on mobile.'},
+      {type:'exercise',id:'ex-media-queries',title:'Challenge: Responsive Grid',
+        instructions:'Make the grid show 1 column on mobile, 2 columns on tablet (768px+), and 3 columns on desktop (1024px+).',
+        html:'<div class="responsive-grid"><div class="r-card">1</div><div class="r-card">2</div><div class="r-card">3</div><div class="r-card">4</div><div class="r-card">5</div><div class="r-card">6</div></div>',
+        initialCSS:'.responsive-grid {\n  display: grid;\n  gap: 16px;\n  grid-template-columns: 1fr;\n}\n\n.r-card {\n  background: #dbeafe;\n  padding: 32px;\n  text-align: center;\n  border-radius: 8px;\n  font-size: 1.5rem;\n  font-weight: bold;\n}\n\n/* Tablet: 2 columns */\n@media (min-width: 768px) {\n  \n}\n\n/* Desktop: 3 columns */\n@media (min-width: 1024px) {\n  \n}',
+        solution:'.responsive-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }\n@media (min-width: 768px) { .responsive-grid { grid-template-columns: repeat(2, 1fr); } }\n@media (min-width: 1024px) { .responsive-grid { grid-template-columns: repeat(3, 1fr); } }\n.r-card { background: #dbeafe; padding: 32px; text-align: center; border-radius: 8px; }',
+        validator: css => css.includes('768px') && css.includes('1024px')}
+    ]
+  });
+
+  L['fluid-typography'] = h({
+    title:'Fluid Typography & Sizing', subtitle:'Smooth scaling without breakpoints',
+    sections:[
+      {type:'text',html:`<h2>Fluid Typography with clamp()</h2>
+<p>The <code>clamp()</code> function lets you create typography that scales smoothly between a minimum and maximum size, eliminating the need for breakpoint-based font changes.</p>
+<p><code>clamp(min, preferred, max)</code></p>`},
+      {type:'code',lang:'css',title:'Fluid Typography',code:`h1 {
+  /* Scales from 1.75rem to 3.5rem based on viewport */
+  font-size: clamp(1.75rem, 4vw + 1rem, 3.5rem);
+}
+
+h2 {
+  font-size: clamp(1.4rem, 3vw + 0.5rem, 2.5rem);
+}
+
+p {
+  font-size: clamp(0.95rem, 1vw + 0.75rem, 1.125rem);
+  line-height: 1.6;
+}`},
+      {type:'text',html:`<h3>Fluid Spacing</h3>
+<p>You can also use clamp() for padding, margins, and gaps:</p>`},
+      {type:'code',lang:'css',title:'Fluid spacing with clamp',code:`.section {
+  padding: clamp(2rem, 5vw, 6rem) clamp(1rem, 3vw, 4rem);
+  margin-bottom: clamp(2rem, 4vw, 5rem);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'Use the pattern "clamp(min, preferred, max)" where the preferred value uses viewport units (vw). This creates smooth scaling between the min and max boundaries.'}
+    ]
+  });
+
+  L['container-queries'] = h({
+    title:'Container Queries', subtitle:'Responsive to parent size, not viewport',
+    sections:[
+      {type:'text',html:`<h2>Container Queries</h2>
+<p>Container queries let you style elements based on the size of their <strong>parent container</strong>, not the viewport. This is a game-changer for reusable components.</p>`},
+      {type:'code',lang:'css',title:'Container Queries',code:`/* Define a containment context */
+.card-wrapper {
+  container-type: inline-size;
+  container-name: card;
+}
+
+/* Style based on container width */
+@container card (min-width: 400px) {
+  .card {
+    display: flex;
+    flex-direction: row;
+  }
+  .card-image {
+    width: 40%;
+  }
+}
+
+@container card (min-width: 600px) {
+  .card {
+    gap: 24px;
+  }
+  .card-title {
+    font-size: 1.5rem;
+  }
+}`},
+      {type:'info',variant:'note',icon:'📝',text:'Container queries make truly reusable components possible. A card component can adapt its layout based on where it is placed, without knowing the viewport size.'}
+    ]
+  });
+
+  L['responsive-patterns'] = h({
+    title:'Modern Responsive Patterns', subtitle:'Battle-tested layout approaches',
+    sections:[
+      {type:'text',html:`<h2>Modern Responsive Patterns</h2>
+<h3>The Sidebar Layout</h3>`},
+      {type:'code',lang:'css',title:'Responsive Sidebar Layout',code:`.layout {
+  display: grid;
+  grid-template-columns: minmax(200px, 250px) 1fr;
+  min-height: 100vh;
+}
+
+/* Stack on mobile */
+@media (max-width: 768px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}`},
+      {type:'text',html:`<h3>The Holy Grail Layout</h3>`},
+      {type:'code',lang:'css',title:'Holy Grail Layout',code:`.page {
+  display: grid;
+  grid-template:
+    "header header header" auto
+    "nav    main   aside" 1fr
+    "footer footer footer" auto
+    / 200px 1fr 200px;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .page {
+    grid-template:
+      "header" auto
+      "nav" auto
+      "main" 1fr
+      "aside" auto
+      "footer" auto
+      / 1fr;
+  }
+}`},
+      {type:'text',html:`<h3>The Pancake Stack (No Media Queries)</h3>`},
+      {type:'code',lang:'css',title:'Pancake Stack',code:`.stack {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.stack > main { flex: 1; }
+/* header and footer take their natural height */`}
+    ]
+  });
+
+  // ---- VISUAL STYLING ----
+  L['backgrounds-gradients'] = h({
+    title:'Backgrounds & Gradients', subtitle:'Creating rich visual backgrounds',
+    sections:[
+      {type:'text',html:`<h2>Backgrounds</h2>
+<h3>Multiple Backgrounds</h3>
+<p>CSS supports multiple backgrounds, layered on top of each other:</p>`},
+      {type:'code',lang:'css',title:'Multiple Backgrounds',code:`.fancy-bg {
+  background:
+    linear-gradient(135deg, rgba(99, 102, 241, 0.1), transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15), transparent 50%),
+    linear-gradient(to bottom, #0f172a, #1e293b);
+  background-size: cover;
+}`},
+      {type:'text',html:`<h3>Gradients</h3>
+<p>CSS supports three types of gradients:</p>`},
+      {type:'code',lang:'css',title:'Gradient Types',code:`/* Linear gradient */
+.linear {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Radial gradient */
+.radial {
+  background: radial-gradient(circle at center, #f6d365, #fda085);
+}
+
+/* Conic gradient */
+.conic {
+  background: conic-gradient(from 0deg, red, yellow, green, blue, red);
+}
+
+/* Repeating gradient */
+.stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.05) 10px,
+    rgba(0,0,0,0.05) 20px
+  );
+}`},
+      {type:'text',html:`<h3>Background Properties</h3>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Values</th></tr></thead>
+  <tbody>
+    <tr><td><code>background-size</code></td><td>cover, contain, or specific dimensions</td></tr>
+    <tr><td><code>background-position</code></td><td>center, top right, 50% 25%, etc.</td></tr>
+    <tr><td><code>background-repeat</code></td><td>no-repeat, repeat-x, repeat-y</td></tr>
+    <tr><td><code>background-attachment</code></td><td>scroll, fixed, local</td></tr>
+    <tr><td><code>background-blend-mode</code></td><td>multiply, screen, overlay, etc.</td></tr>
+  </tbody>
+</table>`},
+      {type:'exercise',id:'ex-gradients',title:'Create a Gradient Background',
+        instructions:'Create a gradient background on .hero that goes diagonally from blue (#2563eb) to purple (#7c3aed).',
+        html:'<div class="hero" style="padding:60px 24px;text-align:center;color:white"><h1>Welcome</h1><p>A gradient hero section</p></div>',
+        initialCSS:'.hero {\n  /* Add a diagonal gradient here */\n}',
+        solution:'.hero {\n  background: linear-gradient(135deg, #2563eb, #7c3aed);\n}',
+        validator: css => css.includes('linear-gradient')}
+    ]
+  });
+
+  L['shadows-borders'] = h({
+    title:'Shadows & Borders', subtitle:'Adding depth and definition',
+    sections:[
+      {type:'text',html:`<h2>Box Shadows</h2>
+<p>Shadows add depth and elevation to elements.</p>`},
+      {type:'code',lang:'css',title:'Box Shadow Syntax',code:`.card {
+  /* offset-x offset-y blur-radius spread-radius color */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.elevated-card {
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.12),
+    0 1px 2px rgba(0,0,0,0.24);
+}
+
+/* Inset shadow */
+.inset {
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Glow effect */
+.glow {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+}`},
+      {type:'text',html:`<h2>Text Shadows</h2>`},
+      {type:'code',lang:'css',title:'Text Shadow',code:`h1 {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Neon glow effect */
+.neon-text {
+  text-shadow:
+    0 0 7px #fff,
+    0 0 10px #fff,
+    0 0 21px #fff,
+    0 0 42px #0fa,
+    0 0 82px #0fa;
+}`},
+      {type:'text',html:`<h3>Modern Border Techniques</h3>`},
+      {type:'code',lang:'css',title:'Border Techniques',code:`/* Rounded corners */
+.rounded { border-radius: 12px; }
+.circle { border-radius: 50%; }
+.ellipse { border-radius: 10px 30px; }
+
+/* Border with gradient */
+.gradient-border {
+  border: 2px solid transparent;
+  background: linear-gradient(#fff, #fff) padding-box,
+              linear-gradient(135deg, #667eea, #764ba2) border-box;
+}
+
+/* Dashed with custom dash */
+.custom-dash {
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+}`}
+    ]
+  });
+
+  L['filters-blend'] = h({
+    title:'Filters & Blend Modes', subtitle:'Visual effects and compositing',
+    sections:[
+      {type:'text',html:`<h2>CSS Filters</h2>
+<p>Filters apply graphical effects to elements:</p>`},
+      {type:'code',lang:'css',title:'CSS Filters',code:`.blur { filter: blur(4px); }
+.bright { filter: brightness(1.2); }
+.contrast { filter: contrast(1.5); }
+.grayscale { filter: grayscale(100%); }
+.hue-rotate { filter: hue-rotate(90deg); }
+.saturate { filter: saturate(200%); }
+.sepia { filter: sepia(80%); }
+
+/* Multiple filters */
+.vintage {
+  filter: sepia(30%) contrast(110%) brightness(90%) saturate(120%);
+}
+
+/* Backdrop filter (glassmorphism) */
+.glass {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+}`},
+      {type:'text',html:`<h3>Blend Modes</h3>
+<p>Blend modes control how overlapping elements visually combine:</p>`},
+      {type:'code',lang:'css',title:'Mix Blend Mode',code:`.overlay {
+  mix-blend-mode: multiply; /* darken */
+}
+
+.screen-effect {
+  mix-blend-mode: screen; /* lighten */
+}
+
+/* Background blend mode */
+.pattern {
+  background:
+    url(texture.png),
+    linear-gradient(#333, #666);
+  background-blend-mode: overlay;
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'backdrop-filter: blur() is the key to glassmorphism effects. Combine it with semi-transparent backgrounds for beautiful modern UI elements.'}
+    ]
+  });
+
+  L['masking-clipping'] = h({
+    title:'Masking & Clipping', subtitle:'Revealing parts of elements',
+    sections:[
+      {type:'text',html:`<h2>Clipping and Masking</h2>
+<h3>clip-path</h3>
+<p><code>clip-path</code> clips an element to a specific shape:</p>`},
+      {type:'code',lang:'css',title:'Clip Path Examples',code:`/* Circle */
+.avatar { clip-path: circle(50%); }
+
+/* Polygon — arrow shape */
+.arrow { clip-path: polygon(0 0, 100% 50%, 0 100%); }
+
+/* Inset — rounded rectangle */
+.card { clip-path: inset(0 round 12px); }
+
+/* Diagonal section */
+.diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}`},
+      {type:'text',html:`<h3>CSS Masks</h3>
+<p>Masks use images or gradients to control element transparency:</p>`},
+      {type:'code',lang:'css',title:'CSS Masks',code:`/* Gradient mask — fade to transparent */
+.fade-out {
+  mask-image: linear-gradient(to bottom, black 60%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
+}
+
+/* Image mask */
+.shaped {
+  mask-image: url(mask.svg);
+  mask-size: cover;
+  mask-repeat: no-repeat;
+}`}
+    ]
+  });
+
+  // ---- MOTION & ANIMATION ----
+  L['transitions'] = h({
+    title:'Transitions', subtitle:'Smooth property changes',
+    sections:[
+      {type:'text',html:`<h2>CSS Transitions</h2>
+<p>Transitions create smooth animations when CSS properties change — typically on hover, focus, or class changes.</p>`},
+      {type:'code',lang:'css',title:'Transition Syntax',code:`/* Shorthand: property duration timing-function delay */
+.btn {
+  background: #2563eb;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}`},
+      {type:'text',html:`<h3>Timing Functions</h3>
+<table class="content-table">
+  <thead><tr><th>Function</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>ease</code></td><td>Default — slow start, fast middle, slow end</td></tr>
+    <tr><td><code>linear</code></td><td>Constant speed</td></tr>
+    <tr><td><code>ease-in</code></td><td>Slow start, accelerates</td></tr>
+    <tr><td><code>ease-out</code></td><td>Fast start, decelerates</td></tr>
+    <tr><td><code>ease-in-out</code></td><td>Slow start and end</td></tr>
+    <tr><td><code>cubic-bezier()</code></td><td>Custom curve</td></tr>
+  </tbody>
+</table>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Avoid transitioning "all" — specify exact properties for better performance. transition: transform 0.3s, opacity 0.3s is more performant than transition: all 0.3s.'},
+      {type:'exercise',id:'ex-transitions',title:'Create a Hover Card',
+        instructions:'Add a smooth transition to the card that lifts it up and adds a shadow on hover.',
+        html:'<div class="hover-card"><h3>Hover Me</h3><p>I should lift up when hovered.</p></div>',
+        initialCSS:'.hover-card {\n  background: white;\n  padding: 24px;\n  border-radius: 12px;\n  border: 1px solid #e2e8f0;\n  /* Add transition */\n}\n\n.hover-card:hover {\n  /* Lift and shadow */\n}',
+        solution:'.hover-card {\n  background: white;\n  padding: 24px;\n  border-radius: 12px;\n  border: 1px solid #e2e8f0;\n  transition: transform 0.3s ease, box-shadow 0.3s ease;\n}\n.hover-card:hover {\n  transform: translateY(-4px);\n  box-shadow: 0 12px 24px rgba(0,0,0,0.1);\n}',
+        validator: css => css.includes('transition') && css.includes('transform')}
+    ]
+  });
+
+  L['transforms'] = h({
+    title:'Transforms', subtitle:'Moving, rotating, scaling, and skewing elements',
+    sections:[
+      {type:'text',html:`<h2>CSS Transforms</h2>
+<p>Transforms modify the element's coordinate system without affecting document flow.</p>
+<h3>2D Transforms</h3>`},
+      {type:'code',lang:'css',title:'2D Transforms',code:`/* Translate — move the element */
+.move {
+  transform: translateX(20px);
+  transform: translateY(-10px);
+  transform: translate(20px, -10px);
+}
+
+/* Scale — resize */
+.bigger {
+  transform: scale(1.2);
+  transform: scaleX(1.5);
+  transform: scale(1.1, 0.9);
+}
+
+/* Rotate — in degrees */
+.spin {
+  transform: rotate(45deg);
+}
+
+/* Skew — tilt */
+.tilt {
+  transform: skewX(10deg);
+  transform: skew(10deg, 5deg);
+}
+
+/* Combine multiple transforms */
+.fancy {
+  transform: translateX(20px) rotate(15deg) scale(1.1);
+}`},
+      {type:'text',html:`<h3>3D Transforms</h3>`},
+      {type:'code',lang:'css',title:'3D Transforms',code:`.container {
+  perspective: 1000px; /* Required for 3D */
+}
+
+.card-3d {
+  transform: rotateY(30deg) rotateX(10deg);
+  transform-style: preserve-3d;
+}
+
+.flip-card {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.flip-card:hover {
+  transform: rotateY(180deg);
+}`},
+      {type:'text',html:`<h3>transform-origin</h3>
+<p>Controls the point around which transforms are applied:</p>`},
+      {type:'code',lang:'css',title:'Transform Origin',code:`.default { transform-origin: center; }
+.top-left { transform-origin: top left; }
+.custom { transform-origin: 30% 70%; }`},
+      {type:'info',variant:'tip',icon:'💡',text:'Transforms do not trigger layout recalculation (reflow), making them very performant. Use transform: translateY() instead of changing margin-top for animations.'}
+    ]
+  });
+
+  L['keyframes'] = h({
+    title:'Keyframe Animations', subtitle:'Complex, multi-step animations',
+    sections:[
+      {type:'text',html:`<h2>@keyframes Animations</h2>
+<p>Keyframe animations allow you to define multi-step animations with precise control over timing.</p>`},
+      {type:'code',lang:'css',title:'Keyframe Animation',code:`/* Define the animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply the animation */
+.element {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Shorthand:
+   name duration timing-function delay
+   iteration-count direction fill-mode play-state */
+.animated {
+  animation: fadeInUp 0.6s ease-out 0.2s 1 normal forwards;
+}`},
+      {type:'text',html:`<h3>Multi-step Animations</h3>`},
+      {type:'code',lang:'css',title:'Multi-step Keyframes',code:`@keyframes bounce {
+  0%   { transform: translateY(0); }
+  20%  { transform: translateY(-30px); }
+  40%  { transform: translateY(0); }
+  60%  { transform: translateY(-15px); }
+  80%  { transform: translateY(0); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}`},
+      {type:'text',html:`<h3>Animation Properties</h3>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Values</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>animation-name</code></td><td>@keyframes name</td><td>Which animation to use</td></tr>
+    <tr><td><code>animation-duration</code></td><td>Time (0.5s, 300ms)</td><td>How long it takes</td></tr>
+    <tr><td><code>animation-timing-function</code></td><td>ease, linear, cubic-bezier(), etc.</td><td>Speed curve</td></tr>
+    <tr><td><code>animation-delay</code></td><td>Time</td><td>Wait before starting</td></tr>
+    <tr><td><code>animation-iteration-count</code></td><td>Number, infinite</td><td>How many times</td></tr>
+    <tr><td><code>animation-direction</code></td><td>normal, reverse, alternate</td><td>Playback direction</td></tr>
+    <tr><td><code>animation-fill-mode</code></td><td>forwards, backwards, both</td><td>Style before/after</td></tr>
+  </tbody>
+</table>`},
+      {type:'exercise',id:'ex-animations',title:'Create an Animation',
+        instructions:'Create a keyframe animation that makes the circle pulse (scale up and down) infinitely.',
+        html:'<div class="pulse-circle" style="width:60px;height:60px;background:#2563eb;border-radius:50%;margin:20px auto"></div>',
+        initialCSS:'@keyframes pulse {\n  /* Define pulse animation */\n}\n\n.pulse-circle {\n  animation: /* apply animation */;\n}',
+        solution:'@keyframes pulse {\n  0%, 100% { transform: scale(1); }\n  50% { transform: scale(1.3); }\n}\n.pulse-circle {\n  animation: pulse 1.5s ease-in-out infinite;\n}',
+        validator: css => css.includes('@keyframes') && css.includes('animation')}
+    ]
+  });
+
+  L['animation-best'] = h({
+    title:'Animation Best Practices', subtitle:'Performance and accessibility',
+    sections:[
+      {type:'text',html:`<h2>Animation Best Practices</h2>
+<h3>Animate Only Compositor-Friendly Properties</h3>
+<p>Only <code>transform</code> and <code>opacity</code> can be animated without triggering layout or paint. These are GPU-accelerated and very performant.</p>
+<table class="content-table">
+  <thead><tr><th>Property</th><th>Performance</th></tr></thead>
+  <tbody>
+    <tr><td><code>transform</code></td><td>✅ Excellent — compositor only</td></tr>
+    <tr><td><code>opacity</code></td><td>✅ Excellent — compositor only</td></tr>
+    <tr><td><code>left/top</code></td><td>❌ Triggers layout</td></tr>
+    <tr><td><code>width/height</code></td><td>❌ Triggers layout + paint</td></tr>
+    <tr><td><code>margin/padding</code></td><td>❌ Triggers layout</td></tr>
+    <tr><td><code>background-color</code></td><td>⚠️ Paint only (OK for small areas)</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Good vs Bad animation',code:`/* ❌ Bad — triggers layout on every frame */
+.bad {
+  transition: margin-left 0.3s;
+}
+.bad:hover {
+  margin-left: 20px;
+}
+
+/* ✅ Good — compositor only */
+.good {
+  transition: transform 0.3s;
+}
+.good:hover {
+  transform: translateX(20px);
+}`},
+      {type:'text',html:`<h3>Respect User Preferences</h3>`},
+      {type:'code',lang:'css',title:'Reduced motion',code:`/* Always wrap animations in this media query */
+@media (prefers-reduced-motion: no-preference) {
+  .animated-element {
+    animation: fadeInUp 0.6s ease-out;
+  }
+}
+
+/* Or use it to provide alternatives */
+@media (prefers-reduced-motion: reduce) {
+  .animated-element {
+    animation: none;
+    opacity: 1; /* Show immediately */
+  }
+}`},
+      {type:'info',variant:'warning',icon:'⚠️',text:'Always test your site with prefers-reduced-motion. Some users experience motion sickness or discomfort from animations. Provide a no-animation alternative.'}
+    ]
+  });
+
+  // ---- MODERN CSS ----
+  L['custom-properties'] = h({
+    title:'Custom Properties', subtitle:'CSS variables for maintainable designs',
+    sections:[
+      {type:'text',html:`<h2>CSS Custom Properties (Variables)</h2>
+<p>Custom properties (also called CSS variables) let you store and reuse values throughout your stylesheet. Unlike preprocessor variables, they cascade, inherit, and can be changed with JavaScript.</p>`},
+      {type:'code',lang:'css',title:'Defining and Using Variables',code:`/* Define on :root for global scope */
+:root {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-text: #1e293b;
+  --color-bg: #ffffff;
+  --space-md: 1rem;
+  --radius-lg: 12px;
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Use with var() */
+.btn {
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-md);
+}
+
+.btn:hover {
+  background: var(--color-primary-dark);
+}`},
+      {type:'text',html:`<h3>Fallback Values</h3>
+<p>Provide fallback values in case a variable is not defined:</p>`},
+      {type:'code',lang:'css',title:'Fallback Values',code:`.element {
+  /* Single fallback */
+  color: var(--text-color, #333);
+
+  /* Multiple fallbacks */
+  background: var(--bg, var(--fallback-bg, white));
+}`},
+      {type:'text',html:`<h3>Dark Mode with Custom Properties</h3>`},
+      {type:'code',lang:'css',title:'Dark Mode Variables',code:`:root {
+  --bg: #ffffff;
+  --text: #1e293b;
+  --surface: #f8fafc;
+  --border: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --text: #e2e8f0;
+    --surface: #1e293b;
+    --border: #334155;
+  }
+}
+
+/* These rules work in both themes */
+body { background: var(--bg); color: var(--text); }
+.card { background: var(--surface); border: 1px solid var(--border); }`},
+      {type:'info',variant:'tip',icon:'💡',text:'Custom properties are live — changing them with JavaScript instantly updates all dependent styles. This is the foundation of modern theme systems.'}
+    ]
+  });
+
+  L['css-functions'] = h({
+    title:'CSS Functions', subtitle:'calc(), clamp(), min(), max() and more',
+    sections:[
+      {type:'text',html:`<h2>CSS Functions</h2>
+<h3>calc()</h3>
+<p>Mix units and perform math in CSS:</p>`},
+      {type:'code',lang:'css',title:'calc()',code:`.sidebar {
+  width: calc(100% - 250px);
+}
+
+.grid-item {
+  width: calc((100% - 40px) / 3);
+  /* Equivalent to: (100% - 2 × 20px gap) / 3 columns */
+}
+
+p {
+  font-size: calc(1rem + 0.5vw);
+}`},
+      {type:'text',html:`<h3>clamp()</h3>
+<p>Set a value that scales between a minimum and maximum:</p>
+<p><code>clamp(minimum, preferred, maximum)</code></p>`},
+      {type:'code',lang:'css',title:'clamp()',code:`h1 {
+  /* Min 1.5rem, preferred 5vw, max 3rem */
+  font-size: clamp(1.5rem, 5vw, 3rem);
+}
+
+.container {
+  /* Fluid width between 320px and 1200px */
+  width: clamp(320px, 90%, 1200px);
+  /* Fluid padding */
+  padding: clamp(1rem, 3vw, 4rem);
+}`},
+      {type:'text',html:`<h3>min() and max()</h3>`},
+      {type:'code',lang:'css',title:'min() and max()',code:`/* min() — pick the smaller value */
+.container {
+  width: min(90%, 1200px);
+}
+
+/* max() — pick the larger value */
+.text {
+  font-size: max(1rem, 2vw);
+  /* Never smaller than 1rem */
+}
+
+/* Combining functions */
+.element {
+  width: max(300px, min(50%, 600px));
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'clamp() is equivalent to max(minimum, min(preferred, maximum)). Use clamp() for fluid sizing — it is the most powerful responsive design tool in CSS.'}
+    ]
+  });
+
+  L['css-nesting'] = h({
+    title:'CSS Nesting', subtitle:'Nest selectors like preprocessors',
+    sections:[
+      {type:'text',html:`<h2>Native CSS Nesting</h2>
+<p>CSS now supports native nesting, reducing the need for preprocessors like Sass:</p>`},
+      {type:'code',lang:'css',title:'CSS Nesting',code:`/* Traditional CSS */
+.card { padding: 20px; }
+.card .title { font-size: 1.5rem; }
+.card .title:hover { color: blue; }
+.card p { line-height: 1.6; }
+@media (min-width: 768px) { .card { padding: 32px; } }
+
+/* With native nesting */
+.card {
+  padding: 20px;
+
+  & .title {
+    font-size: 1.5rem;
+
+    &:hover {
+      color: blue;
+    }
+  }
+
+  & p {
+    line-height: 1.6;
+  }
+
+  @media (min-width: 768px) {
+    padding: 32px;
+  }
+}`},
+      {type:'text',html:`<h3>The & Selector</h3>
+<p>The <code>&</code> refers to the parent selector. It is required for pseudo-classes and pseudo-elements:</p>`},
+      {type:'code',lang:'css',title:'Using & in Nesting',code:`.btn {
+  background: blue;
+
+  &:hover { background: darkblue; }
+  &:focus-visible { outline: 2px solid; }
+  &::after { content: "→"; }
+  &.primary { background: green; }
+  & + & { margin-left: 8px; }
+}`}
+    ]
+  });
+
+  L['logical-properties'] = h({
+    title:'Logical Properties', subtitle:'Writing direction-agnostic CSS',
+    sections:[
+      {type:'text',html:`<h2>Logical Properties</h2>
+<p>Logical properties use <strong>start/end</strong> instead of <strong>left/right</strong>, making your CSS work for any writing direction (LTR and RTL).</p>
+<table class="content-table">
+  <thead><tr><th>Physical</th><th>Logical</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>margin-left</code></td><td><code>margin-inline-start</code></td><td>Start of inline axis</td></tr>
+    <tr><td><code>margin-right</code></td><td><code>margin-inline-end</code></td><td>End of inline axis</td></tr>
+    <tr><td><code>margin-top</code></td><td><code>margin-block-start</code></td><td>Start of block axis</td></tr>
+    <tr><td><code>margin-bottom</code></td><td><code>margin-block-end</code></td><td>End of block axis</td></tr>
+    <tr><td><code>width</code></td><td><code>inline-size</code></td><td>Size on inline axis</td></tr>
+    <tr><td><code>height</code></td><td><code>block-size</code></td><td>Size on block axis</td></tr>
+    <tr><td><code>text-align: left</code></td><td><code>text-align: start</code></td><td>Align to start</td></tr>
+    <tr><td><code>border-left</code></td><td><code>border-inline-start</code></td><td>Border on start side</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Logical Properties Example',code:`.card {
+  /* Physical */
+  margin-left: 16px;
+  padding: 16px 24px;
+  border-left: 4px solid blue;
+  width: 300px;
+  height: 200px;
+}
+
+/* Logical (recommended) */
+.card {
+  margin-inline-start: 16px;
+  padding: 16px 24px;
+  border-inline-start: 4px solid blue;
+  inline-size: 300px;
+  block-size: 200px;
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'Use logical properties for all new CSS. They make your layouts automatically support right-to-left languages without any extra work.'}
+    ]
+  });
+
+  L['pseudo-elements'] = h({
+    title:'Pseudo-elements & Pseudo-classes', subtitle:'Advanced selectors for dynamic styling',
+    sections:[
+      {type:'text',html:`<h2>Pseudo-classes</h2>
+<p>Pseudo-classes select elements based on their state or position:</p>
+<table class="content-table">
+  <thead><tr><th>Pseudo-class</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>:hover</code></td><td>Mouse is over the element</td></tr>
+    <tr><td><code>:focus</code></td><td>Element has focus</td></tr>
+    <tr><td><code>:focus-visible</code></td><td>Focused via keyboard (recommended over :focus)</td></tr>
+    <tr><td><code>:active</code></td><td>Being clicked</td></tr>
+    <tr><td><code>:first-child</code></td><td>First child of its parent</td></tr>
+    <tr><td><code>:last-child</code></td><td>Last child of its parent</td></tr>
+    <tr><td><code>:nth-child(n)</code></td><td>The nth child (2n = even, 2n+1 = odd)</td></tr>
+    <tr><td><code>:not(selector)</code></td><td>Elements that do not match</td></tr>
+    <tr><td><code>:has(selector)</code></td><td>Elements that contain a matching descendant</td></tr>
+    <tr><td><code>:is(selector)</code></td><td>Matches any of the selectors (forgiving)</td></tr>
+    <tr><td><code>:where(selector)</code></td><td>Like :is() but with zero specificity</td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Pseudo-class Examples',code:`/* :has() — the "parent selector" */
+.card:has(img) {
+  grid-template-rows: 200px auto;
+}
+
+.form:has(:invalid) {
+  border-color: red;
+}
+
+/* :nth-child — striped tables */
+tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+/* :not() — exclude elements */
+.card:not(:last-child) {
+  margin-bottom: 16px;
+}`},
+      {type:'text',html:`<h2>Pseudo-elements</h2>
+<p>Pseudo-elements create virtual elements that don't exist in the HTML:</p>`},
+      {type:'code',lang:'css',title:'Pseudo-element Examples',code:`/* ::before and ::after */
+.quote::before {
+  content: '"';
+  font-size: 3rem;
+  color: #2563eb;
+  line-height: 0;
+}
+
+/* Decorative line */
+.heading::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: #2563eb;
+  margin-top: 8px;
+}
+
+/* ::placeholder */
+input::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ::selection */
+::selection {
+  background: #2563eb;
+  color: white;
+}
+
+/* ::first-letter */
+p::first-letter {
+  font-size: 2em;
+  font-weight: bold;
+  float: left;
+  line-height: 1;
+  margin-right: 4px;
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:':has() is called the "parent selector" because it lets you style a parent based on its children. It is one of the most powerful new CSS features.'}
+    ]
+  });
+
+  // ---- ARCHITECTURE ----
+  L['bem-methodology'] = h({
+    title:'BEM Methodology', subtitle:'Structured, maintainable class names',
+    sections:[
+      {type:'text',html:`<h2>BEM: Block Element Modifier</h2>
+<p>BEM is a naming convention that makes CSS class names predictable and easy to understand.</p>
+<h3>Structure</h3>
+<ul>
+  <li><strong>Block</strong> — A standalone entity (e.g., <code>.card</code>, <code>.button</code>, <code>.nav</code>)</li>
+  <li><strong>Element</strong> — A part of a block (e.g., <code>.card__title</code>, <code>.card__image</code>)</li>
+  <li><strong>Modifier</strong> — A variation (e.g., <code>.card--featured</code>, <code>.button--large</code>)</li>
+</ul>`},
+      {type:'code',lang:'css',title:'BEM Example',code:`/* Block */
+.card { }
+
+/* Elements (double underscore) */
+.card__title { }
+.card__image { }
+.card__body { }
+.card__footer { }
+
+/* Modifiers (double dash) */
+.card--featured {
+  border: 2px solid gold;
+}
+.card--compact .card__body {
+  padding: 8px;
+}`},
+      {type:'code',lang:'html',title:'BEM in HTML',code:`<div class="card card--featured">
+  <img class="card__image" src="..." alt="">
+  <div class="card__body">
+    <h3 class="card__title">Featured Card</h3>
+    <p class="card__text">Content here</p>
+  </div>
+  <div class="card__footer">
+    <button class="button button--primary">Read More</button>
+  </div>
+</div>`},
+      {type:'info',variant:'tip',icon:'💡',text:'BEM eliminates the need for descendant selectors, making your CSS flatter, more predictable, and easier to refactor.'}
+    ]
+  });
+
+  L['utility-first'] = h({
+    title:'Utility-First Concepts', subtitle:'Atomic CSS approach',
+    sections:[
+      {type:'text',html:`<h2>Utility-First CSS</h2>
+<p>Utility classes are small, single-purpose classes that map to one CSS property:</p>`},
+      {type:'code',lang:'css',title:'Utility Classes',code:`/* Spacing */
+.p-1 { padding: 0.25rem; }
+.p-2 { padding: 0.5rem; }
+.p-4 { padding: 1rem; }
+.m-4 { margin: 1rem; }
+.mt-8 { margin-top: 2rem; }
+
+/* Typography */
+.text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.font-bold { font-weight: 700; }
+.text-center { text-align: center; }
+
+/* Layout */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.grid { display: grid; }
+.gap-4 { gap: 1rem; }
+
+/* Colors */
+.bg-blue { background: #2563eb; }
+.text-white { color: white; }
+.rounded { border-radius: 0.25rem; }
+.shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }`},
+      {type:'text',html:`<h3>When to Use Utilities vs Components</h3>
+<ul>
+  <li><strong>Utilities</strong> — For one-off styles, prototyping, and common patterns</li>
+  <li><strong>Components</strong> — For repeated UI patterns (buttons, cards, modals)</li>
+  <li><strong>Best approach:</strong> Build component classes that compose utilities</li>
+</ul>`},
+      {type:'info',variant:'note',icon:'📝',text:'You do not need to choose between BEM and utilities. Modern CSS architecture combines both — use utilities for layout/spacing and component classes for reusable patterns.'}
+    ]
+  });
+
+  L['performance'] = h({
+    title:'Performance & Optimization', subtitle:'Writing fast CSS',
+    sections:[
+      {type:'text',html:`<h2>CSS Performance</h2>
+<h3>Selectors Performance</h3>
+<p>Browsers match selectors <strong>right to left</strong>. More specific on the right = faster matching:</p>`},
+      {type:'code',lang:'css',title:'Selector Performance',code:`/* ❌ Slow — browser checks all * elements */
+* .link { }
+
+/* ❌ Slower — deep descendant */
+body div ul li a { }
+
+/* ✅ Fast — specific class */
+.nav-link { }
+
+/* ✅ Also fast */
+.nav > .nav-link { }`},
+      {type:'text',html:`<h3>Reflow and Repaint</h3>
+<ul>
+  <li><strong>Reflow (Layout)</strong> — Recalculating element positions and sizes. Expensive!</li>
+  <li><strong>Repaint</strong> — Redrawing pixels. Less expensive but still costly.</li>
+  <li><strong>Composite</strong> — Recombining layers. Cheapest operation.</li>
+</ul>
+<p><strong>Triggering reflow:</strong> Changing width, height, margin, padding, font-size, display, position, adding/removing elements</p>
+<p><strong>Only triggering composite:</strong> Changing transform and opacity</p>`},
+      {type:'text',html:`<h3>Optimization Tips</h3>
+<ul>
+  <li>Use <code>transform</code> instead of <code>top/left/margin</code> for animations</li>
+  <li>Use <code>will-change</code> sparingly for elements you know will animate</li>
+  <li>Avoid deep nesting of selectors</li>
+  <li>Minimize use of expensive properties: <code>box-shadow</code>, <code>border-radius</code> with large values, <code>filter</code></li>
+  <li>Use <code>contain</code> to limit the scope of browser calculations</li>
+  <li>Minify CSS for production</li>
+  <li>Remove unused CSS (use tools like PurgeCSS)</li>
+</ul>`},
+      {type:'info',variant:'tip',icon:'💡',text:'The biggest CSS performance wins come from: 1) Using transform/opacity for animations, 2) Removing unused styles, 3) Minimizing reflows by batching DOM changes.'}
+    ]
+  });
+
+  L['scalable-systems'] = h({
+    title:'Scalable CSS Systems', subtitle:'Design tokens and architecture',
+    sections:[
+      {type:'text',html:`<h2>Building a Scalable CSS System</h2>
+<h3>Design Tokens</h3>
+<p>Design tokens are the atoms of your design system — primitive values for colors, spacing, fonts, etc.</p>`},
+      {type:'code',lang:'css',title:'Design Token System',code:`:root {
+  /* ---- Spacing Scale ---- */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-12: 3rem;    /* 48px */
+
+  /* ---- Type Scale ---- */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* ---- Color Palette ---- */
+  --gray-50: #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+
+  /* ---- Semantic Colors ---- */
+  --color-surface: var(--gray-50);
+  --color-text: var(--gray-900);
+  --color-muted: var(--gray-500);
+
+  /* ---- Border Radius ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+}`},
+      {type:'text',html:`<h3>CSS Architecture Layers</h3>
+<ol>
+  <li><strong>Reset/Normalize</strong> — Cross-browser consistency</li>
+  <li><strong>Tokens</strong> — Design variables (colors, spacing, fonts)</li>
+  <li><strong>Base</strong> — Default element styles (body, headings, links)</li>
+  <li><strong>Utilities</strong> — Single-purpose helper classes</li>
+  <li><strong>Components</strong> — Reusable UI patterns</li>
+  <li><strong>Layouts</strong> — Page-level structural styles</li>
+  <li><strong>Overrides</strong> — One-off exceptions (use sparingly)</li>
+</ol>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Start your design system with tokens. If you get the token layer right, everything else becomes easier to build, maintain, and theme.'}
+    ]
+  });
+
+  // ---- PROFESSIONAL ----
+  L['debugging'] = h({
+    title:'Debugging CSS', subtitle:'Finding and fixing CSS problems',
+    sections:[
+      {type:'text',html:`<h2>CSS Debugging Techniques</h2>
+<h3>Browser DevTools</h3>
+<p>The most important CSS debugging tool is your browser's DevTools (F12 or Right-click > Inspect):</p>
+<ul>
+  <li><strong>Elements Panel</strong> — See all applied styles, computed styles, and the cascade</li>
+  <li><strong>Toggle styles</strong> — Click the checkbox next to any property to disable it</li>
+  <li><strong>Box model diagram</strong> — Visualize margin, border, padding, and content</li>
+  <li><strong>Layout panel</strong> — Inspect flex and grid layouts</li>
+  <li><strong>Computed tab</strong> — See the final computed value of every property</li>
+</ul>`},
+      {type:'text',html:`<h3>Common CSS Bugs and Fixes</h3>
+<table class="content-table">
+  <thead><tr><th>Bug</th><th>Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr><td>Layout broken</td><td>Missing box-sizing</td><td>Add <code>*, *::before, *::after { box-sizing: border-box; }</code></td></tr>
+    <tr><td>Element not visible</td><td>display: none or zero dimensions</td><td>Check display, width, height, opacity, visibility</td></tr>
+    <tr><td>Wrong element styled</td><td>Specificity issue</td><td>Use DevTools to see which rule wins</td></tr>
+    <tr><td>Styles not applying</td><td>Typo or wrong selector</td><td>Check spelling, check HTML class/id names</td></tr>
+    <tr><td>Overlapping elements</td><td>z-index without position</td><td>Add <code>position: relative</code> to use z-index</td></tr>
+    <tr><td>Parent collapse</td><td>Floated children</td><td>Add <code>overflow: auto</code> or <code>display: flow-root</code></td></tr>
+  </tbody>
+</table>`},
+      {type:'code',lang:'css',title:'Debug CSS Trick',code:`/* The universal outline trick */
+* {
+  outline: 1px solid red !important;
+}
+
+/* Better: colored outlines by depth */
+* { outline: 1px solid rgba(255,0,0,0.2) }
+* * { outline: 1px solid rgba(0,255,0,0.2) }
+* * * { outline: 1px solid rgba(0,0,255,0.2) }
+
+/* Check overflow issues */
+* {
+  background: rgba(255,0,0,0.05);
+}`},
+      {type:'info',variant:'tip',icon:'💡',text:'When debugging, use the "cascading" nature of the browser. In DevTools, you can see which styles are being overridden (shown with a strikethrough) and exactly which rule is winning.'}
+    ]
+  });
+
+  L['browser-compat'] = h({
+    title:'Browser Compatibility', subtitle:'Writing CSS that works everywhere',
+    sections:[
+      {type:'text',html:`<h2>Browser Compatibility</h2>
+<h3>Progressive Enhancement</h3>
+<p>Write CSS that works in all browsers, then add enhanced features for modern ones:</p>`},
+      {type:'code',lang:'css',title:'Progressive Enhancement',code:`/* Base style (works everywhere) */
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Enhanced with Grid (modern browsers) */
+@supports (display: grid) {
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+}
+
+/* Check for container query support */
+@supports (container-type: inline-size) {
+  .card-wrapper {
+    container-type: inline-size;
+  }
+}`},
+      {type:'text',html:`<h3>Vendor Prefixes</h3>
+<p>Some CSS features need prefixes for older browsers:</p>`},
+      {type:'code',lang:'css',title:'Vendor Prefixes',code:`.element {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}`},
+      {type:'info',variant:'note',icon:'📝',text:'Use caniuse.com to check browser support for any CSS feature. Autoprefixer (a build tool) can add vendor prefixes automatically.'}
+    ]
+  });
+
+  L['accessibility'] = h({
+    title:'Accessibility & CSS', subtitle:'Styling inclusively',
+    sections:[
+      {type:'text',html:`<h2>CSS Accessibility</h2>
+<h3>Focus Styles</h3>
+<p>Never remove focus outlines without providing an alternative:</p>`},
+      {type:'code',lang:'css',title:'Accessible Focus Styles',code:`/* ❌ Never do this */
+*:focus { outline: none; }
+
+/* ✅ Good: custom focus style */
+*:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Only show focus ring for keyboard users */
+*:focus:not(:focus-visible) {
+  outline: none;
+}`},
+      {type:'text',html:`<h3>Screen Reader Utilities</h3>`},
+      {type:'code',lang:'css',title:'Screen Reader Utilities',code:`/* Visually hidden but available to screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Visible on focus (for skip links) */
+.skip-link {
+  position: absolute;
+  top: -100%;
+}
+.skip-link:focus {
+  top: 0;
+}`},
+      {type:'text',html:`<h3>Color Contrast</h3>
+<p>WCAG requires minimum contrast ratios:</p>
+<ul>
+  <li><strong>Normal text:</strong> 4.5:1 ratio (AA level)</li>
+  <li><strong>Large text (18px+ bold or 24px+ regular):</strong> 3:1 ratio</li>
+  <li><strong>UI components:</strong> 3:1 ratio</li>
+</ul>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Use :focus-visible (not :focus) for focus styles. It shows focus rings for keyboard users but not mouse clicks, giving you the best of both worlds.'}
+    ]
+  });
+
+  L['dark-mode'] = h({
+    title:'Dark Mode Implementation', subtitle:'Building theme-aware interfaces',
+    sections:[
+      {type:'text',html:`<h2>Dark Mode with CSS</h2>
+<h3>System-based Dark Mode</h3>`},
+      {type:'code',lang:'css',title:'System Dark Mode',code:`:root {
+  --bg: #ffffff;
+  --text: #1e293b;
+  --surface: #f8fafc;
+  --border: #e2e8f0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --text: #e2e8f0;
+    --surface: #1e293b;
+    --border: #334155;
+  }
+}`},
+      {type:'text',html:`<h3>Toggle-based Dark Mode</h3>`},
+      {type:'code',lang:'css',title:'Toggle Dark Mode',code:`/* Light theme (default) */
+:root {
+  --bg: #ffffff;
+  --text: #1e293b;
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --text: #e2e8f0;
+}
+
+/* Components use variables */
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s, color 0.3s;
+}`},
+      {type:'code',lang:'javascript',title:'Toggle Script',code:`const toggle = document.getElementById('theme-toggle');
+toggle.addEventListener('click', () => {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+});`},
+      {type:'info',variant:'tip',icon:'💡',text:'Use semantic color tokens (--bg, --text, --surface) instead of raw colors. This makes theme switching trivial — just redefine the tokens.'}
+    ]
+  });
+
+  L['production'] = h({
+    title:'Production Best Practices', subtitle:'Preparing CSS for real-world deployment',
+    sections:[
+      {type:'text',html:`<h2>Production Best Practices</h2>
+<h3>CSS Reset</h3>
+<p>Start every project with a modern reset:</p>`},
+      {type:'code',lang:'css',title:'Modern CSS Reset',code:`/* Box sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margin and padding */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* Set core body defaults */
+body {
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Responsive images */
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Inherit fonts for inputs */
+input, button, textarea, select {
+  font: inherit;
+}
+
+/* Remove list styles */
+ul, ol {
+  list-style: none;
+}
+
+/* No text decoration on links */
+a {
+  text-decoration: none;
+  color: inherit;
+}`},
+      {type:'text',html:`<h3>Production Checklist</h3>
+<ul>
+  <li>✅ <strong>Reset applied</strong> — Normalize cross-browser defaults</li>
+  <li>✅ <strong>box-sizing: border-box</strong> — On all elements</li>
+  <li>✅ <strong>Font loading</strong> — Use font-display: swap for custom fonts</li>
+  <li>✅ <strong>Responsive</strong> — Test on real devices, not just resize</li>
+  <li>✅ <strong>Accessibility</strong> — Focus styles, contrast, reduced motion</li>
+  <li>✅ <strong>Performance</strong> — Minified, no unused CSS, minimal @import</li>
+  <li>✅ <strong>Print styles</strong> — @media print for print-friendly pages</li>
+  <li>✅ <strong>Dark mode</strong> — At minimum, respect prefers-color-scheme</li>
+  <li>✅ <strong>Error states</strong> — Style error messages, form validation states</li>
+  <li>✅ <strong>Loading states</strong> — Skeleton screens, spinners</li>
+</ul>`},
+      {type:'info',variant:'note',icon:'📝',text:'Use <link rel="preconnect"> for font CDNs, <link rel="preload"> for critical fonts, and font-display: swap to prevent invisible text during font loading.'}
+    ]
+  });
+
+  // ---- PROJECTS ----
+  L['project-navbar'] = h({
+    title:'Project: Responsive Navbar', subtitle:'Build a production-ready navigation bar',
+    sections:[
+      {type:'text',html:`<h2>Responsive Navbar Project</h2>
+<p>Build a responsive navigation bar with: a logo, navigation links, a hamburger menu on mobile, and smooth transitions.</p>
+<h3>Requirements</h3>
+<ul>
+  <li>Logo on the left</li>
+  <li>Navigation links centered</li>
+  <li>CTA button on the right</li>
+  <li>Hamburger menu on mobile (≤768px)</li>
+  <li>Smooth slide-in animation for mobile menu</li>
+  <li>Sticky positioning</li>
+</ul>`},
+      {type:'exercise',id:'ex-project-navbar',title:'Build the Navbar',
+        instructions:'Create the responsive navbar using the HTML structure provided. Style it to look professional on both desktop and mobile.',
+        html:'<nav class="proj-nav"><span class="proj-logo">Brand</span><ul class="proj-nav-links"><li><a href="#">Home</a></li><li><a href="#">About</a></li><li><a href="#">Services</a></li><li><a href="#">Contact</a></li></ul><button class="proj-cta">Get Started</button></nav>',
+        initialCSS:'.proj-nav {\n  display: flex;\n  align-items: center;\n  padding: 16px 24px;\n  background: #0f172a;\n  color: white;\n  border-radius: 8px;\n  font-family: system-ui, sans-serif;\n  font-size: 14px;\n}\n\n.proj-logo {\n  font-weight: 700;\n  font-size: 18px;\n}\n\n.proj-nav-links {\n  display: flex;\n  gap: 24px;\n  margin: 0 auto;\n  list-style: none;\n}\n\n.proj-nav-links a {\n  color: #94a3b8;\n  transition: color 0.2s;\n}\n\n.proj-nav-links a:hover {\n  color: white;\n}\n\n.proj-cta {\n  padding: 8px 20px;\n  background: #2563eb;\n  color: white;\n  border: none;\n  border-radius: 6px;\n  font-weight: 600;\n  cursor: pointer;\n  transition: background 0.2s;\n}\n\n.proj-cta:hover {\n  background: #1d4ed8;\n}',
+        solution:'/* The initial CSS is already the solution! Add responsive styles below */\n@media (max-width: 768px) {\n  .proj-nav-links { display: none; }\n}',
+        validator: css => css.includes('display: flex') && css.includes('background')}
+    ]
+  });
+
+  L['project-cards'] = h({
+    title:'Project: Card Component System', subtitle:'Build a flexible card system',
+    sections:[
+      {type:'text',html:`<h2>Card Component System</h2>
+<p>Cards are the most common UI component. Build a system that includes: image cards, text-only cards, horizontal cards, and card grids.</p>`},
+      {type:'exercise',id:'ex-project-cards',title:'Build Card Styles',
+        instructions:'Style the card with: rounded corners, subtle shadow, image on top, and a hover lift effect.',
+        html:'<div style="max-width:320px"><div class="proj-card"><img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'320\' height=\'180\' fill=\'%232563eb\'%3E%3Crect width=\'320\' height=\'180\' rx=\'0\'/%3E%3Ctext x=\'160\' y=\'95\' text-anchor=\'middle\' fill=\'white\' font-size=\'20\' font-family=\'sans-serif\'%3EImage%3C/text%3E%3C/svg%3E" alt="Card image" style="width:100%"><div class="proj-card-body"><h3 class="proj-card-title">Card Title</h3><p class="proj-card-text">This is a card component with an image, title, description, and action button.</p><button class="proj-card-btn">Learn More</button></div></div></div>',
+        initialCSS:'.proj-card {\n  /* Style the card */\n  background: white;\n  font-family: system-ui, sans-serif;\n}\n\n.proj-card-body {\n  /* Add padding */\n}\n\n.proj-card-title {\n  font-size: 1.25rem;\n  font-weight: 700;\n  color: #1e293b;\n}\n\n.proj-card-text {\n  color: #64748b;\n  font-size: 0.9rem;\n  line-height: 1.6;\n}\n\n.proj-card-btn {\n  /* Style the button */\n  background: #2563eb;\n  color: white;\n  border: none;\n  font-weight: 600;\n  cursor: pointer;\n}',
+        solution:'.proj-card {\n  background: white;\n  border-radius: 12px;\n  overflow: hidden;\n  box-shadow: 0 4px 6px rgba(0,0,0,0.07);\n  transition: transform 0.3s, box-shadow 0.3s;\n  font-family: system-ui, sans-serif;\n}\n.proj-card:hover {\n  transform: translateY(-4px);\n  box-shadow: 0 12px 24px rgba(0,0,0,0.1);\n}\n.proj-card-body { padding: 20px; }\n.proj-card-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 8px; }\n.proj-card-text { color: #64748b; font-size: 0.9rem; line-height: 1.6; margin-bottom: 16px; }\n.proj-card-btn { background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; }',
+        validator: css => css.includes('border-radius') && css.includes('box-shadow')}
+    ]
+  });
+
+  L['project-landing'] = h({
+    title:'Project: Responsive Landing Page', subtitle:'A full-page marketing layout',
+    sections:[
+      {type:'text',html:`<h2>Responsive Landing Page</h2>
+<p>Combine everything you have learned to build a responsive landing page with: a hero section, feature cards, testimonials, and a footer.</p>
+<h3>Key Concepts Applied</h3>
+<ul>
+  <li>Flexbox for the navbar</li>
+  <li>CSS Grid for the feature cards</li>
+  <li>Media queries for responsiveness</li>
+  <li>Custom properties for theming</li>
+  <li>Gradients and shadows for visual polish</li>
+  <li>Transitions for interactive elements</li>
+</ul>`},
+      {type:'info',variant:'tip',icon:'💡',text:'Start with mobile layout first, then add complexity. Define your design tokens, then build components. Test at every breakpoint.'}
+    ]
+  });
+
+  L['project-dashboard'] = h({
+    title:'Project: Dashboard UI', subtitle:'Data-rich admin interface',
+    sections:[
+      {type:'text',html:`<h2>Dashboard UI Project</h2>
+<p>Build a modern dashboard layout with sidebar navigation, stat cards, a data table, and chart placeholders.</p>
+<h3>Layout Strategy</h3>`},
+      {type:'code',lang:'css',title:'Dashboard Grid Layout',code:`.dashboard {
+  display: grid;
+  grid-template:
+    "sidebar header" auto
+    "sidebar content" 1fr
+    / 260px 1fr;
+  min-height: 100vh;
+}
+
+.dashboard-sidebar { grid-area: sidebar; }
+.dashboard-header  { grid-area: header; }
+.dashboard-content { grid-area: content; padding: 24px; }
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+/* Chart and table area */
+.dashboard-panels {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard {
+    grid-template:
+      "header" auto
+      "content" 1fr
+      / 1fr;
+  }
+  .dashboard-sidebar { display: none; }
+  .dashboard-panels { grid-template-columns: 1fr; }
+}`}
+    ]
+  });
+
+  L['project-pricing'] = h({
+    title:'Project: Pricing Page', subtitle:'A polished pricing table',
+    sections:[
+      {type:'text',html:`<h2>Pricing Page Project</h2>
+<p>Build a responsive pricing table with: tier cards, feature lists, highlight for the recommended plan, and a toggle for monthly/annual pricing.</p>`},
+      {type:'exercise',id:'ex-project-pricing',title:'Style Pricing Cards',
+        instructions:'Create three pricing cards side by side using CSS Grid. The middle card should be highlighted.',
+        html:'<div class="pricing-grid"><div class="pricing-card"><h3>Basic</h3><div class="price">$9/mo</div><ul class="features"><li>5 Projects</li><li>10GB Storage</li><li>Email Support</li></ul><button>Choose</button></div><div class="pricing-card featured"><h3>Pro</h3><div class="price">$29/mo</div><ul class="features"><li>Unlimited Projects</li><li>100GB Storage</li><li>Priority Support</li></ul><button>Choose</button></div><div class="pricing-card"><h3>Enterprise</h3><div class="price">$99/mo</div><ul class="features"><li>Everything in Pro</li><li>1TB Storage</li><li>24/7 Support</li></ul><button>Choose</button></div></div>',
+        initialCSS:'.pricing-grid {\n  display: grid;\n  grid-template-columns: repeat(3, 1fr);\n  gap: 16px;\n  font-family: system-ui, sans-serif;\n  max-width: 700px;\n}\n\n.pricing-card {\n  padding: 24px;\n  border-radius: 12px;\n  border: 1px solid #e2e8f0;\n  background: white;\n  text-align: center;\n}\n\n.pricing-card h3 { font-size: 1.1rem; margin-bottom: 8px; }\n.price { font-size: 1.8rem; font-weight: 800; margin: 12px 0; color: #1e293b; }\n.features { list-style: none; margin: 16px 0; font-size: 0.85rem; color: #64748b; }\n.features li { padding: 6px 0; border-bottom: 1px solid #f1f5f9; }\n.pricing-card button { width: 100%; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: white; cursor: pointer; font-weight: 600; }\n\n/* Highlight the featured card */\n.pricing-card.featured {\n  /* Your styles */\n}',
+        solution:'.pricing-card.featured {\n  border: 2px solid #2563eb;\n  transform: scale(1.05);\n  box-shadow: 0 12px 24px rgba(37,99,235,0.15);\n}\n.pricing-card.featured button {\n  background: #2563eb;\n  color: white;\n  border-color: #2563eb;\n}',
+        validator: css => css.includes('.featured')}
+    ]
+  });
+
+  L['project-animation'] = h({
+    title:'Project: Animation Showcase', subtitle:'Demonstrate CSS animation mastery',
+    sections:[
+      {type:'text',html:`<h2>Animation Showcase</h2>
+<p>Create a page that demonstrates various CSS animation techniques: hover effects, loading spinners, scroll-triggered reveals, and micro-interactions.</p>`},
+      {type:'exercise',id:'ex-project-animation',title:'Create Animation Effects',
+        instructions:'Create a spinning loader, a bouncing effect, and a fade-in animation using @keyframes.',
+        html:'<div style="display:flex;gap:40px;align-items:center;padding:20px"><div class="loader"></div><div class="bouncer"></div><div class="fader">Fade In</div></div>',
+        initialCSS:'.loader {\n  width: 40px;\n  height: 40px;\n  border: 4px solid #e2e8f0;\n  border-top-color: #2563eb;\n  border-radius: 50%;\n  /* Add spin animation */\n}\n\n.bouncer {\n  width: 24px;\n  height: 24px;\n  background: #2563eb;\n  border-radius: 50%;\n  /* Add bounce animation */\n}\n\n.fader {\n  background: #dbeafe;\n  padding: 16px 24px;\n  border-radius: 8px;\n  font-weight: 600;\n  /* Add fade-in animation */\n}\n\n@keyframes spin {\n  to { transform: rotate(360deg); }\n}\n\n@keyframes bounce {\n  0%, 100% { transform: translateY(0); }\n  50% { transform: translateY(-20px); }\n}\n\n@keyframes fadeIn {\n  from { opacity: 0; transform: translateY(10px); }\n  to { opacity: 1; transform: translateY(0); }\n}',
+        solution:'.loader { width: 40px; height: 40px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite; }\n.bouncer { width: 24px; height: 24px; background: #2563eb; border-radius: 50%; animation: bounce 1s ease infinite; }\n.fader { background: #dbeafe; padding: 16px 24px; border-radius: 8px; font-weight: 600; animation: fadeIn 1s ease forwards; }\n@keyframes spin { to { transform: rotate(360deg); } }\n@keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }\n@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }',
+        validator: css => css.includes('animation') && css.includes('@keyframes')}
+    ]
+  });
+
+  // Return content or a default
+  return L[lessonId] || {
+    title: lessonId.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),
+    subtitle: 'This lesson is being prepared. Check back soon!',
+    sections: [
+      {type:'text', html:'<p>This lesson content is being developed. In the meantime, explore the other lessons in this module!</p>'}
+    ]
+  };
+}
+
+// ============================================================
+// SECTION 3: BADGE DEFINITIONS
+// ============================================================
+const BADGES = [
+  {id:'first-lesson',name:'First Steps',icon:'👣',desc:'Complete your first lesson',check:p=>p.completed.length>=1},
+  {id:'five-lessons',name:'Getting Started',icon:'📚',desc:'Complete 5 lessons',check:p=>p.completed.length>=5},
+  {id:'ten-lessons',name:'Dedicated Learner',icon:'🎯',desc:'Complete 10 lessons',check:p=>p.completed.length>=10},
+  {id:'module-done',name:'Module Master',icon:'🏅',desc:'Complete all lessons in a module',check:p=>{for(const m of COURSE.modules){if(m.lessons.every(l=>p.completed.includes(l.id)))return true;}return false;}},
+  {id:'quiz-ace',name:'Quiz Ace',icon:'🧠',desc:'Score 100% on a quiz',check:p=>Object.values(p.quizScores||{}).some(s=>s===100)},
+  {id:'halfway',name:'Halfway There',icon:'⭐',desc:'Complete 50% of the course',check:p=>p.completed.length>=Math.floor(getTotalLessons()/2)},
+  {id:'graduate',name:'CSS Graduate',icon:'🎓',desc:'Complete all lessons',check:p=>p.completed.length>=getTotalLessons()},
+  {id:'explorer',name:'Explorer',icon:'🧭',desc:'Visit 10 different lessons',check:p=>(p.visited||[]).length>=10},
+];
+
+function getTotalLessons() {
+  return COURSE.modules.reduce((sum,m)=>sum+m.lessons.length,0);
+}
+
+// ============================================================
+// SECTION 4: APPLICATION ENGINE
+// ============================================================
+class CSSCourseApp {
+  constructor() {
+    this.progress = this.loadProgress();
+    this.currentModule = null;
+    this.currentLesson = null;
+    this.init();
+  }
+
+  // --- Progress Management ---
+  loadProgress() {
+    try {
+      const saved = localStorage.getItem('css-mastery-progress');
+      return saved ? JSON.parse(saved) : {completed:[],visited:[],quizScores:{},badges:[],theme:'dark'};
+    } catch(e) { return {completed:[],visited:[],quizScores:{},badges:[],theme:'dark'}; }
+  }
+  saveProgress() {
+    try { localStorage.setItem('css-mastery-progress', JSON.stringify(this.progress)); } catch(e) {}
+  }
+  isCompleted(lessonId) { return this.progress.completed.includes(lessonId); }
+  markComplete(lessonId) {
+    if (!this.progress.completed.includes(lessonId)) {
+      this.progress.completed.push(lessonId);
+      this.saveProgress();
+      this.checkBadges();
+    }
+  }
+  markVisited(lessonId) {
+    if (!this.progress.visited) this.progress.visited = [];
+    if (!this.progress.visited.includes(lessonId)) {
+      this.progress.visited.push(lessonId);
+      this.saveProgress();
+      this.checkBadges();
+    }
+  }
+  saveQuizScore(lessonId, score) {
+    this.progress.quizScores[lessonId] = score;
+    this.saveProgress();
+    this.checkBadges();
+  }
+  checkBadges() {
+    let newBadge = false;
+    BADGES.forEach(b => {
+      if (!this.progress.badges.includes(b.id) && b.check(this.progress)) {
+        this.progress.badges.push(b.id);
+        newBadge = true;
+      }
+    });
+    if (newBadge) this.saveProgress();
+  }
+  getProgressPercent() {
+    return Math.round((this.progress.completed.length / getTotalLessons()) * 100);
+  }
+
+  // --- Initialization ---
+  init() {
+    this.applyTheme();
+    this.renderSidebar();
+    this.setupEventListeners();
+    this.updateProgressUI();
+    // Show welcome page
+    this.renderWelcome();
+  }
+
+  renderWelcome() {
+    this.currentModule = null;
+    this.currentLesson = null;
+    this.renderSidebar();
+    
+    const bc = document.getElementById('breadcrumb');
+    bc.innerHTML = `<span>👋 Welcome</span>`;
+    
+    const area = document.getElementById('contentArea');
+    const totalModules = COURSE.modules.length;
+    const totalLessons = getTotalLessons();
+    
+    let html = `
+      <div style="text-align:center; margin-bottom: 24px;">
+        <span style="font-size: 13px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 1px;">
+          ${totalModules} Modules · Offline Ready · Job-Focused
+        </span>
+      </div>
+      <div class="welcome-hero" style="padding-top: 0;">
+        <h1>From zero to <br><span class="gradient-text">CSS master.</span></h1>
+        <p>No padding, no filler. This course takes you from never touching code to writing clean, production-grade CSS that will land you your first dev job. Every module is dense, practical, and interview-aware.</p>
+      </div>
+      
+      <div class="welcome-stats">
+        <div class="welcome-stat">
+          <div class="welcome-stat-value">${totalModules}</div>
+          <div class="welcome-stat-label">Modules</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-value">${totalLessons}</div>
+          <div class="welcome-stat-label">Lessons</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-value">60+</div>
+          <div class="welcome-stat-label">Code Examples</div>
+        </div>
+        <div class="welcome-stat">
+          <div class="welcome-stat-value">70+</div>
+          <div class="welcome-stat-label">Quiz Questions</div>
+        </div>
+      </div>
+      
+      <div class="welcome-cta">
+        <button class="btn btn-primary" style="padding: 14px 28px; font-size: 16px;" id="startCourseBtn">
+          Begin Module 1 →
+        </button>
+      </div>
+      
+      <div class="welcome-modules" style="margin-top: 48px;">
+        <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;">Course Overview</h2>
+    `;
+    
+    COURSE.modules.forEach(mod => {
+      html += `
+        <div class="welcome-module-card" data-module="${mod.id}">
+          <div class="welcome-module-icon">${mod.icon}</div>
+          <div class="welcome-module-info">
+            <h3>${mod.title}</h3>
+            <p>${mod.description}</p>
+          </div>
+          <div class="welcome-module-count">${mod.lessons.length} lessons</div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    
+    area.innerHTML = html;
+    
+    // Add event listeners for welcome buttons
+    document.getElementById('startCourseBtn').addEventListener('click', () => {
+      const firstLesson = COURSE.modules[0].lessons[0];
+      this.navigateTo(COURSE.modules[0].id, firstLesson.id, true);
+    });
+    
+    area.querySelectorAll('.welcome-module-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const modId = card.dataset.module;
+        const mod = COURSE.modules.find(m => m.id === modId);
+        if (mod && mod.lessons.length > 0) {
+          this.navigateTo(modId, mod.lessons[0].id, true);
+        }
+      });
+    });
+  }
+
+  // --- Theme ---
+  applyTheme() {
+    document.documentElement.setAttribute('data-theme', this.progress.theme || 'dark');
+  }
+  toggleTheme() {
+    this.progress.theme = this.progress.theme === 'dark' ? 'light' : 'dark';
+    this.applyTheme();
+    this.saveProgress();
+  }
+
+  // --- Sidebar ---
+  renderSidebar() {
+    const nav = document.getElementById('sidebarNav');
+    let html = '';
+    COURSE.modules.forEach(mod => {
+      const completedCount = mod.lessons.filter(l => this.isCompleted(l.id)).length;
+      const isOpen = this.currentModule === mod.id;
+      html += `<div class="nav-module ${isOpen?'open':''}" data-module="${mod.id}">
+        <button class="nav-module-header" aria-expanded="${isOpen}">
+          <span class="module-icon">${mod.icon}</span>
+          <span>${mod.title}</span>
+          <span class="chevron">▸</span>
+        </button>
+        <div class="nav-module-lessons">`;
+      mod.lessons.forEach(lesson => {
+        const done = this.isCompleted(lesson.id);
+        const active = this.currentLesson === lesson.id;
+        html += `<button class="nav-lesson ${done?'completed':''} ${active?'active':''}" data-module="${mod.id}" data-lesson="${lesson.id}">
+          <span class="nav-lesson-dot">${done?'✓':''}</span>
+          <span class="nav-lesson-title">${lesson.title}</span>
+        </button>`;
+      });
+      html += `</div></div>`;
+    });
+    nav.innerHTML = html;
+
+    // Event listeners
+    nav.querySelectorAll('.nav-module-header').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const mod = btn.closest('.nav-module');
+        mod.classList.toggle('open');
+        btn.setAttribute('aria-expanded', mod.classList.contains('open'));
+      });
+    });
+    nav.querySelectorAll('.nav-lesson').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.navigateTo(btn.dataset.module, btn.dataset.lesson, true);
+        // Close sidebar on mobile
+        document.getElementById('sidebar').classList.remove('open');
+      });
+    });
+  }
+
+  // --- Navigation ---
+  navigateTo(moduleId, lessonId, scroll) {
+    this.currentModule = moduleId;
+    this.currentLesson = lessonId;
+    this.markVisited(lessonId);
+    this.renderSidebar();
+    this.updateProgressUI();
+    this.renderBreadcrumb();
+    this.renderLesson(moduleId, lessonId);
+    if (scroll !== false) {
+      document.getElementById('mainBody').scrollTop = 0;
+    }
+  }
+
+  renderBreadcrumb() {
+    const mod = COURSE.modules.find(m => m.id === this.currentModule);
+    const les = mod ? mod.lessons.find(l => l.id === this.currentLesson) : null;
+    const bc = document.getElementById('breadcrumb');
+    if (mod && les) {
+      bc.innerHTML = `<span>${mod.icon} ${mod.title}</span><span style="color:var(--text-3)">›</span><span class="bc-accent">${les.title}</span>`;
+    }
+  }
+
+  updateProgressUI() {
+    const pct = this.getProgressPercent();
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${pct}% complete · ${this.progress.completed.length}/${getTotalLessons()} lessons`;
+  }
+
+  // --- Lesson Rendering ---
+  renderLesson(moduleId, lessonId) {
+    const content = getLessonContent(moduleId, lessonId);
+    const mod = COURSE.modules.find(m => m.id === moduleId);
+    const lessonIndex = mod.lessons.findIndex(l => l.id === lessonId);
+    let prevLesson = lessonIndex > 0 ? mod.lessons[lessonIndex - 1] : null;
+    let nextLesson = lessonIndex < mod.lessons.length - 1 ? mod.lessons[lessonIndex + 1] : null;
+    // Also check previous/next modules
+    const modIndex = COURSE.modules.indexOf(mod);
+    let prevModule = null, nextModule = null;
+    if (!prevLesson && modIndex > 0) {
+      prevModule = COURSE.modules[modIndex - 1];
+      prevLesson = prevModule.lessons[prevModule.lessons.length - 1];
+    }
+    if (!nextLesson && modIndex < COURSE.modules.length - 1) {
+      nextModule = COURSE.modules[modIndex + 1];
+      nextLesson = nextModule.lessons[0];
+    }
+
+    let html = `<h1 class="lesson-title">${content.title}</h1>`;
+    html += `<p class="lesson-subtitle">${content.subtitle}</p>`;
+
+    // Render sections
+    if (content.sections) {
+      content.sections.forEach((section, idx) => {
+        html += this.renderSection(section, lessonId, idx);
+      });
+    }
+
+    // Mark complete button
+    const completed = this.isCompleted(lessonId);
+    html += `<div class="complete-bar ${completed?'completed':''}" id="completeBar">
+      <button class="btn ${completed?'btn-secondary':'btn-primary'}" id="completeBtn" data-lesson="${lessonId}">
+        ${completed ? '✓ Completed — Mark as Incomplete' : '✓ Mark as Complete'}
+      </button>
+    </div>`;
+
+    // Navigation
+    html += `<div class="lesson-nav">`;
+    if (prevLesson) {
+      const pm = prevModule || mod;
+      html += `<button class="lesson-nav-btn prev" data-module="${pm.id}" data-lesson="${prevLesson.id}">
+        <div><div class="lnb-dir">← Previous</div><div class="lnb-title">${prevLesson.title}</div></div>
+      </button>`;
+    }
+    if (nextLesson) {
+      const nm = nextModule || mod;
+      html += `<button class="lesson-nav-btn next" data-module="${nm.id}" data-lesson="${nextLesson.id}">
+        <div><div class="lnb-dir">Next →</div><div class="lnb-title">${nextLesson.title}</div></div>
+      </button>`;
+    }
+    html += `</div>`;
+
+    document.getElementById('contentArea').innerHTML = html;
+
+    // Event listeners
+    document.getElementById('completeBtn').addEventListener('click', () => {
+      if (this.isCompleted(lessonId)) {
+        this.progress.completed = this.progress.completed.filter(id => id !== lessonId);
+      } else {
+        this.markComplete(lessonId);
+      }
+      this.saveProgress();
+      this.renderLesson(moduleId, lessonId);
+      this.renderSidebar();
+      this.updateProgressUI();
+    });
+
+    document.querySelectorAll('.lesson-nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.navigateTo(btn.dataset.module, btn.dataset.lesson);
+      });
+    });
+
+    // Init playgrounds
+    this.initPlaygrounds();
+    // Init quizzes
+    this.initQuizzes();
+    // Copy buttons
+    document.querySelectorAll('.code-block-copy').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = btn.closest('.code-block').querySelector('pre').textContent;
+        navigator.clipboard.writeText(code).catch(()=>{});
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      });
+    });
+  }
+
+  renderSection(section, lessonId, idx) {
+    switch (section.type) {
+      case 'text':
+        return `<div class="content-section">${section.html}</div>`;
+      case 'info':
+        return `<div class="info-box ${section.variant}"><span class="info-box-icon">${section.icon}</span><span>${section.text}</span></div>`;
+      case 'code':
+        return this.renderCodeBlock(section);
+      case 'quiz':
+        return this.renderQuiz(section, lessonId, idx);
+      case 'exercise':
+        return this.renderExercise(section, idx);
+      default:
+        return '';
+    }
+  }
+
+  renderCodeBlock(section) {
+    const highlighted = this.highlightCSS(section.code, section.lang);
+    return `<div class="code-block">
+      <div class="code-block-header">
+        <span class="code-block-lang">${section.lang || 'css'}</span>
+        ${section.title ? `<span style="color:var(--text-2);font-size:12px">${section.title}</span>` : ''}
+        <button class="code-block-copy">Copy</button>
+      </div>
+      <pre>${highlighted}</pre>
+    </div>`;
+  }
+
+  // --- Syntax Highlighting ---
+  highlightCSS(code, lang) {
+    // Escape HTML first
+    let s = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+    if (lang === 'html') {
+      // Simple HTML highlighting
+      s = s.replace(/(&lt;\/?)([\w-]+)/g, '$1<span class="hl-tag">$2</span>');
+      s = s.replace(/([\w-]+)(=)(".*?")/g, '<span class="hl-attr">$1</span>$2<span class="hl-string">$3</span>');
+      s = s.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="hl-comment">$1</span>');
+      return s;
+    }
+
+    if (lang === 'javascript') {
+      // Simple JS highlighting
+      s = s.replace(/(\/\/.*?)(?=\n)/g, '<span class="hl-comment">$1</span>');
+      s = s.replace(/('.*?'|".*?")/g, '<span class="hl-string">$1</span>');
+      s = s.replace(/\b(const|let|var|function|return|if|else|for|while|class|new|this|addEventListener|document|import|export|from|true|null|undefined)\b/g, '<span class="hl-keyword">$1</span>');
+      return s;
+    }
+
+    // CSS highlighting
+    // Comments
+    s = s.replace(/(\/\*[\s\S]*?\*\/)/g, '<span class="hl-comment">$1</span>');
+    // Strings
+    s = s.replace(/(".*?"|'.*?')/g, '<span class="hl-string">$1</span>');
+    // @-rules
+    s = s.replace(/(@media|@keyframes|@supports|@container|@import|@font-face|@layer|@property)(\s)/g, '<span class="hl-keyword">$1</span>$2');
+    // Properties (word followed by colon)
+    s = s.replace(/(?<!\/\*)(\b[\w-]+)(?=\s*:)/g, '<span class="hl-property">$1</span>');
+    // Numbers with units
+    s = s.replace(/(\b\d+\.?\d*)(px|em|rem|vh|vw|vmin|vmax|%|s|ms|deg|fr|ch|ex|pt)\b/g, '<span class="hl-number">$1$2</span>');
+    // Standalone numbers
+    s = s.replace(/(:\s*)(\d+\.?\d*)(?=[;}\s,])/g, '$1<span class="hl-number">$2</span>');
+    // Colors
+    s = s.replace(/(#[0-9a-fA-F]{3,8})\b/g, '<span class="hl-color" style="color:#e8c547">$1</span>');
+    // Selectors (lines ending with {)
+    // Keywords
+    s = s.replace(/\b(inherit|initial|unset|revert|auto|none|block|inline|flex|grid|center|left|right|top|bottom|absolute|relative|fixed|sticky|solid|dashed|dotted|transparent|currentColor)\b/g, '<span class="hl-value">$1</span>');
+
+    return s;
+  }
+
+  // --- Exercise Rendering ---
+  renderExercise(section, idx) {
+    const id = section.id || 'exercise-' + idx;
+    return `<div class="playground" id="pg-${id}">
+      <div class="playground-header">
+        <span class="playground-title">${section.title || 'Practice Exercise'}</span>
+        <div class="playground-actions">
+          <button class="playground-btn secondary pg-reset-btn" data-id="${id}">Reset</button>
+          <button class="playground-btn primary pg-check-btn" data-id="${id}">Check Solution</button>
+        </div>
+      </div>
+      <div style="padding:12px 18px;font-size:.88rem;color:var(--text-2);line-height:1.65;border-bottom:1px solid var(--border);background:var(--bg-3)">${section.instructions}</div>
+      <div class="playground-body">
+        <div class="playground-editor">
+          <div class="playground-editor-label">CSS Editor</div>
+          <textarea id="editor-${id}" spellcheck="false">${section.initialCSS}</textarea>
+        </div>
+        <div class="playground-preview">
+          <div class="playground-preview-label">Live Preview</div>
+          <iframe id="preview-${id}" sandbox="allow-same-origin"></iframe>
+        </div>
+      </div>
+      <div class="playground-feedback" id="feedback-${id}"></div>
+    </div>
+    <div style="margin:8px 0">
+      <details style="font-size:.85rem;color:var(--text-3)">
+        <summary style="cursor:pointer;padding:8px 0">Show Solution</summary>
+        <div class="code-block" style="margin:8px 0"><div class="code-block-header"><span class="code-block-lang">css</span></div><pre>${this.highlightCSS(section.solution,'css')}</pre></div>
+      </details>
+    </div>`;
+  }
+
+  initPlaygrounds() {
+    document.querySelectorAll('.playground').forEach(pg => {
+      const id = pg.id.replace('pg-', '');
+      const textarea = document.getElementById('editor-' + id);
+      const preview = document.getElementById('preview-' + id);
+      const checkBtn = pg.querySelector('.pg-check-btn');
+      const resetBtn = pg.querySelector('.pg-reset-btn');
+
+      if (!textarea || !preview) return;
+
+      const exerciseData = this.findExerciseData(id);
+      const updatePreview = () => {
+        const css = textarea.value;
+        const htmlContent = exerciseData ? exerciseData.html : '<p>No HTML defined</p>';
+        preview.srcdoc = `<!DOCTYPE html><html><head><style>
+          *,*::before,*::after{box-sizing:border-box}
+          body{margin:0;padding:16px;font-family:system-ui,sans-serif;font-size:14px;color:#1e293b}
+          ${css}
+        </style></head><body>${htmlContent}</body></html>`;
+      };
+
+      // Tab support in textarea
+      textarea.addEventListener('keydown', e => {
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          textarea.value = textarea.value.substring(0, start) + '  ' + textarea.value.substring(end);
+          textarea.selectionStart = textarea.selectionEnd = start + 2;
+          updatePreview();
+        }
+      });
+
+      textarea.addEventListener('input', updatePreview);
+      updatePreview();
+
+      if (checkBtn && exerciseData && exerciseData.validator) {
+        checkBtn.addEventListener('click', () => {
+          const feedback = document.getElementById('feedback-' + id);
+          const css = textarea.value;
+          if (exerciseData.validator(css)) {
+            feedback.className = 'playground-feedback show success';
+            feedback.textContent = '✓ Great job! Your solution looks correct.';
+          } else {
+            feedback.className = 'playground-feedback show error';
+            feedback.textContent = '✗ Not quite right. Keep trying or check the solution.';
+          }
+        });
+      }
+
+      if (resetBtn && exerciseData) {
+        resetBtn.addEventListener('click', () => {
+          textarea.value = exerciseData.initialCSS;
+          updatePreview();
+          const feedback = document.getElementById('feedback-' + id);
+          feedback.className = 'playground-feedback';
+        });
+      }
+    });
+  }
+
+  findExerciseData(exerciseId) {
+    // Search through all lessons for this exercise
+    for (const mod of COURSE.modules) {
+      for (const lesson of mod.lessons) {
+        const content = getLessonContent(mod.id, lesson.id);
+        if (content.sections) {
+          for (const section of content.sections) {
+            if (section.type === 'exercise' && section.id === exerciseId) {
+              return section;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  // --- Quiz Engine ---
+  renderQuiz(section, lessonId, sectionIdx) {
+    const quizId = `quiz-${lessonId}-${sectionIdx}`;
+    let html = `<div class="quiz-container" id="${quizId}" data-lesson="${lessonId}">`;
+    section.questions.forEach((q, i) => {
+      html += `<div class="quiz-question" data-qi="${i}">
+        <div class="quiz-q-text">${i+1}. ${q.q}</div>
+        <div class="quiz-options">
+          ${q.options.map((opt,j) => `<div class="quiz-option" data-qi="${i}" data-oi="${j}">
+            <span class="quiz-option-marker">${String.fromCharCode(65+j)}</span>
+            <span>${opt}</span>
+          </div>`).join('')}
+        </div>
+        <div class="quiz-explanation" id="quiz-exp-${quizId}-${i}"></div>
+      </div>`;
+    });
+    html += `<div class="quiz-actions">
+      <button class="btn btn-primary quiz-submit-btn" data-quiz="${quizId}" data-section-idx="${sectionIdx}" data-lesson="${lessonId}">Submit Answers</button>
+    </div>`;
+    html += `<div class="quiz-score" id="score-${quizId}" style="display:none"></div>`;
+    html += `</div>`;
+    return html;
+  }
+
+  initQuizzes() {
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const qi = opt.dataset.qi;
+        const container = opt.closest('.quiz-question');
+        container.querySelectorAll(`.quiz-option[data-qi="${qi}"]`).forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+      });
+    });
+
+    document.querySelectorAll('.quiz-submit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const quizId = btn.dataset.quiz;
+        const lessonId = btn.dataset.lesson;
+        const sectionIdx = parseInt(btn.dataset.sectionIdx);
+        this.submitQuiz(quizId, lessonId, sectionIdx);
+      });
+    });
+  }
+
+  submitQuiz(quizId, lessonId, sectionIdx) {
+    // Find the quiz data
+    const content = getLessonContent(this.currentModule, lessonId);
+    const quizSection = content.sections[sectionIdx];
+    if (!quizSection || quizSection.type !== 'quiz') return;
+
+    const container = document.getElementById(quizId);
+    let correct = 0;
+    let total = quizSection.questions.length;
+
+    quizSection.questions.forEach((q, i) => {
+      const question = container.querySelector(`.quiz-question[data-qi="${i}"]`);
+      const selected = question.querySelector('.quiz-option.selected');
+      const expEl = document.getElementById(`quiz-exp-${quizId}-${i}`);
+      const selectedIdx = selected ? parseInt(selected.dataset.oi) : -1;
+
+      if (selectedIdx === q.correct) {
+        correct++;
+        question.classList.add('answered-correct');
+        if (selected) selected.classList.add('correct');
+        expEl.className = 'quiz-explanation show correct';
+        expEl.textContent = '✓ Correct! ' + q.explain;
+      } else {
+        question.classList.add('answered-wrong');
+        if (selected) selected.classList.add('wrong');
+        // Highlight correct answer
+        question.querySelectorAll('.quiz-option')[q.correct].classList.add('correct');
+        expEl.className = 'quiz-explanation show wrong';
+        expEl.textContent = '✗ Incorrect. ' + q.explain;
+      }
+    });
+
+    const score = Math.round((correct / total) * 100);
+    const scoreEl = document.getElementById('score-' + quizId);
+    scoreEl.style.display = 'block';
+    scoreEl.innerHTML = `
+      <div class="quiz-score-value">${score}%</div>
+      <div class="quiz-score-label">${correct} of ${total} correct</div>
+    `;
+
+    this.saveQuizScore(lessonId, score);
+
+    // Disable further interaction
+    container.querySelectorAll('.quiz-option').forEach(o => {
+      o.style.pointerEvents = 'none';
+    });
+    container.querySelector('.quiz-submit-btn').disabled = true;
+    container.querySelector('.quiz-submit-btn').textContent = 'Submitted';
+  }
+
+  // --- Search ---
+  setupEventListeners() {
+    // Menu button
+    document.getElementById('menuBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', () => this.toggleTheme());
+
+    // Search
+    document.getElementById('sidebarSearchInput').addEventListener('focus', () => this.openSearch());
+    document.getElementById('sidebarSearch').addEventListener('click', () => this.openSearch());
+    document.getElementById('searchClose').addEventListener('click', () => this.closeSearch());
+    document.getElementById('searchOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) this.closeSearch();
+    });
+    document.getElementById('searchInput').addEventListener('input', (e) => this.handleSearch(e.target.value));
+
+    // Badges
+    document.getElementById('badgesBtn').addEventListener('click', () => this.openBadges());
+    document.getElementById('badgesClose').addEventListener('click', () => this.closeBadges());
+    document.getElementById('badgesOverlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) this.closeBadges();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        const active = document.activeElement;
+        if (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          this.openSearch();
+        }
+      }
+      if (e.key === 'Escape') {
+        this.closeSearch();
+        this.closeBadges();
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    });
+
+    // Close sidebar on overlay click (mobile)
+    document.querySelector('.main').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+    });
+  }
+
+  openSearch() {
+    document.getElementById('searchOverlay').classList.add('open');
+    document.getElementById('searchInput').focus();
+    document.getElementById('searchInput').value = '';
+    this.handleSearch('');
+  }
+  closeSearch() {
+    document.getElementById('searchOverlay').classList.remove('open');
+  }
+  handleSearch(query) {
+    const results = document.getElementById('searchResults');
+    const q = query.toLowerCase().trim();
+
+    if (!q) {
+      // Show recent/popular
+      let html = '';
+      COURSE.modules.forEach(mod => {
+        mod.lessons.forEach(lesson => {
+          html += `<div class="search-result-item" data-module="${mod.id}" data-lesson="${lesson.id}">
+            <span>${mod.icon}</span>
+            <span>${lesson.title}</span>
+            <span class="sr-module">${mod.title}</span>
+          </div>`;
+        });
+      });
+      results.innerHTML = html;
+      this.attachSearchClicks();
+      return;
+    }
+
+    let matches = [];
+    COURSE.modules.forEach(mod => {
+      mod.lessons.forEach(lesson => {
+        const searchText = `${lesson.title} ${mod.title}`.toLowerCase();
+        if (searchText.includes(q)) {
+          matches.push({module: mod, lesson});
+        }
+      });
+    });
+
+    if (matches.length === 0) {
+      results.innerHTML = `<div class="search-empty">No results found for "${query}"</div>`;
+      return;
+    }
+
+    results.innerHTML = matches.map(m =>
+      `<div class="search-result-item" data-module="${m.module.id}" data-lesson="${m.lesson.id}">
+        <span>${m.module.icon}</span>
+        <span>${m.lesson.title}</span>
+        <span class="sr-module">${m.module.title}</span>
+      </div>`
+    ).join('');
+    this.attachSearchClicks();
+  }
+  attachSearchClicks() {
+    document.querySelectorAll('.search-result-item').forEach(item => {
+      item.addEventListener('click', () => {
+        this.navigateTo(item.dataset.module, item.dataset.lesson);
+        this.closeSearch();
+      });
+    });
+  }
+
+  // --- Badges ---
+  openBadges() {
+    const grid = document.getElementById('badgesGrid');
+    grid.innerHTML = BADGES.map(b => {
+      const earned = this.progress.badges.includes(b.id);
+      return `<div class="badge-card ${earned?'earned':'locked'}">
+        <div class="badge-icon">${b.icon}</div>
+        <div class="badge-name">${b.name}</div>
+        <div class="badge-desc">${b.desc}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('badgesOverlay').classList.add('open');
+  }
+  closeBadges() {
+    document.getElementById('badgesOverlay').classList.remove('open');
+  }
+}
+
+// ============================================================
+// SECTION 5: INITIALIZE APPLICATION
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  window.app = new CSSCourseApp();
+});
+</script>
+</body>
+</html>

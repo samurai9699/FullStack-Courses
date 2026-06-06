@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostgreSQL + Prisma Mastery</title>
+<style>
+:root{--bg-deep:#070b14;--bg-main:#0c1121;--bg-surface:#131a2e;--bg-elevated:#1a2340;--bg-hover:#1f2b4d;--accent:#7c6aef;--accent-glow:rgba(124,106,239,.3);--accent2:#00d4aa;--accent2-glow:rgba(0,212,170,.25);--danger:#ef4444;--warning:#f59e0b;--success:#22c55e;--text:#e2e0ec;--text-sec:#8b8da3;--text-muted:#555876;--border:rgba(124,106,239,.12);--border-lt:rgba(255,255,255,.06);--sidebar-w:300px;--rad:12px;--rad-sm:8px;--rad-xs:6px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;--mono:'SF Mono','Fira Code','Cascadia Code','Consolas',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg-deep);color:var(--text);line-height:1.7;overflow-x:hidden;min-height:100vh}
+::selection{background:var(--accent);color:#fff}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--text-muted);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+a{color:var(--accent2);text-decoration:none}
+#app{display:flex;min-height:100vh}
+#sidebar{position:fixed;top:0;left:0;width:var(--sidebar-w);height:100vh;background:var(--bg-main);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .3s ease;overflow:hidden}
+#sidebar-header{padding:18px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
+#sidebar-header h1{font-size:1.05rem;font-weight:700;color:var(--accent);letter-spacing:-.02em}
+#sidebar-header p{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+#sidebar-search{padding:10px 16px;flex-shrink:0}
+.search-wrap{position:relative}
+.search-wrap::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.8rem;pointer-events:none}
+#search-input{width:100%;padding:9px 12px 9px 34px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--rad-sm);color:var(--text);font-size:.82rem;font-family:var(--font);outline:none;transition:border-color .2s}
+#search-input:focus{border-color:var(--accent)}
+#search-input::placeholder{color:var(--text-muted)}
+#sidebar-nav{flex:1;overflow-y:auto;padding:6px 10px 20px}
+.sidebar-section{margin-bottom:2px}
+.sidebar-section-header{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:var(--rad-sm);cursor:pointer;transition:background .15s;user-select:none}
+.sidebar-section-header:hover{background:var(--bg-surface)}
+.sidebar-section-header .arrow{font-size:.6rem;color:var(--text-muted);transition:transform .2s;flex-shrink:0;width:10px}
+.sidebar-section-header.open .arrow{transform:rotate(90deg)}
+.sidebar-section-header .sec-num{font-size:.68rem;font-weight:700;color:var(--accent);background:var(--accent-glow);padding:2px 7px;border-radius:4px;flex-shrink:0}
+.sidebar-section-header .sec-title{font-size:.8rem;font-weight:600;color:var(--text);flex:1}
+.sidebar-section-header .sec-pct{font-size:.62rem;color:var(--text-muted)}
+.sidebar-lessons{display:none;padding:2px 0 2px 14px}
+.sidebar-lessons.open{display:block}
+.sidebar-lesson{display:flex;align-items:center;gap:8px;padding:6px 12px;border-radius:var(--rad-xs);cursor:pointer;font-size:.78rem;color:var(--text-sec);transition:all .15s}
+.sidebar-lesson:hover{background:var(--bg-surface);color:var(--text)}
+.sidebar-lesson.active{background:var(--accent-glow);color:var(--accent);font-weight:600}
+.sidebar-lesson.hidden{display:none!important}
+.check{width:15px;height:15px;border-radius:50%;border:2px solid var(--text-muted);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.55rem;transition:all .2s}
+.check.done{background:var(--accent2);border-color:var(--accent2);color:#fff}
+#sidebar-progress{padding:14px 20px;border-top:1px solid var(--border);flex-shrink:0}
+.prog-label{font-size:.72rem;color:var(--text-muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.prog-bar{height:5px;background:var(--bg-surface);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width .5s ease}
+#sidebar-toggle{display:none;position:fixed;top:12px;left:12px;z-index:200;width:38px;height:38px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--rad-sm);color:var(--text);font-size:1.1rem;cursor:pointer;align-items:center;justify-content:center}
+#sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90}
+#main{margin-left:var(--sidebar-w);flex:1;min-height:100vh}
+#main-inner{max-width:840px;margin:0 auto;padding:36px 44px 80px}
+#top-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 44px;border-bottom:1px solid var(--border-lt);background:rgba(7,11,20,.85);backdrop-filter:blur(12px);position:sticky;top:0;z-index:50}
+.breadcrumb{font-size:.78rem;color:var(--text-muted)}
+.breadcrumb .bc-s{color:var(--accent)}
+.lesson-nav-btns{display:flex;gap:8px}
+.btn{padding:7px 16px;border-radius:var(--rad-xs);border:none;font-family:var(--font);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#6b58e0;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text-sec);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--bg-surface);color:var(--text)}
+.btn-success{background:var(--accent2);color:#000}
+.btn-success:hover{background:#00b894}
+.btn-sm{padding:5px 12px;font-size:.74rem}
+.lesson-title{font-size:1.9rem;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin-bottom:8px;background:linear-gradient(135deg,var(--text),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lesson-subtitle{font-size:.92rem;color:var(--text-sec);margin-bottom:28px}
+.lesson-content h2{font-size:1.3rem;font-weight:700;color:var(--text);margin:32px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border-lt)}
+.lesson-content h3{font-size:1.05rem;font-weight:700;color:var(--accent);margin:24px 0 8px}
+.lesson-content p{margin-bottom:14px;color:var(--text-sec);font-size:.92rem}
+.lesson-content ul,.lesson-content ol{margin:0 0 14px 18px;color:var(--text-sec);font-size:.92rem}
+.lesson-content li{margin-bottom:5px}
+.lesson-content strong{color:var(--text);font-weight:600}
+.lesson-content code{font-family:var(--mono);font-size:.82em;background:var(--bg-surface);padding:1px 5px;border-radius:3px;color:var(--accent2)}
+.cb{position:relative;margin:14px 0 20px;background:#0a0f1a;border:1px solid var(--border);border-radius:var(--rad);overflow:hidden}
+.cb-h{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:rgba(124,106,239,.06);border-bottom:1px solid var(--border)}
+.cb-l{font-size:.68rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.05em}
+.cp-btn{padding:3px 9px;background:var(--bg-surface);border:1px solid var(--border);border-radius:4px;color:var(--text-muted);font-size:.68rem;font-family:var(--font);cursor:pointer;transition:all .2s}
+.cp-btn:hover{color:var(--accent);border-color:var(--accent)}
+.cp-btn.copied{color:var(--accent2);border-color:var(--accent2)}
+.cb pre{padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.6;color:#c9d1d9}
+.kw{color:#c678dd;font-weight:600}.fn{color:#61afef}.str{color:#98c379}.num{color:#d19a66}.cmt{color:#5c6370;font-style:italic}.op{color:#56b6c2}.type{color:#e5c07b}
+.callout{padding:14px 18px;border-radius:var(--rad);margin:18px 0;font-size:.88rem;border-left:4px solid}
+.callout-info{background:rgba(124,106,239,.08);border-color:var(--accent)}
+.callout-warn{background:rgba(245,158,11,.08);border-color:var(--warning)}
+.callout-success{background:rgba(34,197,94,.08);border-color:var(--success)}
+.callout-danger{background:rgba(239,68,68,.08);border-color:var(--danger)}
+.callout-title{font-weight:700;margin-bottom:3px}
+.callout-info .callout-title{color:var(--accent)}.callout-warn .callout-title{color:var(--warning)}.callout-success .callout-title{color:var(--success)}.callout-danger .callout-title{color:var(--danger)}
+.tw{overflow-x:auto;margin:14px 0 20px;border-radius:var(--rad);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:var(--bg-elevated);padding:10px 14px;text-align:left;font-weight:700;color:var(--accent);border-bottom:2px solid var(--border)}
+td{padding:9px 14px;border-bottom:1px solid var(--border-lt);color:var(--text-sec)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(124,106,239,.04)}
+.quiz-section{margin:28px 0;padding:20px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--rad)}
+.quiz-title{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:14px}
+.quiz-q{font-size:.92rem;color:var(--text);margin-bottom:14px;font-weight:600}
+.quiz-opt{padding:11px 14px;background:var(--bg-main);border:1px solid var(--border);border-radius:var(--rad-sm);cursor:pointer;font-size:.85rem;color:var(--text-sec);transition:all .2s;display:flex;align-items:center;gap:10px;margin-bottom:7px}
+.quiz-opt:hover:not(.disabled){border-color:var(--accent);color:var(--text);background:var(--accent-glow)}
+.quiz-opt.correct{border-color:var(--success);color:var(--success);background:rgba(34,197,94,.1);cursor:default}
+.quiz-opt.wrong{border-color:var(--danger);color:var(--danger);background:rgba(239,68,68,.08);cursor:default}
+.quiz-opt.disabled{cursor:default;opacity:.65}
+.ol{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--bg-surface);border-radius:50%;font-size:.72rem;font-weight:700;flex-shrink:0}
+.quiz-opt.correct .ol{background:var(--success);color:#fff}
+.quiz-opt.wrong .ol{background:var(--danger);color:#fff}
+.quiz-fb{margin-top:14px;padding:12px 16px;border-radius:var(--rad-sm);font-size:.85rem;display:none}
+.quiz-fb.show{display:block}
+.quiz-fb.correct-fb{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--success)}
+.quiz-fb.wrong-fb{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:var(--danger)}
+.complete-bar{margin:36px 0 0;padding:18px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--rad);display:flex;align-items:center;justify-content:space-between}
+.complete-bar .status{font-size:.88rem;color:var(--text-sec)}
+.complete-bar .status.done{color:var(--accent2)}
+.challenge-box{background:linear-gradient(135deg,rgba(124,106,239,.08),rgba(0,212,170,.06));border:1px solid var(--accent);border-radius:var(--rad);padding:20px;margin:18px 0}
+.challenge-box h3{color:var(--accent);font-size:.95rem;margin-bottom:6px}
+.challenge-box p{font-size:.85rem;color:var(--text-sec)}
+.landing{text-align:center;padding:50px 20px 70px;max-width:680px;margin:0 auto}
+.landing h1{font-size:2.6rem;font-weight:800;letter-spacing:-.04em;line-height:1.1;margin-bottom:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.landing p{font-size:1rem;color:var(--text-sec);margin-bottom:28px;line-height:1.7}
+.landing-stats{display:flex;gap:20px;justify-content:center;margin-bottom:40px;flex-wrap:wrap;}
+.landing-stat{background:var(--bg-elevated);border:1px solid var(--border);padding:15px 25px;border-radius:var(--rad);text-align:center;min-width:120px;}
+.landing-stat-num{font-size:1.8rem;font-weight:800;color:var(--text);line-height:1;}
+.landing-stat-lbl{font-size:0.8rem;color:var(--text-sec);text-transform:uppercase;letter-spacing:0.05em;margin-top:5px;}
+.landing-modules{text-align:left;margin-top:50px;}
+.landing-modules h2{font-size:1.4rem;color:var(--text);margin-bottom:20px;border-bottom:1px solid var(--border-lt);padding-bottom:10px;}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:15px;}
+.module-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--rad);padding:20px;cursor:pointer;transition:all 0.2s;display:flex;gap:15px;align-items:flex-start;}
+.module-card:hover{transform:translateY(-2px);border-color:var(--accent);background:var(--bg-hover);}
+.module-icon{font-size:1.8rem;line-height:1;}
+.module-info h3{font-size:1.05rem;color:var(--text);margin-bottom:4px;font-weight:700;}
+.module-info p{font-size:0.85rem;color:var(--text-sec);margin-bottom:8px;line-height:1.4;}
+.module-meta{font-size:0.75rem;color:var(--accent);font-weight:600;}
+
+@keyframes fadeInUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeInUp .35s ease forwards}
+@media(max-width:900px){#sidebar{transform:translateX(-100%)}#sidebar.open{transform:translateX(0)}#sidebar-toggle{display:flex}#sidebar-overlay.open{display:block}#main{margin-left:0}#main-inner{padding:22px 18px 60px}#top-bar{padding:12px 18px}.landing h1{font-size:1.9rem}}
+@media(max-width:600px){.lesson-title{font-size:1.4rem}.complete-bar{flex-direction:column;gap:10px;text-align:center}}
+/* Interactive features CSS */
+.action-btns { display: flex; gap: 8px; padding: 0 16px 10px; flex-shrink: 0; }
+.action-btn { flex: 1; padding: 6px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--rad-sm); color: var(--text-sec); font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.action-btn:hover { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+.flashcard-view { max-width: 600px; margin: 40px auto; text-align: center; }
+.fc-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--rad); padding: 40px 30px; min-height: 250px; display: flex; flex-direction: column; justify-content: center; position: relative; cursor: pointer; transition: transform 0.3s; perspective: 1000px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+.fc-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.fc-q { font-size: 1.2rem; font-weight: 600; color: var(--text); }
+.fc-a { font-size: 1.05rem; color: var(--accent2); margin-top: 20px; display: none; padding-top: 20px; border-top: 1px dashed var(--border); }
+.fc-a.show { display: block; animation: fadeInUp 0.3s ease; }
+.fc-controls { display: flex; gap: 12px; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.fc-controls.show { opacity: 1; pointer-events: auto; }
+.fc-btn { padding: 10px 20px; border-radius: var(--rad-sm); border: none; font-weight: 600; cursor: pointer; color: #fff; font-size: 0.9rem; flex: 1; }
+.fc-hard { background: var(--danger); }
+.fc-good { background: var(--accent); }
+.fc-easy { background: var(--success); }
+.fc-empty { padding: 60px 20px; text-align: center; color: var(--text-sec); }
+.fc-stats { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px; }
+.svg-diagram { width: 100%; max-width: 700px; margin: 24px auto; display: block; border-radius: var(--rad); border: 1px solid var(--border); background: var(--bg-surface); }
+.svg-diagram text { font-family: var(--font); }
+.svg-clickable { cursor: pointer; transition: opacity 0.2s; }
+.svg-clickable:hover { opacity: 0.8; }
+.svg-highlight { stroke: var(--accent2) !important; stroke-width: 3px !important; filter: drop-shadow(0 0 4px var(--accent2-glow)); }
+</style>
+</head>
+<body>
+<div id="app">
+<button id="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+<aside id="sidebar">
+<div id="sidebar-header"><h1>🐘 PostgreSQL + Prisma</h1><p>From Zero to Production</p></div>
+<div id="sidebar-search"><div class="search-wrap"><input type="text" id="search-input" placeholder="Search lessons... ( / )" oninput="searchLessons(this.value)"></div></div>
+<div class="action-btns">
+  <button class="action-btn" onclick="startFlashcards()">🎴 Flashcards</button>
+  <button class="action-btn" onclick="downloadNotes()">📥 Download Notes</button>
+</div>
+<nav id="sidebar-nav"></nav>
+<div id="sidebar-progress"><div class="prog-label"><span>Progress</span><span id="prog-pct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div></div>
+</aside>
+<main id="main">
+<div id="top-bar"><div class="breadcrumb" id="breadcrumb">Home</div><div class="lesson-nav-btns"><button class="btn btn-ghost btn-sm" onclick="prevLesson()">← Prev</button><button class="btn btn-ghost btn-sm" onclick="nextLesson()">Next →</button></div></div>
+<div id="main-inner"></div>
+</main>
+</div>
+<script>
+const SECTIONS=[
+
+/* ═══════════════════════════════════════════════
+   SECTION 1 — FOUNDATIONS
+   ═══════════════════════════════════════════════ */
+{id:'foundations',title:'Foundations',icon:'🏗️',lessons:[
+{id:'f1',title:'What Are Databases?',sub:'Why databases exist and why they matter for every application',
+content:`<h2>What is a Database?</h2>
+<p>Imagine you run a small online shop. You have customers, products, orders, and reviews. Where do you keep all this information? You could use spreadsheets, but as your shop grows to thousands of customers, spreadsheets become slow, messy, and dangerous — what if two people edit the same file at once?</p>
+<p>A <strong>database</strong> is an organized, electronic filing system that stores data so it can be easily accessed, managed, and updated. Think of it as a super-powered spreadsheet that:</p>
+<ul>
+<li>Handles millions (or billions) of records efficiently</li>
+<li>Allows multiple users to read and write simultaneously</li>
+<li>Protects your data from corruption and loss</li>
+<li>Enforces rules so bad data can't sneak in</li>
+<li>Provides powerful ways to search, filter, and analyze data</li>
+</ul>
+<h3>Why Not Just Use Files or Spreadsheets?</h3>
+<p>Before databases, programs stored data in plain text files. This created huge problems:</p>
+<ul>
+<li><strong>Data redundancy</strong> — the same info duplicated everywhere</li>
+<li><strong>Inconsistency</strong> — updating one copy but forgetting others</li>
+<li><strong>No concurrency</strong> — only one process could write at a time</li>
+<li><strong>No safety</strong> — a crash could corrupt everything</li>
+<li><strong>Hard to query</strong> — "find all orders over \$100" requires writing custom code every time</li>
+</ul>
+<div class="callout callout-info"><div class="callout-title">💡 Real-World Analogy</div>
+<p>Think of a database like a library. A library doesn't just throw books in a pile — it has a cataloging system (schema), a card catalog for finding books (indexes), librarians who enforce rules (constraints), and security to prevent theft (authentication). A database does all of this electronically for your data.</p></div>
+<h3>Types of Databases</h3>
+<div class="tw"><table>
+<tr><th>Type</th><th>Examples</th><th>Best For</th></tr>
+<tr><td><strong>Relational (SQL)</strong></td><td>PostgreSQL, MySQL, SQLite</td><td>Structured data with relationships</td></tr>
+<tr><td><strong>Document</strong></td><td>MongoDB, CouchDB</td><td>Flexible, nested data</td></tr>
+<tr><td><strong>Key-Value</strong></td><td>Redis, DynamoDB</td><td>Caching, sessions, fast lookups</td></tr>
+<tr><td><strong>Graph</strong></td><td>Neo4j, ArangoDB</td><td>Highly connected data (social networks)</td></tr>
+<tr><td><strong>Time-Series</strong></td><td>InfluxDB, TimescaleDB</td><td>Metrics, IoT data, monitoring</td></tr>
+</table></div>
+<p>For this course we focus on <strong>PostgreSQL</strong> — the most powerful open-source relational database. It's used by Apple, Instagram, Spotify, Reddit, and the vast majority of SaaS startups.</p>
+<h3>What Companies Actually Do</h3>
+<p>Almost every production application you use daily relies on a relational database. When you post on Instagram, that data goes into PostgreSQL. When Spotify tracks your listening history, that's in a database. When you check your bank balance, that's queried from a database with strict ACID guarantees (we'll learn about that later).</p>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>A database is an organized system for storing, retrieving, and managing data. Relational databases like PostgreSQL use tables with rows and columns, enforce data integrity rules, and support powerful queries. They are the backbone of virtually every software application.</p></div>`,
+quiz:[
+{q:'What is the main advantage of a database over storing data in files?',opts:['Databases use less disk space','Databases handle concurrency, integrity, and efficient querying','Databases are always faster','Databases are free'],correct:1,explain:'Databases solve many problems files have: concurrent access, data integrity enforcement, efficient querying, and crash recovery.'},
+{q:'Which type of database is PostgreSQL?',opts:['Document database','Key-Value store','Relational database','Graph database'],correct:2,explain:'PostgreSQL is a relational (SQL) database that stores data in tables with rows and columns.'}]},
+
+{id:'f2',title:'Tables, Rows & Columns',sub:'The fundamental building blocks of every relational database',
+content:`<h2>The Building Blocks</h2>
+<p>A relational database organizes data into <strong>tables</strong>. If you've ever used a spreadsheet, this will feel familiar. A table is like a spreadsheet sheet with a strict structure.</p>
+<h3>Table (Relation)</h3>
+<p>A <strong>table</strong> represents an entity — something you want to store data about. Examples: <code>users</code>, <code>products</code>, <code>orders</code>, <code>reviews</code>. Each table has a fixed set of <strong>columns</strong> and can have any number of <strong>rows</strong>.</p>
+<h3>Columns (Fields/Attributes)</h3>
+<p><strong>Columns</strong> define what kind of data each row holds. Each column has a <strong>name</strong> and a <strong>data type</strong>. For example, <code>name</code> is text, <code>age</code> is a number, <code>created_at</code> is a timestamp.</p>
+<h3>Rows (Records/Tuples)</h3>
+<p>A <strong>row</strong> is a single record in the table — one specific user, one specific product, one specific order. Each row has a value for every column.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Creating a table in PostgreSQL</span>
+<span class="kw">CREATE TABLE</span> users (
+    id    <span class="type">INTEGER</span>,
+    name  <span class="type">VARCHAR</span>(<span class="num">100</span>),
+    email <span class="type">VARCHAR</span>(<span class="num">255</span>),
+    age   <span class="type">INTEGER</span>
+);
+
+<span class="cmt">-- Inserting rows of data</span>
+<span class="kw">INSERT INTO</span> users (id, name, email, age) <span class="kw">VALUES</span>
+    (<span class="num">1</span>, <span class="str">'Alice'</span>, <span class="str">'alice@mail.com'</span>, <span class="num">28</span>),
+    (<span class="num">2</span>, <span class="str">'Bob'</span>, <span class="str">'bob@mail.com'</span>, <span class="num">34</span>),
+    (<span class="num">3</span>, <span class="str">'Carol'</span>, <span class="str">'carol@mail.com'</span>, <span class="num">22</span>);
+
+<span class="cmt">-- Querying all rows</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users;</code></pre></div>
+<h3>What Beginners Usually Misunderstand</h3>
+<div class="callout callout-warn"><div class="callout-title">⚠️ Columns vs Rows</div>
+<p>Many beginners confuse "columns" and "rows." Remember: <strong>columns go down</strong> (like columns in a building — vertical). <strong>Rows go across</strong> (like rows of seats in a theater — horizontal). A column defines the type of data; a row contains one actual record.</p></div>
+<div class="callout callout-info"><div class="callout-title">💡 Analogy</div>
+<p>A table is like a filing cabinet drawer labeled "Customers." Inside, each folder (row) represents one customer. Each folder has the same fields: Name, Email, Phone (columns). The drawer defines the structure; the folders hold the actual data.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Tables define structure through columns (with types), rows hold actual data. Think of it as a strict spreadsheet where every row must follow the same rules.</p></div>`,
+quiz:[{q:'In a relational database, what defines the structure of data each row must follow?',opts:['Rows','The table and its columns','The first row inserted','The primary key'],correct:1,explain:'Tables define structure through their columns, each with a specific data type. Every row must follow this structure.'}]},
+
+{id:'f3',title:'Primary & Foreign Keys',sub:'How data uniquely identifies itself and relates to other data',
+content:`<h2>Primary Keys: Your Data's ID Card</h2>
+<p>Every row in a table needs a way to be uniquely identified — like a social security number or a fingerprint. That's what a <strong>primary key</strong> does.</p>
+<p>A <strong>primary key</strong> is a column (or combination of columns) that:</p>
+<ul>
+<li>Uniquely identifies each row — no two rows can have the same value</li>
+<li>Is never NULL — every row must have a value</li>
+<li>There's only one per table</li>
+</ul>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> users (
+    id    <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,  <span class="cmt">-- auto-incrementing ID (1, 2, 3...)</span>
+    name  <span class="type">VARCHAR</span>(<span class="num">100</span>),
+    email <span class="type">VARCHAR</span>(<span class="num">255</span>) <span class="kw">UNIQUE</span>
+);</code></pre></div>
+<p>The <code>SERIAL</code> type in PostgreSQL automatically generates a new integer for each new row. You don't have to manage it yourself.</p>
+<h3>Foreign Keys: Connecting Tables Together</h3>
+<p>A <strong>foreign key</strong> is a column in one table that references the primary key of another table. This is how tables <em>relate</em> to each other — hence "relational" database.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> orders (
+    id       <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    user_id  <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> users(id),  <span class="cmt">-- foreign key!</span>
+    total    <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+    created_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);
+<span class="cmt">-- user_id can ONLY contain values that exist in users.id</span>
+<span class="cmt">-- This prevents "orphan" orders for non-existent users</span></code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 The Power of References</div>
+<p>Foreign keys are the glue of relational databases. They let you answer questions like: "What orders did Alice place?" by joining the <code>users</code> and <code>orders</code> tables. Without foreign keys, your data is just disconnected spreadsheets.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Primary keys uniquely identify rows. Foreign keys create relationships between tables by referencing primary keys. Together they form the backbone of relational database design.</p></div>`,
+quiz:[{q:'What is the purpose of a foreign key?',opts:['To make queries faster','To uniquely identify each row','To link data between two tables by referencing a primary key','To encrypt sensitive data'],correct:2,explain:'A foreign key creates a relationship between tables by referencing the primary key of another table, ensuring referential integrity.'}]},
+
+{id:'f4',title:'Relationships: 1:1, 1:N, M:N',sub:'How tables connect to each other in the real world',
+content:`<h2>How Tables Talk to Each Other</h2>
+<svg class="svg-diagram" viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg">
+  <!-- Users Table -->
+  <g class="svg-clickable" onclick="document.querySelectorAll('.rel-line').forEach(el=>el.classList.toggle('svg-highlight'))">
+    <rect x="50" y="40" width="140" height="100" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+    <rect x="50" y="40" width="140" height="25" rx="6" fill="var(--bg-hover)"/>
+    <text x="120" y="58" fill="var(--accent)" font-size="12" font-weight="bold" text-anchor="middle">users (1)</text>
+    <text x="60" y="80" fill="var(--text)" font-size="11">🔑 id (PK)</text>
+    <text x="60" y="100" fill="var(--text-sec)" font-size="11">name</text>
+    <text x="60" y="120" fill="var(--text-sec)" font-size="11">email</text>
+  </g>
+
+  <!-- Orders Table -->
+  <g class="svg-clickable" onclick="document.querySelectorAll('.rel-line').forEach(el=>el.classList.toggle('svg-highlight'))">
+    <rect x="400" y="40" width="140" height="100" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+    <rect x="400" y="40" width="140" height="25" rx="6" fill="var(--bg-hover)"/>
+    <text x="470" y="58" fill="var(--accent2)" font-size="12" font-weight="bold" text-anchor="middle">orders (N)</text>
+    <text x="410" y="80" fill="var(--text)" font-size="11">🔑 id (PK)</text>
+    <text x="410" y="100" fill="var(--accent2)" font-size="11">🔗 user_id (FK)</text>
+    <text x="410" y="120" fill="var(--text-sec)" font-size="11">total</text>
+  </g>
+
+  <!-- Relationship Line -->
+  <path class="rel-line" d="M 190 80 L 400 100" stroke="var(--text-muted)" stroke-width="2" fill="none"/>
+  
+  <text x="295" y="80" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">1:N Relationship</text>
+  <text x="295" y="98" fill="var(--text-sec)" font-size="10" text-anchor="middle">One user has many orders</text>
+  <text x="295" y="112" fill="var(--text-sec)" font-size="10" text-anchor="middle">(Click tables to highlight)</text>
+
+  <!-- M:N Tables -->
+  <g transform="translate(0, 140)">
+    <rect x="50" y="0" width="120" height="80" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+    <text x="110" y="20" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">students</text>
+    <text x="60" y="45" fill="var(--text-sec)" font-size="11">🔑 id</text>
+    
+    <rect x="420" y="0" width="120" height="80" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+    <text x="480" y="20" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">courses</text>
+    <text x="430" y="45" fill="var(--text-sec)" font-size="11">🔑 id</text>
+    
+    <rect x="230" y="0" width="140" height="90" rx="6" fill="var(--bg-elevated)" stroke="var(--warning)"/>
+    <text x="300" y="20" fill="var(--warning)" font-size="12" font-weight="bold" text-anchor="middle">enrollments</text>
+    <text x="240" y="45" fill="var(--text-sec)" font-size="11">🔗 student_id</text>
+    <text x="240" y="65" fill="var(--text-sec)" font-size="11">🔗 course_id</text>
+    
+    <path d="M 170 40 L 230 45" stroke="var(--text-muted)" stroke-width="2" fill="none"/>
+    <path d="M 420 40 L 370 65" stroke="var(--text-muted)" stroke-width="2" fill="none"/>
+    <text x="300" y="-10" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">M:N with Junction Table</text>
+  </g>
+</svg>
+<p>Real-world data is all about relationships. A customer places orders. A student enrolls in courses. A post has tags. There are three fundamental types.</p>
+<h3>One-to-One (1:1)</h3>
+<p>One record in Table A corresponds to exactly one record in Table B. Example: a user has one profile.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> user_profiles (
+    user_id    <span class="type">INTEGER</span> <span class="kw">PRIMARY KEY</span> <span class="kw">REFERENCES</span> users(id),
+    bio        <span class="type">TEXT</span>,
+    avatar_url <span class="type">VARCHAR</span>(<span class="num">500</span>),
+    website    <span class="type">VARCHAR</span>(<span class="num">255</span>)
+);</code></pre></div>
+<h3>One-to-Many (1:N)</h3>
+<p>One record in Table A can have many records in Table B. This is the most common relationship. The "many" side holds the foreign key.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> orders (
+    id       <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    user_id  <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> users(id),
+    total    <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)
+);
+<span class="cmt">-- Alice (id=1) can have 100 orders all pointing to her</span></code></pre></div>
+<h3>Many-to-Many (M:N)</h3>
+<p>Records in both tables can relate to many records in the other. Requires a <strong>junction table</strong>.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> courses (
+    id    <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    title <span class="type">VARCHAR</span>(<span class="num">200</span>)
+);
+
+<span class="cmt">-- Junction table: sits between the two tables</span>
+<span class="kw">CREATE TABLE</span> enrollments (
+    student_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> users(id),
+    course_id  <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> courses(id),
+    enrolled_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>(),
+    <span class="kw">PRIMARY KEY</span> (student_id, course_id)  <span class="cmt">-- composite key</span>
+);</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ What Beginners Get Wrong</div>
+<p>A common mistake is storing multiple values in a single column (e.g., a comma-separated list of course IDs). This breaks the relational model and makes queries nearly impossible. <strong>Always</strong> use a junction table for many-to-many relationships.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>1:1 — shared key or reference. 1:N — foreign key on the "many" side. M:N — junction table with two foreign keys. These three patterns cover 99% of real-world data relationships.</p></div>`,
+quiz:[{q:'A blog post can have many tags, and each tag can be on many posts. What relationship is this?',opts:['One-to-One','One-to-Many','Many-to-Many','Self-referencing'],correct:2,explain:'When both sides can have multiple related records, it is many-to-many, requiring a junction table.'}]},
+
+{id:'f5',title:'Data Types in PostgreSQL',sub:'Choosing the right type for every column',
+content:`<h2>Choosing the Right Data Type</h2>
+<p>Every column must have a data type. Choosing the right type matters for storage, performance, and data integrity.</p>
+<div class="tw"><table>
+<tr><th>Category</th><th>Type</th><th>Use For</th><th>Example</th></tr>
+<tr><td rowspan="3"><strong>Numbers</strong></td><td><code>INTEGER</code></td><td>Whole numbers</td><td>age, quantity</td></tr>
+<tr><td><code>BIGINT</code></td><td>Very large numbers</td><td>views_count, file_size</td></tr>
+<tr><td><code>DECIMAL(p,s)</code></td><td>Precise decimals</td><td>price, balance</td></tr>
+<tr><td rowspan="3"><strong>Text</strong></td><td><code>VARCHAR(n)</code></td><td>Variable-length with max</td><td>name, email</td></tr>
+<tr><td><code>TEXT</code></td><td>Unlimited length</td><td>bio, description</td></tr>
+<tr><td><code>CHAR(n)</code></td><td>Fixed-length</td><td>country_code (2 chars)</td></tr>
+<tr><td rowspan="2"><strong>Date/Time</strong></td><td><code>TIMESTAMP</code></td><td>Date and time</td><td>created_at</td></tr>
+<tr><td><code>DATE</code></td><td>Date only</td><td>birth_date</td></tr>
+<tr><td rowspan="2"><strong>Other</strong></td><td><code>BOOLEAN</code></td><td>True/False</td><td>is_active, is_admin</td></tr>
+<tr><td><code>JSONB</code></td><td>Flexible JSON data</td><td>settings, metadata</td></tr>
+</table></div>
+<div class="callout callout-info"><div class="callout-title">💡 Money in PostgreSQL</div>
+<p>Never use <code>FLOAT</code> or <code>DOUBLE</code> for money. Floating-point math has rounding errors (0.1 + 0.2 ≠ 0.3 in floating-point). Always use <code>DECIMAL(10,2)</code> or <code>NUMERIC</code> for financial data.</p></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ VARCHAR vs TEXT</div>
+<p>In PostgreSQL, there's no performance difference between <code>VARCHAR(n)</code> and <code>TEXT</code>. Many PostgreSQL experts prefer <code>TEXT</code> with a <code>CHECK</code> constraint instead of <code>VARCHAR</code>.</p></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> products (
+    id          <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    name        <span class="type">VARCHAR</span>(<span class="num">200</span>) <span class="kw">NOT NULL</span>,
+    description <span class="type">TEXT</span>,
+    price       <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>) <span class="kw">NOT NULL</span>,
+    quantity    <span class="type">INTEGER</span> <span class="kw">DEFAULT</span> <span class="num">0</span>,
+    is_active   <span class="type">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">TRUE</span>,
+    metadata    <span class="type">JSONB</span>,
+    created_at  <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Use the most specific type: INTEGER for counts, DECIMAL for money, TEXT/VARCHAR for strings, TIMESTAMP for dates, BOOLEAN for flags, JSONB for flexible data.</p></div>`,
+quiz:[{q:'Why should you avoid FLOAT for storing money?',opts:['FLOAT uses too much space','Floating-point math has rounding errors','FLOAT is slower','PostgreSQL does not support FLOAT'],correct:1,explain:'Floating-point arithmetic can produce rounding errors. Use DECIMAL for exact precision with monetary values.'}]},
+
+{id:'f6',title:'Constraints: Protecting Your Data',sub:'Rules the database enforces to prevent bad data',
+content:`<h2>Rules Your Data Must Follow</h2>
+<p>Constraints are rules enforced by the database to prevent bad data from being stored. Think of them as bouncers at a club.</p>
+<div class="tw"><table>
+<tr><th>Constraint</th><th>Purpose</th><th>Example</th></tr>
+<tr><td><code>NOT NULL</code></td><td>Must have a value</td><td>name VARCHAR NOT NULL</td></tr>
+<tr><td><code>UNIQUE</code></td><td>No duplicate values</td><td>email VARCHAR UNIQUE</td></tr>
+<tr><td><code>DEFAULT</code></td><td>Fallback value</td><td>role VARCHAR DEFAULT 'user'</td></tr>
+<tr><td><code>CHECK</code></td><td>Custom validation</td><td>CHECK (age >= 13)</td></tr>
+<tr><td><code>PRIMARY KEY</code></td><td>NOT NULL + UNIQUE</td><td>id SERIAL PRIMARY KEY</td></tr>
+<tr><td><code>FOREIGN KEY</code></td><td>Must exist in referenced table</td><td>REFERENCES users(id)</td></tr>
+</table></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> users (
+    id         <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    username   <span class="type">VARCHAR</span>(<span class="num">50</span>) <span class="kw">NOT NULL UNIQUE</span>,
+    email      <span class="type">VARCHAR</span>(<span class="num">255</span>) <span class="kw">NOT NULL UNIQUE</span>,
+    age        <span class="type">INTEGER</span> <span class="kw">CHECK</span> (age >= <span class="num">13</span>),
+    role       <span class="type">VARCHAR</span>(<span class="num">20</span>) <span class="kw">DEFAULT</span> <span class="str">'user'</span>,
+    created_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);
+
+<span class="cmt">-- This would FAIL: age must be >= 13</span>
+<span class="kw">INSERT INTO</span> users (username, email, age)
+<span class="kw">VALUES</span> (<span class="str">'kid'</span>, <span class="str">'kid@mail.com'</span>, <span class="num">8</span>);
+<span class="cmt">-- ERROR: new row violates check constraint "users_age_check"</span></code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 Defense in Depth</div>
+<p>You should validate data in your application code AND in the database. Application code can be bypassed (direct API calls, bugs), but database constraints are <strong>always</strong> enforced. Think of it as two locks on your door.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Constraints are your last line of defense for data integrity. Use NOT NULL, UNIQUE, CHECK, and foreign keys generously. They prevent bugs at the database level.</p></div>`,
+quiz:[{q:'Which constraint combines NOT NULL and UNIQUE?',opts:['CHECK','FOREIGN KEY','PRIMARY KEY','DEFAULT'],correct:2,explain:'A PRIMARY KEY constraint ensures the column is both NOT NULL and UNIQUE.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 2 — SQL MASTERY
+   ═══════════════════════════════════════════════ */
+{id:'sql',title:'SQL Mastery',icon:'⚡',lessons:[
+{id:'s1',title:'SELECT & Filtering',sub:'Querying data with SELECT, WHERE, ORDER BY, LIMIT',
+content:`<h2>Your First SQL Queries</h2>
+<p>SQL stands for <strong>Structured Query Language</strong>. It's the universal language for talking to relational databases. The most fundamental command is <code>SELECT</code>.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Select all columns, all rows</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users;
+
+<span class="cmt">-- Select specific columns with alias</span>
+<span class="kw">SELECT</span> name <span class="kw">AS</span> full_name, email <span class="kw">FROM</span> users;
+
+<span class="cmt">-- Computed columns</span>
+<span class="kw">SELECT</span> name, price, quantity,
+       price * quantity <span class="kw">AS</span> line_total
+<span class="kw">FROM</span> order_items;</code></pre></div>
+<h3>WHERE: Filtering Rows</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Comparison operators: =, !=, <, >, <=, >=</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> age >= <span class="num">18</span>;
+
+<span class="cmt">-- Multiple conditions with AND / OR</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> age >= <span class="num">18</span> <span class="kw">AND</span> role = <span class="str">'admin'</span>;
+
+<span class="cmt">-- IN: check against a list</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products
+<span class="kw">WHERE</span> category <span class="kw">IN</span> (<span class="str">'electronics'</span>, <span class="str">'books'</span>);
+
+<span class="cmt">-- BETWEEN: range check (inclusive)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products
+<span class="kw">WHERE</span> price <span class="kw">BETWEEN</span> <span class="num">10</span> <span class="kw">AND</span> <span class="num">100</span>;
+
+<span class="cmt">-- LIKE: pattern matching (% = any chars, _ = one char)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> email <span class="kw">LIKE</span> <span class="str">'%@gmail.com'</span>;
+
+<span class="cmt">-- NULL checks (NEVER use = NULL!)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> phone <span class="kw">IS NULL</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> phone <span class="kw">IS NOT NULL</span>;</code></pre></div>
+<h3>Sorting & Limiting</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- ORDER BY: sort results</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products <span class="kw">ORDER BY</span> price <span class="kw">DESC</span>;
+
+<span class="cmt">-- LIMIT & OFFSET (pagination!)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products <span class="kw">ORDER BY</span> id
+<span class="kw">LIMIT</span> <span class="num">10</span> <span class="kw">OFFSET</span> <span class="num">0</span>;   <span class="cmt">-- Page 1</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> products <span class="kw">ORDER BY</span> id
+<span class="kw">LIMIT</span> <span class="num">10</span> <span class="kw">OFFSET</span> <span class="num">10</span>;  <span class="cmt">-- Page 2</span>
+
+<span class="cmt">-- DISTINCT: remove duplicates</span>
+<span class="kw">SELECT DISTINCT</span> category <span class="kw">FROM</span> products;</code></pre></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 Common Mistake</div>
+<p>Never use <code>= NULL</code> or <code>!= NULL</code>. In SQL, NULL represents "unknown," so comparing with = always returns unknown. Always use <code>IS NULL</code> or <code>IS NOT NULL</code>.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>SELECT retrieves data. WHERE filters rows. ORDER BY sorts. LIMIT/OFFSET paginate. DISTINCT removes duplicates. These are the building blocks of every SQL query.</p></div>`,
+quiz:[
+{q:'Which clause filters rows in a query?',opts:['SELECT','FROM','WHERE','ORDER BY'],correct:2,explain:'The WHERE clause filters which rows are returned based on conditions.'},
+{q:'What is wrong with: SELECT * FROM users WHERE phone = NULL?',opts:['Nothing, it works','Should use IS NULL instead of = NULL','NULL must be in quotes','Cannot query for NULL'],correct:1,explain:'NULL represents "unknown" and cannot be compared with =. Always use IS NULL or IS NOT NULL.'}]},
+
+{id:'s2',title:'Aggregate Functions & GROUP BY',sub:'Summarizing data with COUNT, SUM, AVG and grouping',
+content:`<h2>Summarizing Data</h2>
+<p>Aggregate functions compute a single result from multiple rows — summary questions about your data.</p>
+<div class="tw"><table>
+<tr><th>Function</th><th>What It Does</th><th>Example Question</th></tr>
+<tr><td><code>COUNT(*)</code></td><td>Counts rows</td><td>How many users?</td></tr>
+<tr><td><code>SUM(col)</code></td><td>Adds up values</td><td>Total revenue?</td></tr>
+<tr><td><code>AVG(col)</code></td><td>Averages values</td><td>Average order value?</td></tr>
+<tr><td><code>MIN(col)</code></td><td>Smallest value</td><td>Cheapest product?</td></tr>
+<tr><td><code>MAX(col)</code></td><td>Largest value</td><td>Most expensive?</td></tr>
+</table></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Overall summary</span>
+<span class="kw">SELECT</span>
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total_orders,
+    <span class="fn">SUM</span>(total) <span class="kw">AS</span> revenue,
+    <span class="fn">AVG</span>(total) <span class="kw">AS</span> avg_order_value
+<span class="kw">FROM</span> orders;
+
+<span class="cmt">-- GROUP BY: break down by category</span>
+<span class="kw">SELECT</span>
+    user_id,
+    <span class="fn">COUNT</span>(*) <span class="kw">AS</span> order_count,
+    <span class="fn">SUM</span>(total) <span class="kw">AS</span> total_spent
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">ORDER BY</span> total_spent <span class="kw">DESC</span>;
+
+<span class="cmt">-- HAVING: filter groups (after aggregation)</span>
+<span class="kw">SELECT</span> user_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> order_count
+<span class="kw">FROM</span> orders
+<span class="kw">GROUP BY</span> user_id
+<span class="kw">HAVING COUNT</span>(*) > <span class="num">5</span>
+<span class="kw">ORDER BY</span> order_count <span class="kw">DESC</span>;</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ WHERE vs HAVING</div>
+<p><code>WHERE</code> filters individual rows <em>before</em> grouping. <code>HAVING</code> filters groups <em>after</em> aggregation. If you need to filter on COUNT, SUM, etc., you must use HAVING.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>COUNT, SUM, AVG, MIN, MAX summarize data. GROUP BY splits data into categories. HAVING filters groups. The order: WHERE → GROUP BY → HAVING → ORDER BY → LIMIT.</p></div>`,
+quiz:[{q:'Which clause filters groups after aggregation?',opts:['WHERE','GROUP BY','HAVING','ORDER BY'],correct:2,explain:'HAVING filters groups after GROUP BY. WHERE filters individual rows before grouping.'}]},
+
+{id:'s3',title:'JOINs: Combining Tables',sub:'The most important SQL concept for relational data',
+content:`<h2>The Most Important SQL Concept</h2>
+<p>JOINs combine rows from two or more tables based on a related column. This is how you unlock the power of relational data.</p>
+<h3>INNER JOIN</h3>
+<p>Returns only rows that have matching values in both tables.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Get each order with the customer's name</span>
+<span class="kw">SELECT</span> o.id, u.name, o.total
+<span class="kw">FROM</span> orders o
+<span class="kw">INNER JOIN</span> users u <span class="kw">ON</span> o.user_id = u.id;
+<span class="cmt">-- Note: "INNER" is optional, just "JOIN" works</span></code></pre></div>
+<h3>LEFT JOIN</h3>
+<p>Returns ALL rows from the left table, matched rows from the right. If no match, right side is NULL.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- All users, even those with no orders</span>
+<span class="kw">SELECT</span> u.name, <span class="fn">COUNT</span>(o.id) <span class="kw">AS</span> order_count
+<span class="kw">FROM</span> users u
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">GROUP BY</span> u.name;</code></pre></div>
+<div class="tw"><table>
+<tr><th>JOIN Type</th><th>Returns</th><th>Use When</th></tr>
+<tr><td><code>INNER JOIN</code></td><td>Only matching rows from both</td><td>You only want related data</td></tr>
+<tr><td><code>LEFT JOIN</code></td><td>All left + matching right</td><td>All from main table, even without matches</td></tr>
+<tr><td><code>RIGHT JOIN</code></td><td>All right + matching left</td><td>Rare; rewrite as LEFT JOIN</td></tr>
+<tr><td><code>FULL JOIN</code></td><td>All rows from both</td><td>Everything, matched or not</td></tr>
+</table></div>
+<div class="callout callout-info"><div class="callout-title">💡 Pro Tip</div>
+<p>Always qualify column names with table aliases when joining: <code>u.name</code> instead of just <code>name</code>. It prevents ambiguity and makes code self-documenting.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>INNER JOIN for related data only. LEFT JOIN when you need all records from the primary table. JOINs are how relational databases become powerful — they connect your normalized data.</p></div>`,
+quiz:[{q:'You want ALL customers including those who never ordered. Which JOIN?',opts:['INNER JOIN','LEFT JOIN','CROSS JOIN','RIGHT JOIN'],correct:1,explain:'LEFT JOIN returns all rows from the left table (customers) even if there are no matching orders.'}]},
+
+{id:'s4',title:'Subqueries & CTEs',sub:'Queries inside queries for powerful data analysis',
+content:`<h2>Queries Inside Queries</h2>
+<h3>Subqueries</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Users who have placed orders</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (
+    <span class="kw">SELECT DISTINCT</span> user_id <span class="kw">FROM</span> orders
+);
+
+<span class="cmt">-- Subquery in FROM (derived table)</span>
+<span class="kw">SELECT</span> avg_data.name, avg_data.avg_total
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> u.name, <span class="fn">AVG</span>(o.total) <span class="kw">AS</span> avg_total
+    <span class="kw">FROM</span> users u
+    <span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+    <span class="kw">GROUP BY</span> u.name
+) <span class="kw">AS</span> avg_data
+<span class="kw">WHERE</span> avg_data.avg_total > <span class="num">100</span>;</code></pre></div>
+<h3>CTEs (Common Table Expressions)</h3>
+<p>CTEs use <code>WITH</code> and make complex queries much more readable. Think of them as temporary named results.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">WITH</span> user_totals <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> user_id,
+           <span class="fn">SUM</span>(total) <span class="kw">AS</span> total_spent,
+           <span class="fn">COUNT</span>(*) <span class="kw">AS</span> order_count
+    <span class="kw">FROM</span> orders
+    <span class="kw">GROUP BY</span> user_id
+)
+<span class="kw">SELECT</span> u.name, ut.total_spent, ut.order_count
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> user_totals ut <span class="kw">ON</span> u.id = ut.user_id
+<span class="kw">WHERE</span> ut.total_spent > <span class="num">500</span>
+<span class="kw">ORDER BY</span> ut.total_spent <span class="kw">DESC</span>;</code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 CTEs vs Subqueries</div>
+<p>CTEs are preferred because they're more readable, can be referenced multiple times, and show maturity in interviews. A CTE is like defining a variable — you name it once and use it wherever needed.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Subqueries nest one query inside another. CTEs (WITH) name intermediate results for clarity and reusability.</p></div>`,
+quiz:[{q:'What keyword starts a Common Table Expression?',opts:['FROM','WITH','SUBQUERY','DEFINE'],correct:1,explain:'CTEs start with the WITH keyword, followed by the name, AS, and the query.'}]},
+
+{id:'s5',title:'Window Functions',sub:'Calculations across rows without collapsing them',
+content:`<h2>Calculations Across Rows</h2>
+<p>Window functions perform calculations across a set of rows <em>related to the current row</em>, without collapsing them like GROUP BY does.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- ROW_NUMBER: rank rows within groups</span>
+<span class="kw">SELECT</span> user_id, total,
+    <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (
+        <span class="kw">PARTITION BY</span> user_id <span class="kw">ORDER BY</span> total <span class="kw">DESC</span>
+    ) <span class="kw">AS</span> order_rank
+<span class="kw">FROM</span> orders;
+
+<span class="cmt">-- Running total</span>
+<span class="kw">SELECT</span> created_at, total,
+    <span class="fn">SUM</span>(total) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> created_at) <span class="kw">AS</span> running_total
+<span class="kw">FROM</span> orders;
+
+<span class="cmt">-- LAG: access previous row's value</span>
+<span class="kw">SELECT</span> total,
+    <span class="fn">LAG</span>(total) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> created_at) <span class="kw">AS</span> prev_order,
+    total - <span class="fn">LAG</span>(total) <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> created_at) <span class="kw">AS</span> change
+<span class="kw">FROM</span> orders;</code></pre></div>
+<div class="tw"><table>
+<tr><th>Function</th><th>Purpose</th></tr>
+<tr><td><code>ROW_NUMBER()</code></td><td>Unique sequential number</td></tr>
+<tr><td><code>RANK()</code></td><td>Rank with gaps for ties</td></tr>
+<tr><td><code>DENSE_RANK()</code></td><td>Rank without gaps</td></tr>
+<tr><td><code>LAG(col, n)</code></td><td>Value from n rows before</td></tr>
+<tr><td><code>LEAD(col, n)</code></td><td>Value from n rows after</td></tr>
+<tr><td><code>SUM() OVER</code></td><td>Running or partitioned sum</td></tr>
+</table></div>
+<div class="callout callout-info"><div class="callout-title">💡 GROUP BY vs Window Functions</div>
+<p>GROUP BY collapses rows into summary rows. Window functions keep every row and add the calculation as a new column. If you need both detail and summary, use window functions.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Window functions (OVER, PARTITION BY) compute across related rows without losing detail. Essential for rankings, running totals, and comparing rows.</p></div>`,
+quiz:[{q:'What is the key difference between GROUP BY and window functions?',opts:['No difference','GROUP BY collapses rows; window functions keep all rows','Window functions are faster','GROUP BY only uses COUNT'],correct:1,explain:'GROUP BY aggregates into summary groups. Window functions add computed columns while preserving all rows.'}]},
+
+{id:'s6',title:'Transactions & ACID',sub:'Keeping data consistent with atomic operations',
+content:`<h2>Keeping Data Consistent</h2>
+<p>Imagine transferring money between bank accounts. You need to subtract from one and add to another. If the system crashes between steps, money vanishes. Transactions prevent this.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">BEGIN</span>;
+<span class="cmt">-- Transfer \$100 from Alice to Bob</span>
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance - <span class="num">100</span> <span class="kw">WHERE</span> id = <span class="num">1</span>;
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> balance = balance + <span class="num">100</span> <span class="kw">WHERE</span> id = <span class="num">2</span>;
+<span class="kw">COMMIT</span>;
+<span class="cmt">-- Both succeed or neither does</span>
+
+<span class="cmt">-- If something goes wrong:</span>
+<span class="kw">ROLLBACK</span>;  <span class="cmt">-- Everything undone</span></code></pre></div>
+<h3>ACID: The Four Guarantees</h3>
+<div class="tw"><table>
+<tr><th>Property</th><th>Meaning</th><th>Analogy</th></tr>
+<tr><td><strong>A</strong>tomicity</td><td>All or nothing</td><td>Letter arrives fully or not at all</td></tr>
+<tr><td><strong>C</strong>onsistency</td><td>Rules always hold</td><td>Illegal chess moves rejected</td></tr>
+<tr><td><strong>I</strong>solation</td><td>Concurrent txs don't interfere</td><td>Parallel checkout lines</td></tr>
+<tr><td><strong>D</strong>urability</td><td>Committed survives crashes</td><td>Permanent marker, not pencil</td></tr>
+</table></div>
+<div class="callout callout-info"><div class="callout-title">💡 Why ACID Matters</div>
+<p>ACID is why banks, healthcare systems, and e-commerce platforms trust relational databases. Without it, you'd need complex error-recovery code for every database operation.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Transactions ensure multiple operations succeed or fail as a unit. Always wrap related operations — especially anything involving money or inventory.</p></div>`,
+quiz:[{q:'What does the A in ACID stand for?',opts:['Availability','Atomicity','Accuracy','Aggregation'],correct:1,explain:'Atomicity means a transaction is treated as a single unit — all operations succeed or none do.'}]},
+
+{id:'s7',title:'INSERT, UPDATE, DELETE',sub:'Creating, modifying, and removing data',
+content:`<h2>Modifying Data</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- INSERT: create records (RETURNING gives you back the row)</span>
+<span class="kw">INSERT INTO</span> users (name, email, age)
+<span class="kw">VALUES</span> (<span class="str">'Alice'</span>, <span class="str">'alice@mail.com'</span>, <span class="num">28</span>)
+<span class="kw">RETURNING</span> *;
+
+<span class="cmt">-- Multiple inserts</span>
+<span class="kw">INSERT INTO</span> users (name, email) <span class="kw">VALUES</span>
+    (<span class="str">'Bob'</span>, <span class="str">'bob@mail.com'</span>),
+    (<span class="str">'Carol'</span>, <span class="str">'carol@mail.com'</span>);
+
+<span class="cmt">-- UPDATE: modify existing records</span>
+<span class="kw">UPDATE</span> users <span class="kw">SET</span> age = <span class="num">29</span>
+<span class="kw">WHERE</span> email = <span class="str">'alice@mail.com'</span>
+<span class="kw">RETURNING</span> *;
+
+<span class="cmt">-- DELETE: remove records</span>
+<span class="kw">DELETE FROM</span> users <span class="kw">WHERE</span> id = <span class="num">5</span>;</code></pre></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 ALWAYS Use WHERE with UPDATE/DELETE</div>
+<p>Without WHERE, <code>UPDATE</code> changes EVERY row and <code>DELETE</code> removes EVERY row. Always double-check. In production, many engineers do a SELECT first to verify which rows will be affected.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>INSERT creates rows. UPDATE modifies existing rows. DELETE removes rows. Always use WHERE with UPDATE and DELETE. Use RETURNING to get back affected rows.</p></div>`,
+quiz:[{q:'What happens with DELETE FROM users (no WHERE)?',opts:['Deletes nothing','Deletes ALL rows','Only first row','Gives an error'],correct:1,explain:'Without WHERE, DELETE removes ALL rows from the table.'}]},
+
+{id:'s8',title:'Views & Indexes',sub:'Saved queries and making things fast',
+content:`<h2>Views: Saved Queries</h2>
+<p>A <strong>view</strong> is a saved SELECT query that acts like a virtual table. It doesn't store data — it runs the query each time you access it.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE VIEW</span> active_user_orders <span class="kw">AS</span>
+<span class="kw">SELECT</span> u.name, u.email, o.id <span class="kw">AS</span> order_id, o.total
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span> u.is_active = <span class="kw">TRUE</span>;
+
+<span class="cmt">-- Query the view like a table</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> active_user_orders <span class="kw">WHERE</span> total > <span class="num">100</span>;</code></pre></div>
+<h2>Indexes: Making Queries Fast</h2>
+<p>An <strong>index</strong> is like the index at the back of a book — instead of reading every page, you jump directly to the right one.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Single column index</span>
+<span class="kw">CREATE INDEX</span> idx_users_email <span class="kw">ON</span> users (email);
+
+<span class="cmt">-- Composite index (multiple columns)</span>
+<span class="kw">CREATE INDEX</span> idx_orders_user_date
+<span class="kw">ON</span> orders (user_id, created_at <span class="kw">DESC</span>);
+
+<span class="cmt">-- Unique index (enforces uniqueness + speeds lookups)</span>
+<span class="kw">CREATE UNIQUE INDEX</span> idx_users_email_uniq
+<span class="kw">ON</span> users (email);</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ The Cost of Indexes</div>
+<p>Indexes speed reads but slow writes (INSERT, UPDATE, DELETE must also update the index). Only index columns used in WHERE, JOIN, and ORDER BY. Start with primary keys and foreign keys.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Views simplify complex queries. Indexes speed up lookups at the cost of write performance. Use indexes strategically on frequently queried columns.</p></div>`,
+quiz:[{q:'What is the trade-off of adding more indexes?',opts:['No extra space','Faster reads but slower writes','Slower reads','No trade-off'],correct:1,explain:'Indexes speed up read queries but add overhead to write operations because the index must be updated.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 3 — POSTGRESQL DEEP DIVE
+   ═══════════════════════════════════════════════ */
+{id:'pg',title:'PostgreSQL Deep Dive',icon:'🐘',lessons:[
+{id:'p1',title:'PostgreSQL Architecture',sub:'How PostgreSQL works under the hood',
+content:`<h2>Process Model</h2>
+<svg class="svg-diagram" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:var(--accent);stop-opacity:1" />
+      <stop offset="100%" style="stop-color:var(--accent2);stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect x="50" y="20" width="120" height="40" rx="6" fill="url(#grad1)"/>
+  <text x="110" y="45" fill="white" font-size="14" font-weight="bold" text-anchor="middle">Client Application</text>
+  
+  <path d="M 110 60 L 110 100" stroke="var(--text-sec)" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <rect x="250" y="20" width="300" height="260" rx="8" fill="var(--bg-main)" stroke="var(--border)" stroke-width="2"/>
+  <text x="400" y="45" fill="var(--text)" font-size="16" font-weight="bold" text-anchor="middle">PostgreSQL Server</text>
+  
+  <rect x="270" y="70" width="120" height="40" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+  <text x="330" y="95" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">Postmaster</text>
+  
+  <rect x="270" y="140" width="120" height="40" rx="6" fill="var(--bg-elevated)" stroke="var(--accent)"/>
+  <text x="330" y="165" fill="var(--accent)" font-size="12" font-weight="bold" text-anchor="middle">Backend Process</text>
+  
+  <path d="M 330 110 L 330 140" stroke="var(--text-sec)" stroke-width="2" stroke-dasharray="4"/>
+  <path d="M 110 100 L 110 160 L 270 160" stroke="var(--accent2)" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <rect x="420" y="70" width="110" height="90" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+  <text x="475" y="95" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">Shared Memory</text>
+  <rect x="430" y="110" width="90" height="20" rx="4" fill="var(--bg-hover)"/>
+  <text x="475" y="124" fill="var(--text-sec)" font-size="10" text-anchor="middle">Shared Buffers</text>
+  <rect x="430" y="135" width="90" height="20" rx="4" fill="var(--bg-hover)"/>
+  <text x="475" y="149" fill="var(--text-sec)" font-size="10" text-anchor="middle">WAL Buffers</text>
+  
+  <path d="M 390 160 L 420 160" stroke="var(--text-sec)" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  
+  <rect x="270" y="210" width="260" height="50" rx="6" fill="var(--bg-elevated)" stroke="var(--border)"/>
+  <text x="400" y="230" fill="var(--text)" font-size="12" font-weight="bold" text-anchor="middle">Disk Storage</text>
+  <text x="400" y="248" fill="var(--text-sec)" font-size="10" text-anchor="middle">Data Files &amp; WAL Files</text>
+  
+  <path d="M 475 160 L 475 210" stroke="var(--text-sec)" stroke-width="2" marker-end="url(#arrow)"/>
+  
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="var(--text-sec)" />
+    </marker>
+  </defs>
+</svg>
+<p>PostgreSQL uses a <strong>process-per-connection</strong> model. When a client connects, PostgreSQL forks a new process (a "backend process") to handle that connection.</p>
+<h3>Key Components</h3>
+<ul>
+<li><strong>Postmaster</strong> — main process that accepts connections and forks backends</li>
+<li><strong>Shared Buffers</strong> — memory area caching data pages (default 128MB)</li>
+<li><strong>WAL (Write-Ahead Log)</strong> — logs all changes before applying them. Enables crash recovery.</li>
+<li><strong>Background Workers</strong> — autovacuum, stats collection, replication</li>
+</ul>
+<h3>How a Query Gets Executed</h3>
+<ol>
+<li><strong>Parser</strong> — checks SQL syntax</li>
+<li><strong>Rewriter</strong> — applies rules/views</li>
+<li><strong>Planner/Optimizer</strong> — finds the cheapest execution plan</li>
+<li><strong>Executor</strong> — runs the plan and returns results</li>
+</ol>
+<div class="callout callout-info"><div class="callout-title">💡 Why This Matters</div>
+<p>Process-per-connection means each connection uses ~5-10MB RAM. With 1000 concurrent users, that's 10GB just for connections. This is why <strong>connection pooling</strong> is essential.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>PostgreSQL uses process-per-connection with shared buffers for caching and WAL for crash recovery. The query planner optimizes every query before executing it.</p></div>`,
+quiz:[{q:'What does WAL stand for?',opts:['Write-After Logging','Write-Ahead Log','Wide Area Lookup','Web Access Layer'],correct:1,explain:'Write-Ahead Log ensures changes are logged before being applied, enabling crash recovery.'}]},
+
+{id:'p2',title:'MVCC & Isolation Levels',sub:'How PostgreSQL handles concurrent reads and writes',
+content:`<h2>MVCC: Multi-Version Concurrency Control</h2>
+<p>Instead of locking rows during reads, PostgreSQL keeps <strong>multiple versions</strong> of each row. When you update a row, PostgreSQL creates a new version. Readers see the old version; the writer sees the new one.</p>
+<div class="callout callout-info"><div class="callout-title">💡 Analogy</div>
+<p>Imagine a shared document where each person sees a snapshot at the moment they opened it. Changes by others don't affect your view until you refresh. No locking needed.</p></div>
+<h3>Isolation Levels</h3>
+<div class="tw"><table>
+<tr><th>Level</th><th>What You See</th><th>Use When</th></tr>
+<tr><td><code>READ COMMITTED</code> (default)</td><td>Only committed data</td><td>Most applications</td></tr>
+<tr><td><code>REPEATABLE READ</code></td><td>Snapshot from start of tx</td><td>Consistent reads needed</td></tr>
+<tr><td><code>SERIALIZABLE</code></td><td>As if txs ran one at a time</td><td>Complex invariants</td></tr>
+</table></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">BEGIN</span>;
+<span class="kw">SET TRANSACTION ISOLATION LEVEL SERIALIZABLE</span>;
+<span class="cmt">-- your queries here</span>
+<span class="kw">COMMIT</span>;</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ Default Is Enough (Usually)</div>
+<p>READ COMMITTED works for most apps. Only use SERIALIZABLE when you have complex invariants that concurrent transactions could violate.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>MVCC lets readers and writers work without blocking each other by keeping multiple row versions. READ COMMITTED is the practical default.</p></div>`,
+quiz:[{q:'How does MVCC prevent readers from blocking writers?',opts:['By using locks','By keeping multiple row versions','By queuing operations','By allowing one tx at a time'],correct:1,explain:'MVCC maintains multiple versions so readers see consistent snapshots without locks.'}]},
+
+{id:'p3',title:'Index Types Deep Dive',sub:'B-tree, GIN, GiST and composite indexes',
+content:`<h2>PostgreSQL Index Types</h2>
+<div class="tw"><table>
+<tr><th>Type</th><th>Best For</th><th>Created How</th></tr>
+<tr><td><code>B-tree</code> (default)</td><td>Equality, range, sort</td><td><code>CREATE INDEX</code></td></tr>
+<tr><td><code>GIN</code></td><td>JSONB, arrays, full-text</td><td><code>USING GIN</code></td></tr>
+<tr><td><code>GiST</code></td><td>Geometric, range types</td><td><code>USING GiST</code></td></tr>
+<tr><td><code>Hash</code></td><td>Pure equality (rare)</td><td><code>USING HASH</code></td></tr>
+</table></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- GIN index for JSONB queries</span>
+<span class="kw">CREATE INDEX</span> idx_metadata <span class="kw">ON</span> users <span class="kw">USING GIN</span> (metadata);
+
+<span class="cmt">-- Composite index (column order matters!)</span>
+<span class="kw">CREATE INDEX</span> idx_orders_comp
+<span class="kw">ON</span> orders (user_id, status, created_at <span class="kw">DESC</span>);
+<span class="cmt">-- Works for: WHERE user_id=1</span>
+<span class="cmt">-- Works for: WHERE user_id=1 AND status='active'</span>
+<span class="cmt">-- WON'T help: WHERE status='active' (alone)</span></code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ Column Order Matters!</div>
+<p>In composite index (a, b, c), it works for queries on (a), (a,b), or (a,b,c) — but NOT for (b) alone or (b,c). Put the most-filtered column first.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>B-tree for most cases. GIN for JSONB and arrays. Composite indexes: most selective column first. Always verify with EXPLAIN ANALYZE.</p></div>`,
+quiz:[{q:'Which index type is best for JSONB queries?',opts:['B-tree','Hash','GIN','GiST'],correct:2,explain:'GIN is designed for composite values like JSONB, arrays, and full-text search.'}]},
+
+{id:'p4',title:'EXPLAIN ANALYZE',sub:'Reading and understanding query execution plans',
+content:`<h2>Reading Query Plans</h2>
+<p><code>EXPLAIN ANALYZE</code> is your most powerful tool for understanding and optimizing queries.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">EXPLAIN ANALYZE</span>
+<span class="kw">SELECT</span> u.name, <span class="fn">COUNT</span>(o.id)
+<span class="kw">FROM</span> users u
+<span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id
+<span class="kw">WHERE</span> u.is_active = <span class="kw">TRUE</span>
+<span class="kw">GROUP BY</span> u.name;</code></pre></div>
+<div class="tw"><table>
+<tr><th>Node Type</th><th>What It Means</th><th>Good/Bad?</th></tr>
+<tr><td><code>Seq Scan</code></td><td>Reads every row</td><td>Bad on large tables</td></tr>
+<tr><td><code>Index Scan</code></td><td>Uses an index</td><td>Good</td></tr>
+<tr><td><code>Index Only Scan</code></td><td>Reads only from index</td><td>Best</td></tr>
+<tr><td><code>Hash Join</code></td><td>Hash table for joining</td><td>Good for large data</td></tr>
+<tr><td><code>Nested Loop</code></td><td>For each in A, scan B</td><td>Bad if outer is large</td></tr>
+</table></div>
+<div class="callout callout-info"><div class="callout-title">💡 Pro Tip</div>
+<p>Use <code>EXPLAIN (ANALYZE, BUFFERS)</code> for the most detail. BUFFERS shows disk vs cache reads.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>EXPLAIN ANALYZE shows how PostgreSQL executes your query. Look for Seq Scans on large tables and add indexes to eliminate them.</p></div>`,
+quiz:[{q:'Which scan type reads every row in a table?',opts:['Index Scan','Index Only Scan','Seq Scan','Bitmap Scan'],correct:2,explain:'Sequential Scan reads every row. On large tables, this usually indicates a missing index.'}]},
+
+{id:'p5',title:'Performance Tuning',sub:'Configuration, vacuum, and query optimization',
+content:`<h2>Key Configuration</h2>
+<div class="tw"><table>
+<tr><th>Setting</th><th>Default</th><th>Recommended</th><th>Purpose</th></tr>
+<tr><td><code>shared_buffers</code></td><td>128MB</td><td>25% of RAM</td><td>Data cache</td></tr>
+<tr><td><code>work_mem</code></td><td>4MB</td><td>16-64MB</td><td>Sort/hash memory</td></tr>
+<tr><td><code>effective_cache_size</code></td><td>4GB</td><td>75% of RAM</td><td>Planner hints</td></tr>
+<tr><td><code>maintenance_work_mem</code></td><td>64MB</td><td>256MB-1GB</td><td>VACUUM, CREATE INDEX</td></tr>
+</table></div>
+<h3>Query Optimization Tips</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- 1. Select only what you need</span>
+<span class="kw">SELECT</span> id, name <span class="kw">FROM</span> users;  <span class="cmt">-- Good</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users;          <span class="cmt">-- Wasteful</span>
+
+<span class="cmt">-- 2. Use EXISTS instead of IN for subqueries</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users u
+<span class="kw">WHERE EXISTS</span> (
+    <span class="kw">SELECT</span> <span class="num">1</span> <span class="kw">FROM</span> orders o <span class="kw">WHERE</span> o.user_id = u.id
+);
+
+<span class="cmt">-- 3. Avoid functions on indexed columns</span>
+<span class="cmt">-- BAD: can't use index</span>
+<span class="kw">WHERE</span> <span class="fn">LOWER</span>(email) = <span class="str">'alice@mail.com'</span>;
+<span class="cmt">-- GOOD: functional index</span>
+<span class="kw">CREATE INDEX</span> idx_email_lower <span class="kw">ON</span> users (<span class="fn">LOWER</span>(email));
+
+<span class="cmt">-- 4. Monitor table bloat (dead rows from MVCC)</span>
+<span class="kw">SELECT</span> relname, n_dead_tup, n_live_tup
+<span class="kw">FROM</span> pg_stat_user_tables
+<span class="kw">WHERE</span> n_dead_tup > <span class="num">10000</span>;</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Tune shared_buffers (25% RAM). Use EXISTS over IN. Avoid functions on indexed columns. Trust autovacuum but monitor it.</p></div>`,
+quiz:[{q:'What percentage of RAM should shared_buffers typically be?',opts:['5%','25%','75%','100%'],correct:1,explain:'General recommendation: ~25% of total system RAM for shared_buffers.'}]},
+
+{id:'p6',title:'JSONB & Full-Text Search',sub:'PostgreSQL is more than just relational tables',
+content:`<h2>JSONB: Flexible Schema</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> events (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    data <span class="type">JSONB</span> <span class="kw">NOT NULL</span>
+);
+
+<span class="kw">INSERT INTO</span> events (data) <span class="kw">VALUES</span>
+(<span class="str">'{"type": "click", "page": "/pricing", "user_id": 42}'</span>);
+
+<span class="cmt">-- Query JSONB with ->> (get text value)</span>
+<span class="kw">SELECT</span> data->><span class="str">'type'</span> <span class="kw">AS</span> event_type <span class="kw">FROM</span> events;
+
+<span class="cmt">-- Containment check with @></span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> events
+<span class="kw">WHERE</span> data @> <span class="str">'{"type": "click"}'</span>;
+
+<span class="cmt">-- GIN index for fast JSONB queries</span>
+<span class="kw">CREATE INDEX</span> idx_events_data <span class="kw">ON</span> events <span class="kw">USING GIN</span> (data);</code></pre></div>
+<h2>Full-Text Search</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Add search vector column</span>
+<span class="kw">ALTER TABLE</span> articles
+<span class="kw">ADD COLUMN</span> search_vector <span class="type">tsvector</span>;
+
+<span class="cmt">-- Populate from title + body</span>
+<span class="kw">UPDATE</span> articles <span class="kw">SET</span> search_vector =
+    <span class="fn">to_tsvector</span>(<span class="str">'english'</span>, title || <span class="str">' '</span> || body);
+
+<span class="cmt">-- GIN index for fast search</span>
+<span class="kw">CREATE INDEX</span> idx_fts <span class="kw">ON</span> articles <span class="kw">USING GIN</span> (search_vector);
+
+<span class="cmt">-- Search!</span>
+<span class="kw">SELECT</span> title, <span class="fn">ts_rank</span>(search_vector, query) <span class="kw">AS</span> relevance
+<span class="kw">FROM</span> articles,
+     <span class="fn">to_tsquery</span>(<span class="str">'english'</span>, <span class="str">'database & postgres'</span>) query
+<span class="kw">WHERE</span> search_vector @@ query
+<span class="kw">ORDER BY</span> relevance <span class="kw">DESC</span>;</code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 When to Use JSONB vs Columns</div>
+<p>JSONB for truly flexible data (settings, event payloads, API responses). Regular columns for data you frequently query, constrain, or join on. Don't use JSONB as an excuse to avoid schema design.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>JSONB stores flexible data with @> and ->> operators. Full-text search uses tsvector + tsquery with GIN indexes. Both eliminate the need for separate tools.</p></div>`,
+quiz:[{q:'Which operator checks if JSONB contains a specific value?',opts:['->>','@@','@>','||'],correct:2,explain:'The @> (containment) operator checks if the left JSONB value contains all keys from the right.'}]},
+
+{id:'p7',title:'Backup & Recovery',sub:'Protecting your data with proper backup strategies',
+content:`<h2>Backup Strategies</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Bash</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt"># Logical backup (SQL statements)</span>
+pg_dump -U postgres -d mydb -f backup.sql
+
+<span class="cmt"># Custom format (compressed, selective restore)</span>
+pg_dump -U postgres -Fc -d mydb -f backup.dump
+
+<span class="cmt"># Restore</span>
+psql -U postgres -d mydb < backup.sql
+pg_restore -U postgres -d mydb backup.dump
+
+<span class="cmt"># Physical backup (for large databases + PITR)</span>
+pg_basebackup -U postgres -D /backup/base -Ft -z</code></pre></div>
+<div class="tw"><table>
+<tr><th>Method</th><th>Pros</th><th>Best For</th></tr>
+<tr><td><code>pg_dump</code></td><td>Simple, portable</td><td>Small-medium databases</td></tr>
+<tr><td><code>pg_basebackup</code></td><td>Fast, supports PITR</td><td>Production databases</td></tr>
+<tr><td>WAL archiving</td><td>Point-in-time recovery</td><td>Mission-critical systems</td></tr>
+</table></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 Don't Be That Person</div>
+<p>A backup you can't restore is not a backup. Test your restore process regularly. The most common mistake is setting up backups but never testing restoration.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Use pg_dump for simple backups, pg_basebackup + WAL archiving for production PITR. Always test restoration.</p></div>`,
+quiz:[{q:'Which tool supports point-in-time recovery?',opts:['pg_dump','pg_basebackup with WAL archiving','COPY command','pgAdmin export'],correct:1,explain:'PITR requires a base backup plus continuous WAL archiving.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 4 — DATABASE DESIGN
+   ═══════════════════════════════════════════════ */
+{id:'design',title:'Database Design',icon:'📐',lessons:[
+{id:'d1',title:'Normalization (1NF, 2NF, 3NF)',sub:'Organizing data to reduce redundancy and improve integrity',
+content:`<h2>Normalization</h2>
+<p>Normalization organizes tables to minimize data redundancy. The simple rule: if you're copying the same data into multiple rows, split it into a separate table.</p>
+<h3>1NF: Atomic Values</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- ❌ BAD: violates 1NF</span>
+phones <span class="type">VARCHAR</span>(<span class="num">200</span>)  <span class="cmt">-- "555-1234, 555-5678"</span>
+
+<span class="cmt">-- ✅ GOOD: 1NF</span>
+<span class="kw">CREATE TABLE</span> student_phones (
+    student_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> students(id),
+    phone <span class="type">VARCHAR</span>(<span class="num">20</span>),
+    <span class="kw">PRIMARY KEY</span> (student_id, phone)
+);</code></pre></div>
+<h3>3NF: No Transitive Dependencies</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- ❌ BAD: city depends on zip, not on id</span>
+city <span class="type">VARCHAR</span>(<span class="num">100</span>)  <span class="cmt">-- transitive dependency</span>
+
+<span class="cmt">-- ✅ GOOD: 3NF</span>
+<span class="kw">CREATE TABLE</span> zip_codes (
+    zip <span class="type">VARCHAR</span>(<span class="num">10</span>) <span class="kw">PRIMARY KEY</span>,
+    city <span class="type">VARCHAR</span>(<span class="num">100</span>)
+);</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Normalize first: 1NF = atomic values, 3NF = no transitive dependencies. Denormalize only when performance demands it.</p></div>`,
+quiz:[{q:'Which normal form eliminates transitive dependencies?',opts:['1NF','2NF','3NF','BCNF'],correct:2,explain:'3NF requires no non-key column depends on another non-key column.'}]},
+
+{id:'d2',title:'Denormalization',sub:'When speed wins over purity',
+content:`<h2>Breaking the Rules Strategically</h2>
+<h3>Materialized Views</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE MATERIALIZED VIEW</span> monthly_revenue <span class="kw">AS</span>
+<span class="kw">SELECT</span>
+    <span class="fn">DATE_TRUNC</span>(<span class="str">'month'</span>, created_at) <span class="kw">AS</span> month,
+    <span class="fn">SUM</span>(total) <span class="kw">AS</span> revenue, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> orders
+<span class="kw">FROM</span> orders <span class="kw">GROUP BY</span> <span class="num">1</span>;
+
+<span class="kw">REFRESH MATERIALIZED VIEW</span> monthly_revenue;</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ Golden Rule</div>
+<p>Normalize first. Only denormalize when you have a <strong>proven</strong> performance problem.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Materialized views store expensive query results on disk. Denormalization trades write complexity for read speed.</p></div>`,
+quiz:[{q:'When should you denormalize?',opts:['Always','Only after proven performance bottlenecks','Never','When first designing'],correct:1,explain:'Start normalized. Only denormalize when specific queries are too slow for indexes.'}]},
+
+{id:'d3',title:'Soft Deletes & Audit Logs',sub:'Never actually deleting data in production',
+content:`<h2>Soft Deletes</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">ALTER TABLE</span> users
+<span class="kw">ADD COLUMN</span> deleted_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT NULL</span>;
+
+<span class="cmt">-- Soft delete</span>
+<span class="kw">UPDATE</span> users <span class="kw">SET</span> deleted_at = <span class="fn">NOW</span>() <span class="kw">WHERE</span> id = <span class="num">42</span>;
+
+<span class="cmt">-- Query only active</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> deleted_at <span class="kw">IS NULL</span>;
+
+<span class="cmt">-- Partial index (only active rows)</span>
+<span class="kw">CREATE INDEX</span> idx_active <span class="kw">ON</span> users (id) <span class="kw">WHERE</span> deleted_at <span class="kw">IS NULL</span>;</code></pre></div>
+<h2>Audit Logs</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> audit_logs (
+    id <span class="type">BIGSERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    table_name <span class="type">VARCHAR</span>(<span class="num">100</span>), record_id <span class="type">INTEGER</span>,
+    action <span class="type">VARCHAR</span>(<span class="num">10</span>),  <span class="cmt">-- INSERT/UPDATE/DELETE</span>
+    old_data <span class="type">JSONB</span>, new_data <span class="type">JSONB</span>,
+    changed_by <span class="type">INTEGER</span>, changed_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Use deleted_at for soft deletes. Audit logs track who changed what. Both are standard in production SaaS.</p></div>`,
+quiz:[{q:'What is the standard column pattern for soft deletes?',opts:['is_deleted BOOLEAN','deleted_at TIMESTAMP','Any work, but TIMESTAMP records when'],correct:2,explain:'TIMESTAMP is most common because it records when deletion happened and works with IS NULL.'}]},
+
+{id:'d4',title:'Multi-Tenant Design',sub:'One database, many customers',
+content:`<h2>Multi-Tenancy</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> products (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    tenant_id <span class="type">INTEGER</span> <span class="kw">NOT NULL REFERENCES</span> tenants(id),
+    name <span class="type">VARCHAR</span>(<span class="num">200</span>), price <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)
+);
+<span class="kw">CREATE INDEX</span> idx_tenant <span class="kw">ON</span> products (tenant_id);
+
+<span class="cmt">-- Row-Level Security (defense in depth)</span>
+<span class="kw">ALTER TABLE</span> products <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="kw">CREATE POLICY</span> tenant_isolation <span class="kw">ON</span> products
+<span class="kw">USING</span> (tenant_id = <span class="fn">current_setting</span>(<span class="str">'app.tenant_id'</span>)::<span class="type">INTEGER</span>);</code></pre></div>
+<div class="tw"><table>
+<tr><th>Strategy</th><th>Isolation</th><th>Best For</th></tr>
+<tr><td>Shared schema + tenant_id</td><td>Low</td><td>Most SaaS apps</td></tr>
+<tr><td>Separate schemas</td><td>Medium</td><td>Custom per-tenant</td></tr>
+<tr><td>Separate databases</td><td>High</td><td>Regulated industries</td></tr>
+</table></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Shared schema + tenant_id + Row-Level Security is the pragmatic choice for most SaaS. Always index tenant_id.</p></div>`,
+quiz:[{q:'Most common multi-tenancy strategy?',opts:['Separate databases','Shared schema with tenant_id','No separation','File-based'],correct:1,explain:'Shared schema with tenant_id is cost-effective and scales well.'}]},
+
+{id:'d5',title:'RBAC Schema',sub:'Role-based access control database design',
+content:`<h2>RBAC Schema</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> roles (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    name <span class="type">VARCHAR</span>(<span class="num">50</span>) <span class="kw">UNIQUE NOT NULL</span>
+);
+<span class="kw">CREATE TABLE</span> permissions (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    name <span class="type">VARCHAR</span>(<span class="num">100</span>) <span class="kw">UNIQUE NOT NULL</span>
+);
+<span class="kw">CREATE TABLE</span> role_permissions (
+    role_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> roles(id),
+    permission_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> permissions(id),
+    <span class="kw">PRIMARY KEY</span> (role_id, permission_id)
+);
+<span class="kw">CREATE TABLE</span> user_roles (
+    user_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> users(id),
+    role_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> roles(id),
+    <span class="kw">PRIMARY KEY</span> (user_id, role_id)
+);</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>RBAC: users → user_roles → roles → role_permissions → permissions. Five tables for complete access control.</p></div>`,
+quiz:[{q:'How do you check if a user has a permission?',opts:['Only users and permissions','Join user_roles → roles → role_permissions → permissions','Only roles','Direct lookup'],correct:1,explain:'Traverse through user_roles and role_permissions to connect users to permissions.'}]},
+
+{id:'d6',title:'SaaS Architecture Patterns',sub:'Subscriptions, feature flags, and usage metering',
+content:`<h2>SaaS Tables</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> plans (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    name <span class="type">VARCHAR</span>(<span class="num">50</span>), price_monthly <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>),
+    features <span class="type">JSONB</span> <span class="kw">DEFAULT</span> <span class="str">'{}'</span>
+);
+<span class="kw">CREATE TABLE</span> subscriptions (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    tenant_id <span class="type">INTEGER</span>, plan_id <span class="type">INTEGER</span>,
+    status <span class="type">VARCHAR</span>(<span class="num">20</span>) <span class="kw">DEFAULT</span> <span class="str">'active'</span>,
+    expires_at <span class="type">TIMESTAMP</span>
+);
+<span class="kw">CREATE TABLE</span> usage_events (
+    id <span class="type">BIGSERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    tenant_id <span class="type">INTEGER</span>, event_type <span class="type">VARCHAR</span>(<span class="num">50</span>),
+    quantity <span class="type">INTEGER</span> <span class="kw">DEFAULT</span> <span class="num">1</span>,
+    created_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>SaaS databases need plans, subscriptions, feature flags, and usage metering. JSONB for flexible configs.</p></div>`,
+quiz:[{q:'Why use JSONB for plan features?',opts:['Faster than columns','Flexible varying config per plan','Prevents injection','Auto-validates'],correct:1,explain:'JSONB allows each plan to have different feature configs without schema changes.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 5 — PRISMA ORM
+   ═══════════════════════════════════════════════ */
+{id:'prisma',title:'Prisma ORM',icon:'◆',lessons:[
+{id:'pr1',title:'Getting Started with Prisma',sub:'Installation, schema, and first migration',
+content:`<h2>What is Prisma?</h2>
+<p><strong>Prisma</strong> is a modern ORM for Node.js/TypeScript. It lets you interact with your database using a type-safe API instead of raw SQL.</p>
+<div class="cb"><div class="cb-h"><span class="cb-l">Bash</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>npm install prisma @prisma/client
+npx prisma init
+<span class="cmt"># Creates prisma/schema.prisma</span></code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// prisma/schema.prisma</span>
+<span class="kw">generator</span> client {
+  provider = <span class="str">"prisma-client-js"</span>
+}
+<span class="kw">datasource</span> db {
+  provider = <span class="str">"postgresql"</span>
+  url      = <span class="fn">env</span>(<span class="str">"DATABASE_URL"</span>)
+}
+<span class="kw">model</span> <span class="type">User</span> {
+  id        <span class="type">Int</span>      <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  email     <span class="type">String</span>   <span class="attr">@unique</span>
+  name      <span class="type">String</span>?
+  createdAt <span class="type">DateTime</span> <span class="attr">@default</span>(<span class="fn">now</span>())
+  orders    <span class="type">Order</span>[]
+}
+<span class="kw">model</span> <span class="type">Order</span> {
+  id        <span class="type">Int</span>      <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  total     <span class="type">Decimal</span>
+  user      <span class="type">User</span>    <span class="attr">@relation</span>(fields: [userId], references: [id])
+  userId    <span class="type">Int</span>
+  createdAt <span class="type">DateTime</span> <span class="attr">@default</span>(<span class="fn">now</span>())
+}</code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">Bash</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>npx prisma migrate dev --name init  <span class="cmt"># SQL + apply + generate</span>
+npx prisma generate                 <span class="cmt"># Generate client</span>
+npx prisma studio                   <span class="cmt"># Visual DB browser</span></code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Prisma schema defines your model. Migrations sync it to the database. The generated client gives you fully type-safe database access.</p></div>`,
+quiz:[{q:'What file defines your data model in Prisma?',opts:['package.json','prisma/schema.prisma','src/models.ts','database.sql'],correct:1,explain:'prisma/schema.prisma is the single source of truth for your data model.'}]},
+
+{id:'pr2',title:'Models & Relations',sub:'Defining types, relationships, and attributes',
+content:`<h2>Relations in Prisma</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// One-to-Many: User has many Posts</span>
+<span class="kw">model</span> <span class="type">User</span> {
+  id    <span class="type">Int</span>   <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  posts <span class="type">Post</span>[]
+}
+<span class="kw">model</span> <span class="type">Post</span> {
+  id       <span class="type">Int</span>  <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  author   <span class="type">User</span> <span class="attr">@relation</span>(fields: [authorId], references: [id])
+  authorId <span class="type">Int</span>
+}
+
+<span class="cmt">// Many-to-Many (implicit — Prisma creates junction table!)</span>
+<span class="kw">model</span> <span class="type">Post</span> { tags <span class="type">Tag</span>[] }
+<span class="kw">model</span> <span class="type">Tag</span>  { posts <span class="type">Post</span>[] }
+
+<span class="cmt">// One-to-One</span>
+<span class="kw">model</span> <span class="type">User</span>    { profile <span class="type">Profile</span>? }
+<span class="kw">model</span> <span class="type">Profile</span> {
+  user   <span class="type">User</span> <span class="attr">@relation</span>(fields: [userId], references: [id])
+  userId <span class="type">Int</span>  <span class="attr">@unique</span>  <span class="cmt">// unique = one-to-one</span>
+}</code></pre></div>
+<h3>Key Attributes</h3>
+<div class="tw"><table>
+<tr><th>Attribute</th><th>Purpose</th></tr>
+<tr><td><code>@id</code></td><td>Primary key</td></tr>
+<tr><td><code>@unique</code></td><td>Unique constraint</td></tr>
+<tr><td><code>@default(value)</code></td><td>Default value</td></tr>
+<tr><td><code>@relation(...)</code></td><td>Define relationship</td></tr>
+<tr><td><code>@@index([field])</code></td><td>Database index</td></tr>
+</table></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Implicit M:N creates junction tables automatically. @unique on FK = one-to-one. @relation defines all relationships.</p></div>`,
+quiz:[{q:'How does Prisma handle many-to-many?',opts:['Manual junction table','Array fields on both models — auto junction','@manyToMany attribute','Separate migration'],correct:1,explain:'Prisma creates the junction table automatically with implicit many-to-many.'}]},
+
+{id:'pr3',title:'Migrations',sub:'Evolving your schema over time',
+content:`<h2>Migration Workflow</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Bash</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt"># 1. Edit schema.prisma</span>
+<span class="cmt"># 2. Create migration</span>
+npx prisma migrate dev --name add_avatar_url
+<span class="cmt"># Generates SQL, applies it, regenerates client</span>
+
+<span class="cmt"># 3. Production (never migrate dev in prod!)</span>
+npx prisma migrate deploy</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ Production</div>
+<p><code>migrate dev</code> is for development only (can reset DB). <code>migrate deploy</code> safely applies pending migrations in production.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p><code>migrate dev</code> for dev, <code>migrate deploy</code> for prod. Migrations are version-controlled SQL files committed to git.</p></div>`,
+quiz:[{q:'Which command applies migrations in production?',opts:['migrate dev','migrate deploy','db push','generate'],correct:1,explain:'migrate deploy safely applies pending migrations without resetting.'}]},
+
+{id:'pr4',title:'CRUD Operations',sub:'Reading and writing data with Prisma Client',
+content:`<h2>Prisma Client CRUD</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">import</span> { PrismaClient } <span class="kw">from</span> <span class="str">'@prisma/client'</span>;
+<span class="kw">const</span> prisma = <span class="kw">new</span> <span class="fn">PrismaClient</span>();
+
+<span class="cmt">// CREATE</span>
+<span class="kw">const</span> user = <span class="kw">await</span> prisma.user.<span class="fn">create</span>({
+  data: { email: <span class="str">'alice@example.com'</span>, name: <span class="str">'Alice'</span> },
+});
+
+<span class="cmt">// READ: findUnique (by unique field)</span>
+<span class="kw">const</span> user = <span class="kw">await</span> prisma.user.<span class="fn">findUnique</span>({
+  where: { email: <span class="str">'alice@example.com'</span> },
+});
+
+<span class="cmt">// READ: findMany with filters</span>
+<span class="kw">const</span> users = <span class="kw">await</span> prisma.user.<span class="fn">findMany</span>({
+  where: { name: { contains: <span class="str">'ali'</span>, mode: <span class="str">'insensitive'</span> } },
+  orderBy: { createdAt: <span class="str">'desc'</span> },
+  take: <span class="num">10</span>, skip: <span class="num">0</span>,
+});
+
+<span class="cmt">// UPDATE</span>
+<span class="kw">await</span> prisma.user.<span class="fn">update</span>({
+  where: { id: <span class="num">1</span> },
+  data: { name: <span class="str">'Alice Smith'</span> },
+});
+
+<span class="cmt">// UPSERT (update or create)</span>
+<span class="kw">await</span> prisma.user.<span class="fn">upsert</span>({
+  where: { email: <span class="str">'alice@example.com'</span> },
+  update: { name: <span class="str">'Updated'</span> },
+  create: { email: <span class="str">'alice@example.com'</span>, name: <span class="str">'New'</span> },
+});
+
+<span class="cmt">// DELETE</span>
+<span class="kw">await</span> prisma.user.<span class="fn">delete</span>({ where: { id: <span class="num">1</span> } });
+
+<span class="cmt">// COUNT</span>
+<span class="kw">const</span> count = <span class="kw">await</span> prisma.user.<span class="fn">count</span>();</code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 Type Safety in Action</div>
+<p>Try typing <code>prisma.user.findMany({ where: { fakeField: true } })</code> — your IDE immediately shows an error. Prisma catches bugs before runtime.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>create, findUnique, findMany, update, upsert, delete, count — the core operations. All fully type-safe.</p></div>`,
+quiz:[{q:'Which method finds a record by unique field?',opts:['findFirst','findUnique','findMany','findSingle'],correct:1,explain:'findUnique uses a unique field like id or email.'}]},
+
+{id:'pr5',title:'Includes & Selects',sub:'Loading related data efficiently',
+content:`<h2>Loading Relations</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Include related data</span>
+<span class="kw">const</span> user = <span class="kw">await</span> prisma.user.<span class="fn">findUnique</span>({
+  where: { id: <span class="num">1</span> },
+  include: {
+    orders: { where: { status: <span class="str">'paid'</span> }, take: <span class="num">5</span> },
+    profile: <span class="kw">true</span>,
+  },
+});
+
+<span class="cmt">// Select specific fields + count</span>
+<span class="kw">const</span> users = <span class="kw">await</span> prisma.user.<span class="fn">findMany</span>({
+  select: {
+    id: <span class="kw">true</span>, name: <span class="kw">true</span>,
+    _count: { select: { orders: <span class="kw">true</span> } },
+  },
+});
+
+<span class="cmt">// Nested write</span>
+<span class="kw">const</span> user = <span class="kw">await</span> prisma.user.<span class="fn">create</span>({
+  data: {
+    email: <span class="str">'new@x.com'</span>, name: <span class="str">'New'</span>,
+    orders: { create: { total: <span class="num">49.99</span> } },
+  },
+  include: { orders: <span class="kw">true</span> },
+});</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ include vs select</div>
+<p><code>include</code> returns all scalar fields + relations. <code>select</code> returns only specified fields. Use select for lean API responses.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>include loads relations. select picks fields. _count gets counts. Nested writes create related records atomically.</p></div>`,
+quiz:[{q:'What is the difference between include and select?',opts:['Same thing','include adds relations; select returns only chosen fields','include for reads, select for writes','include only works with findMany'],correct:1,explain:'include returns all fields plus relations. select returns only the fields you specify.'}]},
+
+{id:'pr6',title:'Transactions & Raw SQL',sub:'Atomic operations and complex queries',
+content:`<h2>Transactions</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Interactive transaction</span>
+<span class="kw">const</span> result = <span class="kw">await</span> prisma.<span class="fn">\$transaction</span>(<span class="kw">async</span> (tx) => {
+  <span class="kw">const</span> sender = <span class="kw">await</span> tx.account.<span class="fn">update</span>({
+    where: { id: <span class="num">1</span> },
+    data: { balance: { decrement: <span class="num">100</span> } },
+  });
+  <span class="kw">if</span> (sender.balance < <span class="num">0</span>)
+    <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Insufficient funds'</span>);
+  <span class="kw">return</span> tx.account.<span class="fn">update</span>({
+    where: { id: <span class="num">2</span> },
+    data: { balance: { increment: <span class="num">100</span> } },
+  });
+});</code></pre></div>
+<h2>Raw SQL</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Parameterized (auto prevents SQL injection!)</span>
+<span class="kw">const</span> userId = <span class="num">1</span>;
+<span class="kw">const</span> results = <span class="kw">await</span> prisma.<span class="fn">\$queryRaw</span><span class="str">\`
+  SELECT u.name, COUNT(o.id) as orders
+  FROM "User" u
+  JOIN "Order" o ON u.id = o."userId"
+  WHERE u.id = \${userId}
+  GROUP BY u.name
+\`</span>;</code></pre></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 Always Use Tagged Templates</div>
+<p>Prisma's tagged template literals auto-parameterize values. Never concatenate user input into raw SQL.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>\$transaction wraps operations atomically. \$queryRaw handles complex SQL. Always use tagged templates for parameterization.</p></div>`,
+quiz:[{q:'How to prevent SQL injection in Prisma raw queries?',opts:['String concatenation','Tagged template literals ($queryRaw`...`)','Escape quotes manually','Prisma always prevents it'],correct:1,explain:'Tagged template literals automatically parameterize interpolated values.'}]},
+
+{id:'pr7',title:'Performance & N+1',sub:'The most common pitfall and how to fix it',
+content:`<h2>The N+1 Problem</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// ❌ BAD: N+1 (1 + N queries!)</span>
+<span class="kw">const</span> users = <span class="kw">await</span> prisma.user.<span class="fn">findMany</span>();
+<span class="kw">for</span> (<span class="kw">const</span> user <span class="kw">of</span> users) {
+  user.orders = <span class="kw">await</span> prisma.order.<span class="fn">findMany</span>({
+    where: { userId: user.id },  <span class="cmt">// 1 query per user!</span>
+  });
+}
+
+<span class="cmt">// ✅ GOOD: single query with include</span>
+<span class="kw">const</span> users = <span class="kw">await</span> prisma.user.<span class="fn">findMany</span>({
+  include: { orders: <span class="kw">true</span> },  <span class="cmt">// 1 query total</span>
+});</code></pre></div>
+<h3>Pagination</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Cursor-based (fast for any page, even page 1000)</span>
+<span class="kw">const</span> users = <span class="kw">await</span> prisma.user.<span class="fn">findMany</span>({
+  take: <span class="num">20</span>,
+  skip: <span class="num">1</span>,  <span class="cmt">// skip the cursor</span>
+  cursor: { id: lastUserId },
+  orderBy: { id: <span class="str">'asc'</span> },
+});</code></pre></div>
+<h3>Singleton Pattern</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// lib/prisma.ts — reuse one instance</span>
+<span class="kw">const</span> globalForPrisma = globalThis <span class="kw">as</span> <span class="kw">any</span>;
+<span class="kw">export const</span> prisma = globalForPrisma.prisma ??
+  <span class="kw">new</span> <span class="fn">PrismaClient</span>();
+<span class="kw">if</span> (process.env.NODE_ENV !== <span class="str">'production'</span>)
+  globalForPrisma.prisma = prisma;</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Avoid N+1 with include/select. Cursor pagination for large datasets. Singleton client to reuse connections.</p></div>`,
+quiz:[{q:'What is the N+1 problem?',opts:['Migration error','Fetching N records then N extra queries for relations','Connection pooling issue','Pagination error'],correct:1,explain:'N+1 occurs when you fetch N records then loop making one query per record. Fix with include.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 6 — BACKEND INTEGRATION
+   ═══════════════════════════════════════════════ */
+{id:'backend',title:'Backend Integration',icon:'🔧',lessons:[
+{id:'b1',title:'Express + Prisma Setup',sub:'Project structure and first API',
+content:`<h2>Project Structure</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Text</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code>my-api/
+├── prisma/schema.prisma
+├── src/
+│   ├── index.ts
+│   ├── routes/users.ts
+│   ├── services/userService.ts
+│   └── lib/prisma.ts
+└── .env</code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// src/lib/prisma.ts</span>
+<span class="kw">import</span> { PrismaClient } <span class="kw">from</span> <span class="str">'@prisma/client'</span>;
+<span class="kw">export const</span> prisma = <span class="kw">new</span> <span class="fn">PrismaClient</span>();
+
+<span class="cmt">// src/index.ts</span>
+<span class="kw">import</span> express <span class="kw">from</span> <span class="str">'express'</span>;
+<span class="kw">const</span> app = <span class="fn">express</span>();
+app.<span class="fn">use</span>(express.<span class="fn">json</span>());
+
+app.<span class="fn">get</span>(<span class="str">'/api/users'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> users = <span class="kw">await</span> prisma.user.<span class="fn">findMany</span>({
+    select: { id: <span class="kw">true</span>, name: <span class="kw">true</span>, email: <span class="kw">true</span> },
+  });
+  res.<span class="fn">json</span>(users);
+});
+app.<span class="fn">listen</span>(<span class="num">3000</span>);</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Structure with separate routes, services, and a Prisma singleton. Express Router for clean routes.</p></div>`,
+quiz:[{q:'Why create a Prisma Client singleton?',opts:['Save disk space','Avoid exhausting DB connections','Code shorter','Required by Prisma'],correct:1,explain:'Each instance opens a connection pool. A singleton reuses one pool.'}]},
+
+{id:'b2',title:'Authentication with JWT',sub:'Password hashing, tokens, and auth middleware',
+content:`<h2>Auth System</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">import</span> bcrypt <span class="kw">from</span> <span class="str">'bcrypt'</span>;
+<span class="kw">import</span> jwt <span class="kw">from</span> <span class="str">'jsonwebtoken'</span>;
+
+<span class="cmt">// Register: hash password, create user, issue JWT</span>
+<span class="kw">const</span> hashed = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(password, <span class="num">12</span>);
+<span class="kw">const</span> user = <span class="kw">await</span> prisma.user.<span class="fn">create</span>({
+  data: { email, name, password: hashed },
+});
+<span class="kw">const</span> token = jwt.<span class="fn">sign</span>(
+  { userId: user.id, role: user.role },
+  process.env.JWT_SECRET,
+  { expiresIn: <span class="str">'7d'</span> }
+);
+
+<span class="cmt">// Auth middleware</span>
+<span class="kw">function</span> <span class="fn">authenticate</span>(req, res, next) {
+  <span class="kw">const</span> token = req.headers.authorization
+    ?.<span class="fn">replace</span>(<span class="str">'Bearer '</span>, <span class="str">''</span>);
+  <span class="kw">if</span> (!token)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'No token'</span> });
+  <span class="kw">try</span> {
+    req.user = jwt.<span class="fn">verify</span>(token, process.env.JWT_SECRET);
+    <span class="fn">next</span>();
+  } <span class="kw">catch</span> {
+    res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid token'</span> });
+  }
+}</code></pre></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 Security Rules</div>
+<p>1) Never store plain-text passwords. 2) Don't put sensitive data in JWT. 3) Use HTTPS. 4) bcrypt cost 12+.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Hash with bcrypt. Issue JWTs on login. Verify in middleware. Protect routes with the middleware.</p></div>`,
+quiz:[{q:'Why never store plain-text passwords?',opts:['Too much space','DB compromise exposes all passwords','PostgreSQL unsupported','Slows queries'],correct:1,explain:'Plain-text passwords are immediately usable if the database is breached.'}]},
+
+{id:'b3',title:'Service & Repository Patterns',sub:'Organizing backend code for scalability',
+content:`<h2>Layered Architecture</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Repository: data access only</span>
+<span class="kw">export const</span> userRepository = {
+  <span class="fn">findById</span>(id: <span class="type">number</span>) {
+    <span class="kw">return</span> prisma.user.<span class="fn">findUnique</span>({
+      where: { id }, include: { profile: <span class="kw">true</span> },
+    });
+  },
+  <span class="fn">findByEmail</span>(email: <span class="type">string</span>) {
+    <span class="kw">return</span> prisma.user.<span class="fn">findUnique</span>({ where: { email } });
+  },
+  <span class="fn">create</span>(data) {
+    <span class="kw">return</span> prisma.user.<span class="fn">create</span>({ data });
+  },
+};
+
+<span class="cmt">// Service: business logic</span>
+<span class="kw">export const</span> userService = {
+  <span class="kw">async</span> <span class="fn">register</span>(email, name, password) {
+    <span class="kw">const</span> existing = <span class="kw">await</span> userRepository.<span class="fn">findByEmail</span>(email);
+    <span class="kw">if</span> (existing) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Email already in use'</span>);
+    <span class="kw">const</span> hashed = <span class="kw">await</span> bcrypt.<span class="fn">hash</span>(password, <span class="num">12</span>);
+    <span class="kw">return</span> userRepository.<span class="fn">create</span>({
+      email, name, password: hashed
+    });
+  },
+};</code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 What Companies Actually Do</div>
+<p>Most production backends follow some version of this layered architecture. Routes handle HTTP. Services contain business logic. Repositories handle queries.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Separation of concerns makes code testable and maintainable. Each layer has one job.</p></div>`,
+quiz:[{q:'Where does "email must be unique" logic belong?',opts:['Routes','Services','Repositories','Database only'],correct:1,explain:'Services orchestrate: check via repo, then decide to proceed or throw.'}]},
+
+{id:'b4',title:'Error Handling & Validation',sub:'Graceful errors and input validation',
+content:`<h2>Error Handling</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Global error handler</span>
+app.<span class="fn">use</span>((err, req, res, next) => {
+  <span class="kw">if</span> (err.status)
+    <span class="kw">return</span> res.<span class="fn">status</span>(err.status).<span class="fn">json</span>({ error: err.message });
+
+  <span class="cmt">// Prisma-specific errors</span>
+  <span class="kw">if</span> (err.code === <span class="str">'P2002'</span>)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">409</span>).<span class="fn">json</span>({ error: <span class="str">'Duplicate value'</span> });
+  <span class="kw">if</span> (err.code === <span class="str">'P2025'</span>)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">404</span>).<span class="fn">json</span>({ error: <span class="str">'Not found'</span> });
+
+  res.<span class="fn">status</span>(<span class="num">500</span>).<span class="fn">json</span>({ error: <span class="str">'Internal server error'</span> });
+});</code></pre></div>
+<div class="tw"><table>
+<tr><th>Prisma Code</th><th>Meaning</th><th>HTTP Status</th></tr>
+<tr><td><code>P2002</code></td><td>Unique constraint</td><td>409</td></tr>
+<tr><td><code>P2025</code></td><td>Not found</td><td>404</td></tr>
+<tr><td><code>P2003</code></td><td>FK constraint</td><td>400</td></tr>
+</table></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Validate early. Custom error classes. Handle Prisma codes globally. Never expose raw errors to clients.</p></div>`,
+quiz:[{q:'Prisma code P2002 means:',opts:['Not found','Unique constraint violation','FK failure','Connection error'],correct:1,explain:'P2002 indicates a unique constraint was violated.'}]},
+
+{id:'b5',title:'Authorization & RBAC Middleware',sub:'Controlling access with roles and permissions',
+content:`<h2>Authorization Middleware</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">export function</span> <span class="fn">authorize</span>(...roles: <span class="type">string</span>[]) {
+  <span class="kw">return</span> (req, res, next) => {
+    <span class="kw">if</span> (!req.user)
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Not authenticated'</span> });
+    <span class="kw">if</span> (!roles.<span class="fn">includes</span>(req.user.role))
+      <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">403</span>).<span class="fn">json</span>({ error: <span class="str">'Forbidden'</span> });
+    <span class="fn">next</span>();
+  };
+}
+
+<span class="cmt">// Usage</span>
+app.<span class="fn">delete</span>(<span class="str">'/api/users/:id'</span>,
+  authenticate,
+  <span class="fn">authorize</span>(<span class="str">'admin'</span>),
+  handler
+);</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ 401 vs 403</div>
+<p><strong>401</strong> = "I don't know who you are" (no/invalid token). <strong>403</strong> = "I know you, but you can't do this" (no permission).</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Authenticate = identify. Authorize = permission check. 401 vs 403 is a common interview question.</p></div>`,
+quiz:[{q:'HTTP 403 means:',opts:['Not found','Bad request','Forbidden (authenticated, no permission)','Unauthorized'],correct:2,explain:'403 Forbidden: server knows the user but they lack permission.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 7 — PRODUCTION
+   ═══════════════════════════════════════════════ */
+{id:'production',title:'Production Engineering',icon:'🚀',lessons:[
+{id:'pp1',title:'Docker & Environment',sub:'Containerized setup and configuration management',
+content:`<h2>Docker Compose</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">YAML</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt"># docker-compose.yml</span>
+<span class="kw">version</span>: <span class="str">'3.8'</span>
+<span class="kw">services</span>:
+  <span class="fn">db</span>:
+    <span class="kw">image</span>: postgres:<span class="num">16</span>
+    <span class="kw">environment</span>:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    <span class="kw">ports</span>: [<span class="str">"5432:5432"</span>]
+    <span class="kw">volumes</span>: [pgdata:/var/lib/postgresql/data]
+  <span class="fn">api</span>:
+    <span class="kw">build</span>: .
+    <span class="kw">environment</span>:
+      DATABASE_URL: postgresql://myuser:mypassword@db:5432/mydb
+    <span class="kw">depends_on</span>: [db]
+<span class="kw">volumes</span>: <span class="fn">pgdata</span>:</code></pre></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 Never Commit .env</div>
+<p>Use .env.example as a template. In production, inject via your hosting platform.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Docker Compose makes local PostgreSQL trivial. Volumes persist data. Never commit secrets.</p></div>`,
+quiz:[{q:'Why use Docker volumes for PostgreSQL?',opts:['Faster queries','Persist data across restarts','Encrypt data','Enable replication'],correct:1,explain:'Volumes store data outside the container, persisting across restarts.'}]},
+
+{id:'pp2',title:'Connection Pooling & Caching',sub:'PgBouncer, Redis, and monitoring',
+content:`<h2>Redis Caching</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">async function</span> <span class="fn">getUser</span>(id) {
+  <span class="kw">const</span> cached = <span class="kw">await</span> redis.<span class="fn">get</span>(<span class="str">\`user:\${id}\`</span>);
+  <span class="kw">if</span> (cached) <span class="kw">return</span> JSON.<span class="fn">parse</span>(cached);
+  <span class="kw">const</span> user = <span class="kw">await</span> prisma.user.<span class="fn">findUnique</span>({ where: { id } });
+  <span class="kw">await</span> redis.<span class="fn">setex</span>(<span class="str">\`user:\${id}\`</span>, <span class="num">300</span>, JSON.<span class="fn">stringify</span>(user));
+  <span class="kw">return</span> user;
+}</code></pre></div>
+<h2>Monitoring</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Slow queries</span>
+<span class="kw">SELECT</span> query, calls, mean_exec_time
+<span class="kw">FROM</span> pg_stat_statements
+<span class="kw">ORDER BY</span> mean_exec_time <span class="kw">DESC</span> <span class="kw">LIMIT</span> <span class="num">10</span>;
+
+<span class="cmt">-- Active connections</span>
+<span class="kw">SELECT count</span>(*) <span class="kw">FROM</span> pg_stat_activity;</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>PgBouncer for pooling. Redis for caching. pg_stat_statements for monitoring.</p></div>`,
+quiz:[{q:'What does connection pooling solve?',opts:['Slow queries','Too many connections consuming memory','Missing indexes','SQL injection'],correct:1,explain:'Pooling reuses connections, preventing memory exhaustion.'}]},
+
+{id:'pp3',title:'Security Best Practices',sub:'SQL injection, passwords, encryption, and least privilege',
+content:`<h2>Security Checklist</h2>
+<div class="tw"><table>
+<tr><th>Practice</th><th>Why</th></tr>
+<tr><td>Parameterized queries</td><td>Prevents SQL injection</td></tr>
+<tr><td>Hash passwords (bcrypt)</td><td>Protects credentials</td></tr>
+<tr><td>Use HTTPS</td><td>Encrypts data in transit</td></tr>
+<tr><td>Limit DB user permissions</td><td>Least privilege</td></tr>
+<tr><td>Enable SSL for DB connections</td><td>Encrypts app-to-DB</td></tr>
+</table></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">-- Limited-privilege app user</span>
+<span class="kw">CREATE USER</span> app_user <span class="kw">WITH PASSWORD</span> <span class="str">'secure'</span>;
+<span class="kw">GRANT CONNECT ON DATABASE</span> mydb <span class="kw">TO</span> app_user;
+<span class="kw">GRANT SELECT, INSERT, UPDATE, DELETE
+  ON ALL TABLES IN SCHEMA</span> public <span class="kw">TO</span> app_user;</code></pre></div>
+<div class="callout callout-danger"><div class="callout-title">🚫 Never Use Superuser for Apps</div>
+<p>Your app should connect with a limited user. Never use the postgres superuser.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Parameterize queries. Hash passwords. Use SSL. Create limited DB users. Security is defense in depth.</p></div>`,
+quiz:[{q:'Primary defense against SQL injection?',opts:['Input limits','Parameterized queries','WAF','CAPTCHA'],correct:1,explain:'Parameterized queries separate SQL code from data, preventing injection.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 8 — INTERVIEW PREP
+   ═══════════════════════════════════════════════ */
+{id:'interview',title:'Interview Preparation',icon:'🎯',lessons:[
+{id:'i1',title:'SQL Interview Questions',sub:'Rankings, duplicates, self-joins, and common patterns',
+content:`<h2>Common SQL Patterns</h2>
+<h3>Second Highest Salary</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">SELECT DISTINCT</span> salary <span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> salary,
+           <span class="fn">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> salary <span class="kw">DESC</span>) <span class="kw">AS</span> rank
+    <span class="kw">FROM</span> employees
+) ranked <span class="kw">WHERE</span> rank = <span class="num">2</span>;</code></pre></div>
+<h3>Duplicate Emails</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">SELECT</span> email, <span class="fn">COUNT</span>(*) <span class="kw">FROM</span> users
+<span class="kw">GROUP BY</span> email <span class="kw">HAVING COUNT</span>(*) > <span class="num">1</span>;</code></pre></div>
+<h3>Employees Earning More Than Their Manager</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">SELECT</span> e.name <span class="kw">AS</span> employee, m.name <span class="kw">AS</span> manager
+<span class="kw">FROM</span> employees e
+<span class="kw">JOIN</span> employees m <span class="kw">ON</span> e.manager_id = m.id
+<span class="kw">WHERE</span> e.salary > m.salary;</code></pre></div>
+<h3>Consecutive Days with Sales</h3>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">WITH</span> dates <span class="kw">AS</span> (
+    <span class="kw">SELECT DISTINCT</span> <span class="fn">DATE</span>(created_at) <span class="kw">AS</span> d <span class="kw">FROM</span> orders
+), grouped <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> d, d - <span class="fn">ROW_NUMBER</span>() <span class="kw">OVER</span> (<span class="kw">ORDER BY</span> d)::int <span class="kw">AS</span> grp
+    <span class="kw">FROM</span> dates
+)
+<span class="kw">SELECT</span> <span class="fn">MIN</span>(d), <span class="fn">MAX</span>(d), <span class="fn">COUNT</span>(*)
+<span class="kw">FROM</span> grouped <span class="kw">GROUP BY</span> grp <span class="kw">HAVING COUNT</span>(*) >= <span class="num">3</span>;</code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 Interview Tips</div>
+<p>1) Think out loud. 2) Start simple, then optimize. 3) Ask clarifying questions. 4) Consider edge cases.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Rankings, self-joins, GROUP BY + HAVING, subqueries — these cover 80% of SQL interview questions.</p></div>`,
+quiz:[{q:'ROW_NUMBER() vs RANK()?',opts:['Same thing','ROW_NUMBER is unique; RANK gives same rank for ties','RANK is unique; ROW_NUMBER gives same for ties','Neither handles ties'],correct:1,explain:'ROW_NUMBER assigns unique numbers. RANK gives the same rank for tied values, with gaps.'}]},
+
+{id:'i2',title:'Schema Design Challenges',sub:'URL shortener, e-commerce, social media',
+content:`<h2>URL Shortener</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> urls (
+    id <span class="type">BIGSERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    short_code <span class="type">VARCHAR</span>(<span class="num">10</span>) <span class="kw">UNIQUE NOT NULL</span>,
+    original <span class="type">TEXT</span> <span class="kw">NOT NULL</span>,
+    clicks <span class="type">INTEGER</span> <span class="kw">DEFAULT</span> <span class="num">0</span>,
+    user_id <span class="type">INTEGER</span> <span class="kw">REFERENCES</span> users(id),
+    created_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);
+<span class="kw">CREATE INDEX</span> idx_short <span class="kw">ON</span> urls (short_code);</code></pre></div>
+<h2>E-Commerce Core</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> order_items (
+    id <span class="type">SERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    order_id <span class="type">INTEGER</span>, product_id <span class="type">INTEGER</span>,
+    quantity <span class="type">INTEGER</span>,
+    unit_price <span class="type">DECIMAL</span>(<span class="num">10</span>,<span class="num">2</span>)  <span class="cmt">-- snapshot at order time!</span>
+);</code></pre></div>
+<div class="callout callout-warn"><div class="callout-title">⚠️ Snapshot Prices</div>
+<p>Always store unit_price in order_items. Prices change; historical orders must show the original price.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Identify entities, relationships, constraints. Consider indexing. Snapshot mutable data in transactions.</p></div>`,
+quiz:[{q:'Why snapshot unit_price in order_items?',opts:['Save space','Prices change; orders need original price','Looks better','No reason'],correct:1,explain:'Historical records must be accurate regardless of future price changes.'}]},
+
+{id:'i3',title:'Prisma & Backend Q&A',sub:'N+1, transactions, raw SQL, migrations',
+content:`<h2>Frequently Asked Questions</h2>
+<h3>N+1 Problem?</h3><p>Fetching N records then N extra queries for relations. Solve with <code>include</code>.</p>
+<h3>Transactions?</h3><p>Interactive: <code>\$transaction(async (tx) => {...})</code>. Batch: <code>\$transaction([...])</code>.</p>
+<h3>When Raw SQL?</h3><p>Window functions, CTEs, complex aggregations. Always use tagged templates.</p>
+<h3>Production Migrations?</h3><p><code>prisma migrate deploy</code> in CI/CD. Backward-compatible changes for zero downtime.</p>
+<h3>findUnique vs findFirst?</h3><p><code>findUnique</code> requires unique field. <code>findFirst</code> works with any filter.</p>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Know N+1, transactions, raw SQL, migration strategies, and Prisma tradeoffs cold.</p></div>`,
+quiz:[{q:'When to use findFirst vs findUnique?',opts:['Identical','findUnique requires unique field; findFirst any filter','findFirst is faster','findUnique only for id'],correct:1,explain:'findUnique needs a unique field. findFirst works with any filter.'}]},
+
+{id:'i4',title:'Debugging Scenarios',sub:'Slow queries, connection issues, and data problems',
+content:`<h2>API Suddenly Slow</h2>
+<ol><li><code>EXPLAIN ANALYZE</code> the slow query</li><li>Look for Seq Scan on large tables</li><li>Check connections: <code>SELECT count(*) FROM pg_stat_activity</code></li><li>Check locks: <code>SELECT * FROM pg_locks WHERE NOT granted</code></li><li>Check bloat: <code>n_dead_tup</code> in <code>pg_stat_user_tables</code></li></ol>
+<h2>Data Inconsistency</h2>
+<ol><li>Check for missing foreign key constraints</li><li>Look for concurrent writes without transactions</li><li>Check isolation level</li><li>Audit application code for race conditions</li></ol>
+<div class="challenge-box"><h3>🧠 Debug This Query</h3><p>This query is slow on a 10M row table:</p>
+<p><code>SELECT * FROM orders WHERE EXTRACT(YEAR FROM created_at) = 2024</code></p>
+<p><strong>Answer:</strong> The function on the column prevents index usage. Fix: <code>WHERE created_at >= '2024-01-01' AND created_at < '2025-01-01'</code></p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Systematic debugging: execution plans, connections, locks, indexes. EXPLAIN ANALYZE first, always.</p></div>`,
+quiz:[{q:'Why is WHERE EXTRACT(YEAR FROM col) = 2024 slow?',opts:['EXTRACT is deprecated','Function on column prevents index usage','Cannot filter by year','Wrong syntax'],correct:1,explain:'Functions on columns prevent standard index usage. Use range conditions instead.'}]}
+]},
+
+/* ═══════════════════════════════════════════════
+   SECTION 9 — PORTFOLIO PROJECTS
+   ═══════════════════════════════════════════════ */
+{id:'projects',title:'Portfolio Projects',icon:'🏗️',lessons:[
+{id:'pj1',title:'SaaS Invoicing Platform',sub:'Tenants, invoices, line items, PDF-ready schemas',
+content:`<h2>SaaS Invoicing Schema</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">model</span> <span class="type">Tenant</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  name <span class="type">String</span>
+  clients <span class="type">Client</span>[]
+  invoices <span class="type">Invoice</span>[]
+}
+<span class="kw">model</span> <span class="type">Client</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  tenant <span class="type">Tenant</span> <span class="attr">@relation</span>(fields: [tenantId], references: [id])
+  tenantId <span class="type">Int</span>
+  name <span class="type">String</span>
+  email <span class="type">String</span>
+  invoices <span class="type">Invoice</span>[]
+}
+<span class="kw">model</span> <span class="type">Invoice</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  tenant <span class="type">Tenant</span> <span class="attr">@relation</span>(fields: [tenantId], references: [id])
+  tenantId <span class="type">Int</span>
+  client <span class="type">Client</span> <span class="attr">@relation</span>(fields: [clientId], references: [id])
+  clientId <span class="type">Int</span>
+  number <span class="type">String</span>
+  status <span class="type">String</span> <span class="attr">@default</span>(<span class="str">"draft"</span>)
+  subtotal <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  tax <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  total <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  items <span class="type">InvoiceItem</span>[]
+  dueDate <span class="type">DateTime</span>
+  createdAt <span class="type">DateTime</span> <span class="attr">@default</span>(<span class="fn">now</span>())
+  @@index([tenantId, status])
+}
+<span class="kw">model</span> <span class="type">InvoiceItem</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  invoice <span class="type">Invoice</span> <span class="attr">@relation</span>(fields: [invoiceId], references: [id])
+  invoiceId <span class="type">Int</span>
+  description <span class="type">String</span>
+  quantity <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  unitPrice <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  total <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+}</code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Create invoice with items atomically</span>
+<span class="kw">const</span> invoice = <span class="kw">await</span> prisma.<span class="fn">\$transaction</span>(<span class="kw">async</span> (tx) => {
+  <span class="kw">const</span> items = req.body.items;
+  <span class="kw">const</span> subtotal = items.<span class="fn">reduce</span>(
+    (s, i) => s + i.quantity * i.unitPrice, <span class="num">0</span>
+  );
+  <span class="kw">return</span> tx.invoice.<span class="fn">create</span>({
+    data: {
+      tenantId: req.user.tenantId,
+      clientId: req.body.clientId,
+      number: <span class="kw">await</span> <span class="fn">nextInvoiceNumber</span>(tx),
+      subtotal, tax: subtotal * <span class="num">0.1</span>,
+      total: subtotal * <span class="num">1.1</span>,
+      dueDate: req.body.dueDate,
+      items: { create: items.<span class="fn">map</span>(i => ({
+        ...i, total: i.quantity * i.unitPrice,
+      }))},
+    },
+    include: { items: <span class="kw">true</span> },
+  });
+});</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Multi-tenant invoices with line items. Transactions for consistency. Composite indexes for tenant queries.</p></div>`,
+quiz:[{q:'Why use a transaction for invoice creation?',opts:['Performance','Invoice + items succeed or fail together','Required by Prisma','Saves memory'],correct:1,explain:'Transactions ensure atomicity — the invoice and all items succeed or fail together.'}]},
+
+{id:'pj2',title:'Authentication System',sub:'Registration, login, JWT, refresh tokens',
+content:`<h2>Full Auth Schema</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">model</span> <span class="type">User</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  email <span class="type">String</span> <span class="attr">@unique</span>
+  password <span class="type">String</span>
+  role <span class="type">String</span> <span class="attr">@default</span>(<span class="str">"user"</span>)
+  refreshTokens <span class="type">RefreshToken</span>[]
+}
+<span class="kw">model</span> <span class="type">RefreshToken</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  token <span class="type">String</span> <span class="attr">@unique</span>
+  user <span class="type">User</span> <span class="attr">@relation</span>(fields: [userId], references: [id])
+  userId <span class="type">Int</span>
+  expiresAt <span class="type">DateTime</span>
+}</code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Refresh: validate, rotate, issue new pair</span>
+app.<span class="fn">post</span>(<span class="str">'/api/auth/refresh'</span>, <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> stored = <span class="kw">await</span> prisma.refreshToken
+    .<span class="fn">findUnique</span>({
+      where: { token: req.body.refreshToken },
+      include: { user: <span class="kw">true</span> },
+    });
+  <span class="kw">if</span> (!stored || stored.expiresAt < <span class="kw">new</span> <span class="fn">Date</span>())
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">401</span>).<span class="fn">json</span>({ error: <span class="str">'Invalid'</span> });
+  <span class="kw">await</span> prisma.refreshToken.<span class="fn">delete</span>({
+    where: { id: stored.id },
+  });
+  <span class="kw">const</span> tokens = <span class="kw">await</span> <span class="fn">issueTokenPair</span>(stored.user);
+  res.<span class="fn">json</span>(tokens);
+});</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Access tokens (short-lived) + refresh tokens (long-lived, DB-stored). Rotate refresh tokens on use.</p></div>`,
+quiz:[{q:'Why rotate refresh tokens?',opts:['Performance','If stolen, old is invalidated on next use','OAuth requirement','No reason'],correct:1,explain:'Rotating limits vulnerability window if a token is compromised.'}]},
+
+{id:'pj3',title:'E-Commerce Backend',sub:'Products, carts, orders, inventory management',
+content:`<h2>E-Commerce Schema</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">model</span> <span class="type">Product</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  name <span class="type">String</span>
+  slug <span class="type">String</span> <span class="attr">@unique</span>
+  price <span class="type">Decimal</span> <span class="attr">@db.Decimal</span>(<span class="num">10</span>, <span class="num">2</span>)
+  stock <span class="type">Int</span> <span class="attr">@default</span>(<span class="num">0</span>)
+  category <span class="type">Category</span> <span class="attr">@relation</span>(fields: [categoryId], references: [id])
+  categoryId <span class="type">Int</span>
+  @@index([categoryId])
+}</code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Atomic inventory decrement</span>
+<span class="kw">const</span> order = <span class="kw">await</span> prisma.<span class="fn">\$transaction</span>(<span class="kw">async</span> (tx) => {
+  <span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> cartItems) {
+    <span class="kw">const</span> product = <span class="kw">await</span> tx.product.<span class="fn">update</span>({
+      where: { id: item.productId },
+      data: { stock: { decrement: item.quantity } },
+    });
+    <span class="kw">if</span> (product.stock < <span class="num">0</span>)
+      <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">\`\${product.name} out of stock\`</span>);
+  }
+  <span class="cmt">// Create order...</span>
+});</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Slug-based URLs. Atomic inventory decrements prevent overselling. Order items snapshot prices.</p></div>`,
+quiz:[{q:'Why decrement stock in a transaction?',opts:['Better performance','Prevents overselling from concurrent orders','Prisma requirement','Saves disk'],correct:1,explain:'Without a transaction, concurrent orders could both see enough stock and both succeed — overselling.'}]},
+
+{id:'pj4',title:'Task Management API',sub:'Projects, tasks, labels, subtasks, activity logs',
+content:`<h2>Task Management Schema</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">model</span> <span class="type">Task</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  title <span class="type">String</span>
+  status <span class="type">String</span> <span class="attr">@default</span>(<span class="str">"todo"</span>)
+  priority <span class="type">String</span> <span class="attr">@default</span>(<span class="str">"medium"</span>)
+  project <span class="type">Project</span> <span class="attr">@relation</span>(fields: [projectId], references: [id])
+  projectId <span class="type">Int</span>
+  assignee <span class="type">User</span>? <span class="attr">@relation</span>(fields: [assigneeId], references: [id])
+  assigneeId <span class="type">Int</span>?
+  labels <span class="type">Label</span>[]
+  parent <span class="type">Task</span>? <span class="attr">@relation</span>(<span class="str">"Subtasks"</span>, fields: [parentId], references: [id])
+  parentId <span class="type">Int</span>?
+  subtasks <span class="type">Task</span>[] <span class="attr">@relation</span>(<span class="str">"Subtasks"</span>)
+  activities <span class="type">Activity</span>[]
+  @@index([projectId, status])
+}
+<span class="kw">model</span> <span class="type">Activity</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  task <span class="type">Task</span> <span class="attr">@relation</span>(fields: [taskId], references: [id])
+  taskId <span class="type">Int</span>
+  action <span class="type">String</span>
+  details <span class="type">Json</span>?
+  createdAt <span class="type">DateTime</span> <span class="attr">@default</span>(<span class="fn">now</span>())
+  @@index([taskId, createdAt])
+}</code></pre></div>
+<div class="callout callout-info"><div class="callout-title">💡 Self-Referencing Relation</div>
+<p>Tasks reference themselves via <code>parentId</code> for subtasks. Labels use implicit M:N.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Self-referencing for subtasks. Activity logging for audit. JSONB for flexible details. Labels via M:N.</p></div>`,
+quiz:[{q:'Pattern for tasks with subtasks?',opts:['Many-to-many','Self-referencing one-to-many','Separate table','JSONB array'],correct:1,explain:'Self-referencing uses a FK pointing to the same table (parentId → id).'}]},
+
+{id:'pj5',title:'Audit Logging System',sub:'Triggers, change tracking, compliance-ready',
+content:`<h2>Complete Audit System</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">SQL</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">CREATE TABLE</span> audit_logs (
+    id <span class="type">BIGSERIAL</span> <span class="kw">PRIMARY KEY</span>,
+    table_name <span class="type">VARCHAR</span>(<span class="num">100</span>), record_id <span class="type">INTEGER</span>,
+    action <span class="type">VARCHAR</span>(<span class="num">10</span>),
+    old_data <span class="type">JSONB</span>, new_data <span class="type">JSONB</span>,
+    changed_by <span class="type">INTEGER</span>,
+    changed_at <span class="type">TIMESTAMP</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>()
+);
+
+<span class="kw">CREATE OR REPLACE FUNCTION</span> audit_trigger()
+<span class="kw">RETURNS TRIGGER AS</span> \$\$
+<span class="kw">BEGIN</span>
+    <span class="kw">INSERT INTO</span> audit_logs
+      (table_name, record_id, action, old_data, new_data)
+    <span class="kw">VALUES</span> (
+      TG_TABLE_NAME,
+      COALESCE(NEW.id, OLD.id),
+      TG_OP,
+      <span class="kw">CASE WHEN</span> TG_OP <span class="kw">IN</span> (<span class="str">'UPDATE'</span>,<span class="str">'DELETE'</span>)
+           <span class="kw">THEN</span> <span class="fn">to_jsonb</span>(OLD) <span class="kw">END</span>,
+      <span class="kw">CASE WHEN</span> TG_OP <span class="kw">IN</span> (<span class="str">'INSERT'</span>,<span class="str">'UPDATE'</span>)
+           <span class="kw">THEN</span> <span class="fn">to_jsonb</span>(NEW) <span class="kw">END</span>
+    );
+    <span class="kw">RETURN</span> COALESCE(NEW, OLD);
+<span class="kw">END</span>;
+\$\$ <span class="kw">LANGUAGE</span> plpgsql;
+
+<span class="kw">CREATE TRIGGER</span> users_audit
+<span class="kw">AFTER INSERT OR UPDATE OR DELETE ON</span> users
+<span class="kw">FOR EACH ROW EXECUTE FUNCTION</span> audit_trigger();</code></pre></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Triggers + JSONB = automatic comprehensive audit logging. Apply to any table by creating a trigger.</p></div>`,
+quiz:[{q:'What PostgreSQL feature auto-logs changes?',opts:['Views','Indexes','Triggers','Sequences'],correct:2,explain:'Triggers fire automatically on INSERT/UPDATE/DELETE, enabling automatic audit logging.'}]},
+
+{id:'pj6',title:'Multi-Tenant SaaS Architecture',sub:'Complete production-ready multi-tenant system',
+content:`<h2>Full Multi-Tenant System</h2>
+<div class="cb"><div class="cb-h"><span class="cb-l">Prisma</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="kw">model</span> <span class="type">Tenant</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  name <span class="type">String</span>
+  slug <span class="type">String</span> <span class="attr">@unique</span>
+  plan <span class="type">String</span> <span class="attr">@default</span>(<span class="str">"free"</span>)
+  settings <span class="type">Json</span> <span class="attr">@default</span>(<span class="str">"{}"</span>)
+  users <span class="type">TenantUser</span>[]
+  createdAt <span class="type">DateTime</span> <span class="attr">@default</span>(<span class="fn">now</span>())
+}
+<span class="kw">model</span> <span class="type">TenantUser</span> {
+  id <span class="type">Int</span> <span class="attr">@id</span> <span class="attr">@default</span>(<span class="fn">autoincrement</span>())
+  tenant <span class="type">Tenant</span> <span class="attr">@relation</span>(fields: [tenantId], references: [id])
+  tenantId <span class="type">Int</span>
+  user <span class="type">User</span> <span class="attr">@relation</span>(fields: [userId], references: [id])
+  userId <span class="type">Int</span>
+  role <span class="type">String</span> <span class="attr">@default</span>(<span class="str">"member"</span>)
+  @@unique([tenantId, userId])
+}</code></pre></div>
+<div class="cb"><div class="cb-h"><span class="cb-l">TypeScript</span><button class="cp-btn" onclick="copyCode(this)">Copy</button></div>
+<pre><code><span class="cmt">// Tenant context middleware</span>
+<span class="kw">async function</span> <span class="fn">setTenantContext</span>(req, res, next) {
+  <span class="kw">const</span> slug = req.headers[<span class="str">'x-tenant'</span>];
+  <span class="kw">const</span> tenant = <span class="kw">await</span> prisma.tenant
+    .<span class="fn">findUnique</span>({ where: { slug } });
+  <span class="kw">if</span> (!tenant)
+    <span class="kw">return</span> res.<span class="fn">status</span>(<span class="num">404</span>).<span class="fn">json</span>({ error: <span class="str">'Not found'</span> });
+  req.tenantId = tenant.id;
+  <span class="kw">await</span> prisma.<span class="fn">\$executeRaw</span><span class="str">\`SET app.tenant_id = \${tenant.id}\`</span>;
+  <span class="fn">next</span>();
+}</code></pre></div>
+<div class="challenge-box"><h3>🧠 Full Portfolio Challenge</h3><p>Build a complete multi-tenant SaaS with: tenant registration, user invitations, RBAC, subscriptions, usage metering, and audit logging. This demonstrates production-level skills to employers.</p></div>
+<div class="callout callout-success"><div class="callout-title">✅ Key Takeaway</div>
+<p>Multi-tenant SaaS combines: tenant isolation (RLS), RBAC, subscriptions, usage tracking, and middleware. This is what production SaaS looks like.</p></div>`,
+quiz:[{q:'How does RLS enforce tenant isolation?',opts:['App code only','Database-level policy filtering rows by tenant_id','Separate databases','Network firewall'],correct:1,explain:'RLS policies filter at the database level, ensuring data isolation regardless of app code bugs.'}]}
+]}
+];
+
+/* ===== APP STATE & LOGIC ===== */
+let currentSection=0,currentLesson=0;
+let completed=JSON.parse(localStorage.getItem('pgpr_completed')||'{}');
+
+function allLessons(){let a=[];SECTIONS.forEach((s,si)=>s.lessons.forEach((l,li)=>a.push({si,li,...l})));return a;}
+function saveProgress(){localStorage.setItem('pgpr_completed',JSON.stringify(completed));updateProgress();}
+function updateProgress(){const all=allLessons();const done=Object.keys(completed).length;const pct=Math.round(done/all.length*100);document.getElementById('prog-pct').textContent=pct+'%';document.getElementById('prog-fill').style.width=pct+'%';}
+function toggleComplete(id){if(completed[id]){delete completed[id]}else{completed[id]=true}saveProgress();renderLesson();buildSidebar();}
+
+function buildSidebar(){
+  const nav=document.getElementById('sidebar-nav');nav.innerHTML='';
+  const overviewDiv = document.createElement('div');
+  overviewDiv.className = 'sidebar-section';
+  const isActive = currentSection === -1;
+  overviewDiv.innerHTML = `<div id="overview-hdr" class="sidebar-section-header${isActive ? ' open' : ''}" style="background: ${isActive ? 'var(--accent-glow)' : 'transparent'}" onclick="renderLanding()"><span class="sec-title" style="color: ${isActive ? 'var(--accent)' : 'var(--text)'}; margin-left: 18px;">🏠 Course Overview</span></div>`;
+  nav.appendChild(overviewDiv);
+  SECTIONS.forEach((sec,si)=>{
+    const done=sec.lessons.filter(l=>completed[l.id]).length;
+    const pct=Math.round(done/sec.lessons.length*100);
+    const secDiv=document.createElement('div');secDiv.className='sidebar-section';
+    secDiv.innerHTML=`<div class="sidebar-section-header${si===currentSection?' open':''}" onclick="toggleSection(${si})"><span class="arrow">▸</span><span class="sec-num">${si+1}</span><span class="sec-title">${sec.icon} ${sec.title}</span><span class="sec-pct">${pct}%</span></div><div class="sidebar-lessons${si===currentSection?' open':''}" id="sec-${si}">${sec.lessons.map((l,li)=>`<div class="sidebar-lesson${si===currentSection&&li===currentLesson?' active':''}" data-si="${si}" data-li="${li}" onclick="goToLesson(${si},${li})"><span class="check${completed[l.id]?' done':''}">${completed[l.id]?'✓':''}</span><span>${l.title}</span></div>`).join('')}</div>`;
+    nav.appendChild(secDiv);
+  });
+}
+function toggleSection(si){
+  const el=document.getElementById('sec-'+si);if(!el)return;
+  const hdr=el.previousElementSibling;
+  const isOpen=el.classList.contains('open');
+  document.querySelectorAll('.sidebar-lessons').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.sidebar-section-header').forEach(e=>e.classList.remove('open'));
+  if(!isOpen){el.classList.add('open');hdr.classList.add('open')}
+}
+function goToLesson(si,li){currentSection=si;currentLesson=li;buildSidebar();renderLesson();closeSidebar();window.scrollTo(0,0);}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.remove('open');}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('open');}
+function prevLesson(){const all=allLessons();const idx=all.findIndex(l=>l.si===currentSection&&l.li===currentLesson);if(idx>0){const p=all[idx-1];goToLesson(p.si,p.li)}}
+function nextLesson(){const all=allLessons();const idx=all.findIndex(l=>l.si===currentSection&&l.li===currentLesson);if(idx<all.length-1){const n=all[idx+1];goToLesson(n.si,n.li)}}
+
+
+function renderLanding() {
+  currentSection = -1;
+  document.querySelectorAll('.sidebar-lesson').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.sidebar-section-header').forEach(el => {el.style.background=''; el.querySelector('.sec-title').style.color='';});
+  const overviewHdr = document.getElementById('overview-hdr');
+  if(overviewHdr) {
+    overviewHdr.style.background = 'var(--accent-glow)';
+    overviewHdr.querySelector('.sec-title').style.color = 'var(--accent)';
+  }
+  document.getElementById('breadcrumb').innerHTML = `<span class="bc-s">🏠 Course Overview</span>`;
+  
+  const all = allLessons();
+  const numModules = SECTIONS.length;
+  const numLessons = all.length;
+  const numQuizzes = all.reduce((acc, l) => acc + (l.quiz ? l.quiz.length : 0), 0);
+  
+  let html = `<div class="landing animate-in">
+    <div style="font-size:0.85rem;color:var(--accent2);font-weight:700;margin-bottom:15px;text-transform:uppercase;letter-spacing:0.05em;">${numModules} Modules · Offline Ready · Job-Focused</div>
+    <h1>From zero to PostgreSQL & Prisma master.</h1>
+    <p>No padding, no filler. This course takes you from never touching a database to writing clean, production-grade schemas that will land you your first dev job. Every module is dense, practical, and interview-aware.</p>
+    
+    <div class="landing-stats">
+      <div class="landing-stat"><div class="landing-stat-num">${numModules}</div><div class="landing-stat-lbl">Modules</div></div>
+      <div class="landing-stat"><div class="landing-stat-num">${numLessons}</div><div class="landing-stat-lbl">Lessons</div></div>
+      <div class="landing-stat"><div class="landing-stat-num">50+</div><div class="landing-stat-lbl">Code Examples</div></div>
+      <div class="landing-stat"><div class="landing-stat-num">${numQuizzes}</div><div class="landing-stat-lbl">Quizzes</div></div>
+    </div>
+    
+    <button class="btn btn-primary" style="font-size:1.1rem;padding:12px 30px;border-radius:24px;" onclick="goToLesson(0,0)">Begin Module 1 →</button>
+    
+    <div class="landing-modules">
+      <h2>Course Overview</h2>
+      <div class="module-grid">
+        ${SECTIONS.map((sec, i) => `
+          <div class="module-card" onclick="goToLesson(${i},0)">
+            <div class="module-icon">${sec.icon}</div>
+            <div class="module-info">
+              <h3>${sec.title}</h3>
+              <p>${sec.lessons[0].sub || ''}</p>
+              <div class="module-meta">${sec.lessons.length} lessons</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+  
+  document.getElementById('main-inner').innerHTML = html;
+  closeSidebar();
+}
+
+function renderLesson(){
+  const sec=SECTIONS[currentSection];const lesson=sec.lessons[currentLesson];
+  const all=allLessons();const idx=all.findIndex(l=>l.si===currentSection&&l.li===currentLesson);
+  document.getElementById('breadcrumb').innerHTML=`<span class="bc-s">${sec.icon} ${sec.title}</span> / ${lesson.title}`;
+  let html=`<div class="animate-in"><h1 class="lesson-title">${lesson.title}</h1><p class="lesson-subtitle">${lesson.sub||''}</p><div class="lesson-content">${lesson.content}</div>`;
+  if(lesson.quiz&&lesson.quiz.length>0){
+    html+=`<div class="quiz-section"><div class="quiz-title">📝 Knowledge Check</div>`;
+    lesson.quiz.forEach((q,qi)=>{
+      html+=`<div class="quiz-block" id="quiz-${qi}"><p class="quiz-q">${qi+1}. ${q.q}</p><div class="quiz-opts">${q.opts.map((o,oi)=>`<div class="quiz-opt" onclick="answerQuiz(${qi},${oi},${q.correct})"><span class="ol">${String.fromCharCode(65+oi)}</span><span>${o}</span></div>`).join('')}</div><div class="quiz-fb" id="fb-${qi}"></div></div>`;
+    });
+    html+=`</div>`;
+  }
+  const isDone=completed[lesson.id];
+  html+=`<div class="complete-bar"><span class="status ${isDone?'done':''}">${isDone?'✅ Completed':'⬜ Mark as complete'}</span><button class="btn ${isDone?'btn-ghost':'btn-success'}" onclick="toggleComplete('${lesson.id}')">${isDone?'Undo':'✓ Complete'}</button></div>`;
+  if(idx>0){const prev=all[idx-1];html+=`<div style="margin-top:20px"><button class="btn btn-ghost" onclick="goToLesson(${prev.si},${prev.li})">← ${prev.title}</button></div>`}
+  if(idx<all.length-1){const next=all[idx+1];html+=`<div style="margin-top:10px;text-align:right"><button class="btn btn-primary" onclick="goToLesson(${next.si},${next.li})">${next.title} →</button></div>`}
+  html+=`</div>`;
+  document.getElementById('main-inner').innerHTML=html;
+}
+
+function answerQuiz(qi,selected,correct){
+  const block=document.getElementById('quiz-'+qi);
+  if(block.querySelector('.disabled'))return;
+  const opts=block.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i)=>{o.classList.add('disabled');if(i===correct)o.classList.add('correct');if(i===selected&&i!==correct)o.classList.add('wrong')});
+  const fb=document.getElementById('fb-'+qi);
+  const quiz=SECTIONS[currentSection].lessons[currentLesson].quiz[qi];
+  fb.className='quiz-fb show '+(selected===correct?'correct-fb':'wrong-fb');
+  fb.innerHTML=(selected===correct?'✅ Correct! ':'❌ Incorrect. ')+quiz.explain;
+}
+
+function copyCode(btn){
+  const pre=btn.closest('.cb').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied')},2000);
+  });
+}
+
+function searchLessons(q){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('.sidebar-lesson').forEach(el=>{
+    const si=+el.dataset.si,li=+el.dataset.li;
+    const l=SECTIONS[si].lessons[li];
+    const match=!q||l.title.toLowerCase().includes(q)||(l.sub&&l.sub.toLowerCase().includes(q));
+    el.classList.toggle('hidden',!match);
+  });
+  if(q){document.querySelectorAll('.sidebar-lessons').forEach(e=>e.classList.add('open'));document.querySelectorAll('.sidebar-section-header').forEach(e=>e.classList.add('open'))}
+  else{buildSidebar()}
+}
+
+/* Keyboard shortcuts */
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+  if(e.key==='/'){e.preventDefault();document.getElementById('search-input').focus()}
+  if(e.key==='ArrowLeft'&&e.altKey){e.preventDefault();prevLesson()}
+  if(e.key==='ArrowRight'&&e.altKey){e.preventDefault();nextLesson()}
+});
+
+/* === Download Notes Logic === */
+function downloadNotes() {
+  let md = "# PostgreSQL + Prisma Mastery Notes\n\n";
+  const all = allLessons();
+  const done = all.filter(l => completed[l.id]);
+  if (done.length === 0) {
+    alert("Complete some lessons first to generate notes!");
+    return;
+  }
+  done.forEach(l => {
+    md += `## ${l.title}\n${l.sub || ''}\n\n`;
+    let text = l.content.replace(/<pre><code.*?>([\s\S]*?)<\/code><\/pre>/g, (m, code) => '\n```\n' + code.replace(/<[^>]+>/g, '') + '\n```\n');
+    text = text.replace(/<div class="callout.*?"><div class="callout-title">(.*?)<\/div>([\s\S]*?)<\/div>/g, (m, title, body) => `\n> **${title.replace(/<[^>]+>/g, '')}**\n> ${body.replace(/<[^>]+>/g, '')}\n`);
+    text = text.replace(/<h3.*?>(.*?)<\/h3>/g, '### $1\n');
+    text = text.replace(/<h2.*?>(.*?)<\/h2>/g, '### $1\n');
+    text = text.replace(/<li.*?>(.*?)<\/li>/g, '- $1\n');
+    text = text.replace(/<p.*?>(.*?)<\/p>/g, '$1\n\n');
+    text = text.replace(/<[^>]+>/g, '');
+    md += text.trim() + "\n\n---\n\n";
+  });
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'PostgreSQL_Prisma_Notes.md';
+  a.click();
+}
+
+/* === Spaced Repetition (SRS) Flashcards === */
+let srsDeck = JSON.parse(localStorage.getItem('pgpr_srs') || '{}');
+let activeCard = null;
+
+function syncSRS() {
+  const all = allLessons();
+  all.filter(l => completed[l.id] && l.quiz).forEach(l => {
+    l.quiz.forEach((q, i) => {
+      const cardId = l.id + '_q' + i;
+      if (!srsDeck[cardId]) {
+        srsDeck[cardId] = { q: q.q, a: q.explain, nextReview: Date.now(), interval: 0, ease: 2.5 };
+      }
+    });
+  });
+  localStorage.setItem('pgpr_srs', JSON.stringify(srsDeck));
+}
+
+function startFlashcards() {
+  syncSRS();
+  document.querySelectorAll('.sidebar-lesson').forEach(el => el.classList.remove('active'));
+  document.getElementById('breadcrumb').innerHTML = `<span class="bc-s">🧠 Review</span> / Flashcards`;
+  renderNextCard();
+}
+
+function renderNextCard() {
+  const now = Date.now();
+  const due = Object.entries(srsDeck).filter(([id, c]) => c.nextReview <= now).sort((a,b) => a[1].nextReview - b[1].nextReview);
+  
+  if (due.length === 0) {
+    const total = Object.keys(srsDeck).length;
+    document.getElementById('main-inner').innerHTML = `<div class="flashcard-view animate-in"><div class="fc-empty"><h2>🎉 All caught up!</h2><p>You have reviewed all ${total} flashcards for today. Complete more lessons to unlock more cards.</p></div></div>`;
+    return;
+  }
+  
+  const [id, card] = due[0];
+  activeCard = id;
+  
+  let html = `<div class="flashcard-view animate-in">
+    <div class="fc-stats">${due.length} cards due for review</div>
+    <div class="fc-card" onclick="flipCard()">
+      <div class="fc-q">${card.q}</div>
+      <div class="fc-a" id="fc-answer">${card.a}</div>
+    </div>
+    <div class="fc-controls" id="fc-controls">
+      <button class="fc-btn fc-hard" onclick="rateCard('hard')">Hard (1d)</button>
+      <button class="fc-btn fc-good" onclick="rateCard('good')">Good</button>
+      <button class="fc-btn fc-easy" onclick="rateCard('easy')">Easy</button>
+    </div>
+  </div>`;
+  document.getElementById('main-inner').innerHTML = html;
+}
+
+function flipCard() {
+  document.getElementById('fc-answer').classList.add('show');
+  document.getElementById('fc-controls').classList.add('show');
+}
+
+function rateCard(rating) {
+  const c = srsDeck[activeCard];
+  if (rating === 'hard') {
+    c.interval = 1;
+    c.ease = Math.max(1.3, c.ease - 0.2);
+  } else if (rating === 'good') {
+    c.interval = c.interval === 0 ? 1 : Math.round(c.interval * c.ease);
+  } else if (rating === 'easy') {
+    c.interval = c.interval === 0 ? 4 : Math.round(c.interval * c.ease * 1.3);
+    c.ease += 0.15;
+  }
+  c.nextReview = Date.now() + (c.interval * 24 * 60 * 60 * 1000);
+  localStorage.setItem('pgpr_srs', JSON.stringify(srsDeck));
+  renderNextCard();
+}
+
+/* Init */
+buildSidebar();updateProgress();syncSRS();
+renderLanding();
+</script>
+</body>
+</html>
